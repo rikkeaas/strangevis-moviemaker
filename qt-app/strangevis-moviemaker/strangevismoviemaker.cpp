@@ -13,6 +13,7 @@ strangevismoviemaker::strangevismoviemaker(QWidget *parent)
     layout->addWidget(new QPushButton("Test"));
     setCentralWidget(slider);
     //this->setLayout(layout);
+    this->setMinimumSize(QSize(1000, 1000));
     this->show();
 
     //ui.horizontalSlider->setStyleSheet("QSlider::groove:horizontal {color:black; background-color:red;}"
