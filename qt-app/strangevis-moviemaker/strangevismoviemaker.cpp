@@ -6,12 +6,24 @@ strangevismoviemaker::strangevismoviemaker(QWidget *parent)
 {
     //ui.setupUi(this);
 
-    customSlider* slider = new customSlider(0, 255, this);
-    
+    QWidget* container = new QWidget(this);
+    container->setGeometry(QRect(0, 0, 1000, 1000));
+    QVBoxLayout* contLayout = new QVBoxLayout(container);
+
+    customSlider* slider = new customSlider(1, QRect(100, 50, 200, 16), 0, 300, container);
+    customSlider* slider2 = new customSlider(1, QRect(100, 100, 300, 16), 0, 10, container);
+    customSlider* slider3 = new customSlider(1, QRect(100, 150, 200, 16), 0, 255, container);
+
+    contLayout->addWidget(slider);
+    contLayout->addWidget(slider2);
+    contLayout->addWidget(slider3);
+
+
     QHBoxLayout* layout = new QHBoxLayout(this);
-    layout->addWidget(slider);
-    layout->addWidget(new QPushButton("Test"));
-    setCentralWidget(slider);
+    layout->addWidget(container);
+    
+    //layout->addWidget(new QPushButton("Test"));
+    setCentralWidget(container);
     //this->setLayout(layout);
     this->setMinimumSize(QSize(1000, 1000));
     this->show();

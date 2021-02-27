@@ -8,11 +8,16 @@ class customSlider : public QWidget
     Q_OBJECT
 
 public:
-    customSlider(int minValue, int maxValue, QWidget* parent = Q_NULLPTR);
+    customSlider(int color, QRect sliderPos, int minValue, int maxValue, QWidget* parent);
     ~customSlider();
 
 signals:
 
 public slots:
+    void setPosition(int newVal);
+
+private:
+    QSpinBox* m_spinbox;
+    QSlider* m_horizontalSlider;
 
 };
