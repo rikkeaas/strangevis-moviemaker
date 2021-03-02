@@ -1,0 +1,13 @@
+QSlider::groove:horizontal
+{
+    border: 1px solid #bbb;
+    background: white;
+    border - radius: 4px;
+}
+
+QSlider::handle:horizontal:hover
+{
+    border: 1px solid black;
+    border - radius: 4px;
+}
+

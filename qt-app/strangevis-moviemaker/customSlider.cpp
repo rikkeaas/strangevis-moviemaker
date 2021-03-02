@@ -19,18 +19,28 @@ customSlider::customSlider(int color, QRect sliderPos, int minValue, int maxValu
 	//red : #FF9781 #FF6A4B #FF2D00
 	//green : #9EFFA6 #5AFF68 #00DE13
 	// blue: 66e bbf 55f
-	QFile f("./StyleSheets/sliderStyle.qss");
-	f.open(QFile::ReadOnly);
-	m_horizontalSlider->setStyleSheet(f.readAll());
+	
 
-	QString colorStyle;
+	QFile cf;
 	switch (color)
 	{
 		case 1: // red
-			colorStyle = "QSlider::handle:horizontal{background-color: red}";//"QSlider::sub-page:horizontal{background: qlineargradient(x1 : 0, y1 : 0, x2 : 0, y2 : 1, stop : 0 #FF9781, stop: 1 #FF6A4B);background: qlineargradient(x1 : 0, y1 : 0.2, x2 : 1, y2 : 1, stop : 0 #FF6A4B, stop: 1 #FF2D00);}";
+			cf.setFileName("./StyleSheets/red_slider.qss");
+			break;
+		case 2: // blue
+			cf.setFileName("./StyleSheets/blue_slider.qss");
+			break;
+		case 3: // green
+			cf.setFileName("./StyleSheets/green_slider.qss");
+			break;
 	}
+	cf.open(QFile::ReadOnly);
 
-	m_horizontalSlider->setStyleSheet(colorStyle);
+	QFile f("./StyleSheets/general_slider.qss");
+	f.open(QFile::ReadOnly);
+	m_horizontalSlider->setStyleSheet(f.readAll() + cf.readAll());
+
+	//m_horizontalSlider->styl (colorStyle);
 
 	connect(m_spinbox, SIGNAL(valueChanged(int)), m_horizontalSlider, SLOT(setValue(int)));
 	connect(m_horizontalSlider, SIGNAL(valueChanged(int)), m_spinbox, SLOT(setValue(int)));

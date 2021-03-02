@@ -1,0 +1,12 @@
+QSlider::handle:horizontal
+{
+    background-color: green;
+    width: 16px;
+}
+
+QSlider::sub-page:horizontal
+{
+    background: qlineargradient(x1 : 0, y1 : 0,    x2 : 0, y2 : 1,stop : 0 #9EFFA6, stop: 1 #5AFF68);
+    background: qlineargradient(x1 : 0, y1 : 0.2, x2 : 1, y2 : 1,stop : 0 #5AFF68, stop: 1 #00DE13);
+    border: 1px solid #777;height: 10px;border - radius: 4px;
+}

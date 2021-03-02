@@ -1,8 +1,7 @@
-QSlider::groove:horizontal
+QSlider::handle:horizontal
 {
-    border: 1px solid #bbb;
-    background: white;
-    border - radius: 4px;
+    background-color: blue;
+    width: 16px;
 }
 
 QSlider::sub-page:horizontal
@@ -12,14 +11,3 @@ QSlider::sub-page:horizontal
     border: 1px solid #777;height: 10px;border - radius: 4px;
 }
 
-QSlider::handle:horizontal
-{
-    background-color: red;
-    width: 16px;
-}
-
-QSlider::handle:horizontal:hover
-{
-    border: 1px solid black;
-    border - radius: 4px;
-}
