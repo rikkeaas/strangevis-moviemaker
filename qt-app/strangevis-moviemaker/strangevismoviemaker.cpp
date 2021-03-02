@@ -10,7 +10,7 @@ strangevismoviemaker::strangevismoviemaker(QWidget *parent)
     container->setGeometry(QRect(0, 0, 1000, 1000));
     QVBoxLayout* contLayout = new QVBoxLayout(container);
 
-    customSlider* slider = new customSlider(1, QRect(100, 50, 200, 16), 0, 300, container);
+    customSlider* slider = new customSlider(10, QRect(100, 50, 200, 16), 0, 300, container);
     customSlider* slider2 = new customSlider(2, QRect(100, 100, 300, 16), 0, 10, container);
     customSlider* slider3 = new customSlider(3, QRect(100, 150, 200, 16), 0, 255, container);
 

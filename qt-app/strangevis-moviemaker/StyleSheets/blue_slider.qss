@@ -2,12 +2,15 @@ QSlider::handle:horizontal
 {
     background-color: blue;
     width: 16px;
+    border-radius: 4px;
 }
 
 QSlider::sub-page:horizontal
 {
     background: qlineargradient(x1 : 0, y1 : 0,    x2 : 0, y2 : 1,stop : 0 #66e, stop: 1 #bbf);
     background: qlineargradient(x1 : 0, y1 : 0.2, x2 : 1, y2 : 1,stop : 0 #bbf, stop: 1 #55f);
-    border: 1px solid #777;height: 10px;border - radius: 4px;
+    border: 1px solid #777;
+    height: 10px;
+    border-radius: 4px;
 }
 

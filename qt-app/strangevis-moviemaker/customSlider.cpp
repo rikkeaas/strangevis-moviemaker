@@ -14,12 +14,13 @@ customSlider::customSlider(int color, QRect sliderPos, int minValue, int maxValu
 	m_spinbox->setMaximum(maxValue);
 
 	m_horizontalSlider->setGeometry(sliderPos);
-	m_spinbox->setGeometry(QRect(sliderPos.x(), sliderPos.y() - 40, 50, 30));
+	m_spinbox->setGeometry(QRect(sliderPos.x(), sliderPos.y() - 40, 55, 30));
 
 	//red : #FF9781 #FF6A4B #FF2D00
 	//green : #9EFFA6 #5AFF68 #00DE13
 	// blue: 66e bbf 55f
 	
+	if (color < 1 || color > 3) color = 1; // If not valid color, slider will be red
 
 	QFile cf;
 	switch (color)
@@ -40,8 +41,7 @@ customSlider::customSlider(int color, QRect sliderPos, int minValue, int maxValu
 	f.open(QFile::ReadOnly);
 	m_horizontalSlider->setStyleSheet(f.readAll() + cf.readAll());
 
-	//m_horizontalSlider->styl (colorStyle);
-
+	// Setting up links between spinbox and slider
 	connect(m_spinbox, SIGNAL(valueChanged(int)), m_horizontalSlider, SLOT(setValue(int)));
 	connect(m_horizontalSlider, SIGNAL(valueChanged(int)), m_spinbox, SLOT(setValue(int)));
 
