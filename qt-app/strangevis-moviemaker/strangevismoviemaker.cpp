@@ -4,8 +4,9 @@
 strangevismoviemaker::strangevismoviemaker(QWidget *parent)
     : QMainWindow(parent)
 {
-    //ui.setupUi(this);
+    ui.setupUi(this);
 
+    /*
     QWidget* container = new QWidget(this);
     container->setGeometry(QRect(0, 0, 1000, 1000));
     QVBoxLayout* contLayout = new QVBoxLayout(container);
@@ -31,6 +32,7 @@ strangevismoviemaker::strangevismoviemaker(QWidget *parent)
     //ui.horizontalSlider->setStyleSheet("QSlider::groove:horizontal {color:black; background-color:red;}"
     //                                   "QSlider::handle:horizontal {background-color:blue; height:16px; width: 16px;}");
     //connect(ui.spinBox, SIGNAL(valueChanged(int)), ui.horizontalSlider, SLOT(setValue(int)));
+    */
 }
 
 void strangevismoviemaker::buttonClicked()

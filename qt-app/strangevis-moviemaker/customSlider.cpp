@@ -3,6 +3,7 @@
 #include <QFile>
 #include <iostream>
 
+/*
 customSlider::customSlider(int color, QRect sliderPos, int minValue, int maxValue, QWidget* parent)
 {
 	m_horizontalSlider = new QSlider(Qt::Horizontal, this);
@@ -66,3 +67,5 @@ customSlider::~customSlider()
 {
 
 }
+
+*/

@@ -33,8 +33,10 @@
     <QtMoc Include="strangevismoviemaker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="customSlider.h">
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="customSlider.h">
       <Filter>Header Files</Filter>
-    </QtMoc>
+    </ClInclude>
   </ItemGroup>
 </Project>

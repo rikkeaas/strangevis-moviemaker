@@ -1,0 +1,11 @@
+strangevismoviemaker {
+	background-color: #323232;
+	border-radius: 30px;
+	border: 6px solid red;
+}
+
+QHBoxLayout {
+	border-radius: 20px; 
+	border: 6px solid green;
+	background-color: red;
+}

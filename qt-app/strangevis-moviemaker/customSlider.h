@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QWidget>
 #include "ui_strangevismoviemaker.h"
+/*
 
 class customSlider : public QWidget
 {
@@ -21,3 +22,5 @@ private:
     QSlider* m_horizontalSlider;
 
 };
+
+*/
