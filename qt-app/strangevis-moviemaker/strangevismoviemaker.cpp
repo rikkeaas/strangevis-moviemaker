@@ -2,10 +2,29 @@
 #include "customSlider.h"
 #include <QOpenGLWidget>
 
+#include "Toolbox.h"
+#include <Qlabel>
+#include <QPushButton>
+
+
 strangevismoviemaker::strangevismoviemaker(QWidget *parent)
     : QMainWindow(parent)
 {
     ui.setupUi(this);
+
+    Toolbox* toolbox = new Toolbox("Cutting Tool", 200, parent);
+    auto* anyLayout = new QVBoxLayout();
+    anyLayout->addWidget(new QLabel("Some Text in Section", toolbox));
+    anyLayout->addWidget(new QPushButton("Button in Section", toolbox));
+    toolbox->setContentLayout(*anyLayout);
+
+    // ui.gridLayout->addWidget(toolbox);
+    ui.toolboxMenu->layout()->addWidget(toolbox);
+
+
+    
+    
+
 
     /*
     QWidget* container = new QWidget(this);
