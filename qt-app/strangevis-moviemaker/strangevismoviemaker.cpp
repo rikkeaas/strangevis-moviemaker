@@ -1,5 +1,6 @@
 #include "strangevismoviemaker.h"
 #include "customSlider.h"
+#include <QOpenGLWidget>
 
 strangevismoviemaker::strangevismoviemaker(QWidget *parent)
     : QMainWindow(parent)
@@ -37,11 +38,13 @@ strangevismoviemaker::strangevismoviemaker(QWidget *parent)
 
 void strangevismoviemaker::buttonClicked()
 {
+    /*
     if (ui.pushButton->text() == "DOnt click me")
     {
         ui.pushButton->setText("Click me");
     }
     else {
-        ui.pushButton->setText("DOnt click me");
+        ui.pushButton->setText("DOnt click me")
     }
+    */
 }
