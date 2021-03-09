@@ -34,12 +34,18 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Toolbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="strangevismoviemaker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Renderer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Toolbox.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

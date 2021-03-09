@@ -4,7 +4,7 @@
 Renderer::Renderer()
 {
 	//openglWidget = opengl;
-	m_model = std::make_unique<Model>(Model("data/sinusveins/sinusveins.dat"));
+	m_model = std::make_unique<Model>(Model("data/hand/hand.dat"));
 
 	alpha = 25;
 	beta = -25;

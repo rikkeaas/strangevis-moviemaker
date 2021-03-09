@@ -42,7 +42,7 @@
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
   </widget>
-  <widget class="QDockWidget" name="dockWidget">
+  <widget class="QDockWidget" name="toolboxMenu">
    <property name="minimumSize">
     <size>
      <width>450</width>
