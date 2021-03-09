@@ -1,13 +1,13 @@
 #pragma once
 #include <vector>
 
-class model 
+class Model 
 {
 public:
-	model(const char* filepath);
-	~model();
+	Model(const char* filepath);
+	~Model();
 
-	unsigned short getValue(int x, int y, int z);
+	unsigned short getValue(unsigned int x, unsigned int y, unsigned int z);
 	std::vector<unsigned short> getDimensions();
 
 private:
