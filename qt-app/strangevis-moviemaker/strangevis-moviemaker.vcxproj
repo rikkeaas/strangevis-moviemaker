@@ -89,6 +89,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Toolbox.cpp" />
     <QtRcc Include="strangevismoviemaker.qrc" />
     <QtUic Include="strangevismoviemaker.ui" />
     <QtMoc Include="strangevismoviemaker.h" />
@@ -101,6 +102,7 @@
   <ItemGroup>
     <ClInclude Include="customSlider.h" />
     <ClInclude Include="model.h" />
+    <QtMoc Include="Toolbox.h" />
     <QtMoc Include="Renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

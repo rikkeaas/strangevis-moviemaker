@@ -4,7 +4,7 @@
 Renderer::Renderer()
 {
 	//openglWidget = opengl;
-	m_model = std::make_unique<Model>(Model("data/wholebody/wholebody.dat"));
+	m_model = std::make_unique<Model>(Model("data/hand/hand.dat"));
 
 	alpha = 25;
 	beta = -25;
@@ -101,8 +101,8 @@ void Renderer::paintGL()
 	QMatrix4x4 vMatrix;
 
 	QMatrix4x4 cameraTransformation;
-	cameraTransformation.rotate(alpha, 0, 1, 0);
-	cameraTransformation.rotate(beta, 1, 0, 0);
+	// cameraTransformation.rotate(alpha, 0, 1, 0);
+	// cameraTransformation.rotate(beta, 1, 0, 0);
 	QVector3D cameraPosition = cameraTransformation * QVector3D(0, 0, distance);
 	QVector3D cameraUpDirection = cameraTransformation * QVector3D(0, 1, 0);
 	vMatrix.lookAt(cameraPosition, QVector3D(0, 0, 0), cameraUpDirection);
@@ -159,6 +159,7 @@ void Renderer::wheelEvent(QWheelEvent* event)
 	}
 	event->accept();
 }
+/*
 void Renderer::mouseMoveEvent(QMouseEvent* event)
 {
 	int deltaX = event->x() - lastMousePosition.x();
@@ -183,3 +184,4 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 	lastMousePosition = event->pos();
 	event->accept();
 }
+*/
