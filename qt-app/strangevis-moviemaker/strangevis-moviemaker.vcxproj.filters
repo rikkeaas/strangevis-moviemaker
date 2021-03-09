@@ -28,7 +28,10 @@
     <ClCompile Include="customSlider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Toolbox.cpp">
+    <ClCompile Include="model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -36,12 +39,15 @@
     <QtMoc Include="strangevismoviemaker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Toolbox.h">
+    <QtMoc Include="Renderer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="customSlider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

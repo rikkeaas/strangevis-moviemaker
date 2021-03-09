@@ -1,19 +1,19 @@
 #include "model.h"
 #include <stdio.h>
 
-model::model(const char* filepath)
+Model::Model(const char* filepath)
 {
 	load(filepath);
 }
 
-model::~model()
+Model::~Model()
 {}
 
-bool model::load(const char* filepath)
+bool Model::load(const char* filepath)
 {
 	FILE* fp = fopen(filepath, "rb");
 
-	unsigned int uWidth, uHeight, uDepth;
+	unsigned short uWidth, uHeight, uDepth;
 	fread((void*)&uWidth, 1, sizeof(unsigned short), fp);
 	fread((void*)&uHeight, 1, sizeof(unsigned short), fp);
 	fread((void*)&uDepth, 1, sizeof(unsigned short), fp);
@@ -32,7 +32,7 @@ bool model::load(const char* filepath)
 	m_Data = pData;
 }
 
-std::vector<unsigned short> model::getDimensions() 
+std::vector<unsigned short> Model::getDimensions() 
 {
 	std::vector<unsigned short> dims;
 	dims.push_back(m_width);
@@ -41,7 +41,7 @@ std::vector<unsigned short> model::getDimensions()
 	return dims;
 }
 
-unsigned short model::getValue(int x, int y, int z)
+unsigned short Model::getValue(unsigned int x, unsigned int y, unsigned int z)
 {
 	unsigned short uValue = m_Data[x + y * m_width + z * m_width * m_height];
 	return uValue;
