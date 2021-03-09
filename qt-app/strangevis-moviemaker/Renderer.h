@@ -36,13 +36,13 @@ private:
 	double distance;
 	QPoint lastMousePosition;
 
-	int m_div = 50;
-	int m_prev = 50;
+	int m_div = 100;
+	int m_prev = 100;
 	void createTexture();
 
 	GLuint m_textureID;
 protected:
 	void mousePressEvent(QMouseEvent* event);
-	// void mouseMoveEvent(QMouseEvent* event);
+	//void mouseMoveEvent(QMouseEvent* event);
 	void wheelEvent(QWheelEvent* event);
 };

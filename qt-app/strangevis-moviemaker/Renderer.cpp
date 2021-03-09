@@ -4,11 +4,11 @@
 Renderer::Renderer()
 {
 	//openglWidget = opengl;
-	m_model = std::make_unique<Model>(Model("data/hand/hand.dat"));
+	m_model = std::make_unique<Model>(Model("data/sinusveins/sinusveins.dat"));
 
 	alpha = 25;
 	beta = -25;
-	distance = 2.5;
+	distance = 2.0;
 
 }
 
@@ -71,6 +71,7 @@ void Renderer::createTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dimensions.at(0), dimensions.at(2), 0, GL_RGBA, GL_UNSIGNED_SHORT, buffer.data());
+	
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 }
@@ -101,8 +102,8 @@ void Renderer::paintGL()
 	QMatrix4x4 vMatrix;
 
 	QMatrix4x4 cameraTransformation;
-	// cameraTransformation.rotate(alpha, 0, 1, 0);
-	// cameraTransformation.rotate(beta, 1, 0, 0);
+	//cameraTransformation.rotate(alpha, 0, 1, 0);
+	//cameraTransformation.rotate(beta, 1, 0, 0);
 	QVector3D cameraPosition = cameraTransformation * QVector3D(0, 0, distance);
 	QVector3D cameraUpDirection = cameraTransformation * QVector3D(0, 1, 0);
 	vMatrix.lookAt(cameraPosition, QVector3D(0, 0, 0), cameraUpDirection);
@@ -149,16 +150,21 @@ void Renderer::wheelEvent(QWheelEvent* event)
 {
 	int delta = event->delta();
 	if (event->orientation() == Qt::Vertical) {
-		if (delta < 0) {
-			distance *= 1.1;
+		if (delta > 0) {
+			m_prev = m_div;
+			m_div += delta / 15;
+			m_div = m_div >= m_model->getDimensions().at(1) ? m_model->getDimensions().at(1) - 1 : m_div;
 		}
-		else if (delta > 0) {
-			distance *= 0.9;
+		else if (delta < 0) {
+			m_prev = m_div;
+			m_div += delta / 15;
+			m_div = m_div < 0 ? 0 : m_div;
 		}
 		update();
 	}
 	event->accept();
 }
+
 /*
 void Renderer::mouseMoveEvent(QMouseEvent* event)
 {
