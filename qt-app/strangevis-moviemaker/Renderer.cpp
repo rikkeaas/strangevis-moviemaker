@@ -6,14 +6,15 @@
 Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
 	m_volume = new Model(this);
+	m_volume->load("C:/Users/rikri/Documents/skole/v2021/inf252/project/strangevis-moviemaker/qt-app/strangevis-moviemaker/data/hand/hand.dat");
 
 	alpha = 25;
 	beta = -25;
 	distance = 2.0;
 
-	//m_projectionMatrix.setToIdentity();
+	m_projectionMatrix.setToIdentity();
 	m_modelViewMatrix.setToIdentity();
-	m_modelViewMatrix.translate(0.0, 0.0, -2.0 * sqrt(3.0));
+	m_modelViewMatrix.translate(0.0, 0.0, -1.0 * sqrt(3.0));
 }
 
 
@@ -32,18 +33,20 @@ void Renderer::initializeGL()
 
 	initializeOpenGLFunctions();
 
-	Cube::instance();
+	//Cube::instance();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	// Set global information
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, "Shaders/vertexShader.glsl");
-	shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, "Shaders/fragmentShader.glsl");
+	shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, "Shaders/raycast-vs.glsl");
+	shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, "Shaders/raycast-fs.glsl");
 	shaderProgram.link();
 	shaderProgram.bind();
 
+	qDebug() << shaderProgram.isLinked();
+	vertices << QVector3D(-1.0, -1.0, 0.0) << QVector3D(1.0, -1.0, 0.0) << QVector3D(1.0, 1.0, 0.0) << QVector3D(-1.0, 1.0, 0.0);
 }
 
 
@@ -60,6 +63,11 @@ void Renderer::resizeGL(int width, int height)
 
 	m_projectionMatrix.setToIdentity();
 	m_projectionMatrix.perspective(fov, aspectRatio, nearPlane, farPlane);
+	
+	//m_projectionMatrix.setToIdentity();
+	//m_projectionMatrix.perspective(60.0, (float)width / (float)height, 0.001, 1000);
+
+	glViewport(0, 0, width, height);
 }
 
 void Renderer::paintGL()
@@ -68,8 +76,8 @@ void Renderer::paintGL()
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	//glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LESS);
 
 
 	QMatrix4x4 mMatrix;
@@ -88,18 +96,14 @@ void Renderer::paintGL()
 	m_volume->bind();
 
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
-	shaderProgram.setUniformValue("texture1", 0);
-	shaderProgram.setUniformValue("mvpMatrix", m_projectionMatrix * m_modelViewMatrix);
-	shaderProgram.setUniformValue("color", QColor(Qt::white));
+	shaderProgram.setUniformValue("volumeTexture", 0);
+	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_projectionMatrix * m_modelViewMatrix);
+	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_modelViewMatrix).inverted());
 
-	Cube::instance()->bindCube();
-
-	int location = shaderProgram.attributeLocation("vertexPosition");
-	shaderProgram.enableAttributeArray(location);
-	shaderProgram.setAttributeBuffer(location, GL_FLOAT, 0, 3, sizeof(QVector3D));
-
-	Cube::instance()->drawCube();
-	//glDrawArrays(GL_QUADS, 0, vertices.size());
+	shaderProgram.setAttributeArray("vertex", vertices.constData());
+	shaderProgram.enableAttributeArray("vertex");
+	glDrawArrays(GL_QUADS, 0, vertices.size());
+	shaderProgram.disableAttributeArray("vertex");
 
 	glActiveTexture(GL_TEXTURE0);
 	m_volume->release();
@@ -139,8 +143,6 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 				m_modelViewMatrix.rotate(qRadiansToDegrees(angle), transformedAxis.toVector3D());
 			}
 		}
-
-
 	}
 
 	m_previousX = m_currentX;

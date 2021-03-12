@@ -1,11 +1,26 @@
 #version 450
 
-in vec2 position;
-out vec2 fragPosition;
+uniform mat4 modelViewProjectionMatrix;
+uniform mat4 inverseModelViewProjectionMatrix;
 
-out vec2 pp;
+in vec4 vertex;
+
+out vec2 fragCoord;
+
+
+/*
 void main()
 {
-	fragPosition = position;
-	gl_Position = vec4(position,0.0,1.0);
+	gl_Position = vertex;    
+	vec2 pos = gl_Position.xy/gl_Position.w;
+	near = inverseModelViewProjectionMatrix * (vec4(pos, -1.0, 1.0));       
+    far = inverseModelViewProjectionMatrix * (vec4(pos, +1.0, 1.0));
+}*/
+
+void main()
+{
+	//vec4 newVertex = modelViewProjectionMatrix * vertex;
+	fragCoord = vertex.xy;
+	gl_Position = vertex;
 }
+
