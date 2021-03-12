@@ -7,8 +7,8 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    Renderer* widget = new Renderer();
-    strangevismoviemaker w;
+    Renderer* widget = new Renderer(nullptr);
+    strangevismoviemaker w(widget);
     w.setCentralWidget(widget);
     w.setStyleSheet("background-color: #323232; color: white;");
     w.setWindowTitle("StrangeVis Movie Maker");

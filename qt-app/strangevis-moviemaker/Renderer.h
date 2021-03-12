@@ -17,19 +17,18 @@ class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 	Q_OBJECT
 
 public:
-	Renderer();
+	Renderer(QWidget* parent);
 	~Renderer();
 	void initializeGL();
 	void resizeGL(int width, int height);
 	void paintGL();
+	Model* getVolume();
 private:
-	bool myFunc(QWidget* f);
 	QMatrix4x4 pMatrix;
 	QOpenGLShaderProgram shaderProgram;
 	QVector<QVector3D> vertices;
 
 	QOpenGLWidget* openglWidget;
-	std::unique_ptr<Model> m_model;
 
 	double alpha;
 	double beta;
@@ -38,11 +37,14 @@ private:
 
 	int m_div = 100;
 	int m_prev = 100;
-	void createTexture();
+	float m_zCoord = 0.5;
+	//void createTexture();
 
-	GLuint m_textureID;
+	//GLuint m_textureID;
+
+	Model* m_volume;
 protected:
-	void mousePressEvent(QMouseEvent* event);
+	//void mousePressEvent(QMouseEvent* event);
 	//void mouseMoveEvent(QMouseEvent* event);
 	void wheelEvent(QWheelEvent* event);
 };
