@@ -26,5 +26,5 @@ private:
 	QOpenGLTexture m_volumeTexture;
 
 	// Model data
-	std::vector<unsigned short> m_Data;
+	QVector<unsigned short> m_Data;
 };

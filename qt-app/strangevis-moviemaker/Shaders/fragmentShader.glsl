@@ -13,4 +13,5 @@ void main(void)
 
 	if (tex.r > 0.4) fragColor = vec4(tex.r,0.0,0.0, 1.0);
 	else fragColor = vec4(tex.rrr, 1.0);
+	//fragColor = vec4(1.0,0.0,0.0,1.0);
 }

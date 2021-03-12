@@ -13,7 +13,8 @@ Model::~Model()
 
 bool Model::load(const QString filepath)
 {
-	qDebug() << filepath;
+	// Opening file
+	qDebug() << "Loading " << filepath << "...";
 	QFile file(filepath);
 
 	if (!file.open(QIODevice::ReadOnly))
@@ -25,32 +26,31 @@ bool Model::load(const QString filepath)
 	QDataStream stream(&file);
 	stream.setByteOrder(QDataStream::LittleEndian);
 
+	// Reading dataset dimensions
 	unsigned short uWidth, uHeight, uDepth;
-
 	stream >> uWidth >> uHeight >> uDepth;
 
 	qDebug() << "Width: " << uWidth << "\nHeight: " << uHeight << "\nDepth: " << uDepth;
 
+	// Reading the data into a temporary vector
 	int volumeSize = int(uWidth) * int(uHeight) * int(uDepth);
 	QVector<unsigned short> data(volumeSize);
-
-
 	if (stream.readRawData(reinterpret_cast<char*>(data.data()), volumeSize * sizeof(unsigned short)) != volumeSize * sizeof(unsigned short)) 
 	{
 		qDebug() << "Loading data failed";
 		return false;
 	}
 
+	// Setting member variables
 	m_Data.resize(volumeSize);
 	m_width = uWidth;
 	m_height = uHeight;
 	m_depth = uDepth;
-
 	m_updateNeeded = true;
 
 	for (long i = 0; i < volumeSize; i++)
 	{
-		m_Data[i] = data[i] * 16;
+		m_Data[i] = data[i] * 16; // Upscaling values from 12bit to 16bit range
 	}
 
 	qDebug() << "Successfully loaded " << filepath;
