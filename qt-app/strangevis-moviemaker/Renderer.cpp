@@ -1,32 +1,38 @@
 
 #include "Renderer.h"
+#include "cube.h"
+#include <QtMath>
 
-Renderer::Renderer()
+Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
-	//openglWidget = opengl;
-	m_model = std::make_unique<Model>(Model("data/hand/hand.dat"));
+	m_volume = new Model(this);
 
 	alpha = 25;
 	beta = -25;
 	distance = 2.0;
 
+	//m_projectionMatrix.setToIdentity();
+	m_modelViewMatrix.setToIdentity();
+	m_modelViewMatrix.translate(0.0, 0.0, -2.0 * sqrt(3.0));
 }
 
-bool Renderer::myFunc(QWidget* f)
-{
-	return true;
-}
 
 Renderer::~Renderer()
 {
 }
 
 
+Model* Renderer::getVolume()
+{
+	return m_volume;
+}
 
 void Renderer::initializeGL()
 {
 
 	initializeOpenGLFunctions();
+
+	Cube::instance();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
@@ -38,65 +44,33 @@ void Renderer::initializeGL()
 	shaderProgram.link();
 	shaderProgram.bind();
 
-	createTexture();
-
-	vertices << QVector3D(-1.0, -1.0, 0.0) << QVector3D(1.0, -1.0, 0.0) << QVector3D(1.0, 1.0, 0.0) << QVector3D(-1.0, 1.0, 0.0);
 }
 
-void Renderer::createTexture()
-{
-	glDeleteTextures(1, &m_textureID);
-
-	auto dimensions = m_model->getDimensions();
-	glGenTextures(1, &m_textureID);
-
-	std::vector<unsigned short> buffer;
-
-	unsigned int y = m_div;
-
-	for (unsigned int z = 0; z < dimensions.at(2); z++)
-	{
-		for (unsigned int x = 0; x < dimensions.at(0); x++)
-		{
-			buffer.push_back(m_model->getValue(x, y, z) * 16);
-			buffer.push_back(0);
-			buffer.push_back(0);
-			buffer.push_back(0);
-		}
-	}
-
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dimensions.at(0), dimensions.at(2), 0, GL_RGBA, GL_UNSIGNED_SHORT, buffer.data());
-	
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-}
 
 void Renderer::resizeGL(int width, int height)
 {
 	if (height == 0) {
 		height = 1;
 	}
-	pMatrix.setToIdentity();
-	pMatrix.perspective(60.0, (float)width / (float)height, 0.001, 1000);
-	glViewport(0, 0, width, height);
+	qreal aspectRatio = qreal(width) / qreal(height);
+
+	qreal nearPlane = 0.5;
+	qreal farPlane = 32.0;
+	qreal fov = 60.0;
+
+	m_projectionMatrix.setToIdentity();
+	m_projectionMatrix.perspective(fov, aspectRatio, nearPlane, farPlane);
 }
 
 void Renderer::paintGL()
 {
 	// Clear
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_TEXTURE_2D);
 
-	if (m_div != m_prev)
-	{
-		m_prev = m_div;
-		createTexture();
-	}
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+
 
 	QMatrix4x4 mMatrix;
 	QMatrix4x4 vMatrix;
@@ -109,24 +83,87 @@ void Renderer::paintGL()
 	vMatrix.lookAt(cameraPosition, QVector3D(0, 0, 0), cameraUpDirection);
 
 	shaderProgram.bind();
+
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, m_textureID);
-	
+	m_volume->bind();
 
+	shaderProgram.setUniformValue("zCoord", m_zCoord);
 	shaderProgram.setUniformValue("texture1", 0);
-	shaderProgram.setUniformValue("mvpMatrix", pMatrix * vMatrix * mMatrix);
+	shaderProgram.setUniformValue("mvpMatrix", m_projectionMatrix * m_modelViewMatrix);
 	shaderProgram.setUniformValue("color", QColor(Qt::white));
-	shaderProgram.setAttributeArray("vertex", vertices.constData());
-	shaderProgram.enableAttributeArray("vertex");
-	glDrawArrays(GL_QUADS, 0, vertices.size());
-	shaderProgram.disableAttributeArray("vertex");
-	glBindTexture(GL_TEXTURE_2D, 0);
-	shaderProgram.release();
 
+	Cube::instance()->bindCube();
+
+	int location = shaderProgram.attributeLocation("vertexPosition");
+	shaderProgram.enableAttributeArray(location);
+	shaderProgram.setAttributeBuffer(location, GL_FLOAT, 0, 3, sizeof(QVector3D));
+
+	Cube::instance()->drawCube();
+	//glDrawArrays(GL_QUADS, 0, vertices.size());
+
+	glActiveTexture(GL_TEXTURE0);
+	m_volume->release();
 	
+	shaderProgram.release();
 }
 
+void Renderer::mousePressEvent(QMouseEvent* event)
+{
+	m_currentX = qreal(event->x());
+	m_currentY = qreal(event->y());
 
+	m_previousX = m_currentX;
+	m_previousY = m_currentY;
+}
+
+void Renderer::mouseMoveEvent(QMouseEvent* event)
+{
+	m_currentX = qreal(event->x());
+	m_currentY = qreal(event->y());
+
+	if (event->buttons() & Qt::LeftButton)
+	{
+		if (m_currentX != m_previousX || m_currentY != m_previousY)
+		{
+			QVector3D va = arcballVector(m_previousX, m_previousY);
+			QVector3D vb = arcballVector(m_currentX, m_currentY);
+
+			if (va != vb)
+			{
+				qreal angle = acos(qMax(-1.0f, qMin(1.0f, QVector3D::dotProduct(va, vb))));
+				QVector3D axis = QVector3D::crossProduct(va, vb);
+
+				QMatrix4x4 inverseModelViewMatrix = m_modelViewMatrix.inverted();
+				QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
+
+				m_modelViewMatrix.rotate(qRadiansToDegrees(angle), transformedAxis.toVector3D());
+			}
+		}
+
+
+	}
+
+	m_previousX = m_currentX;
+	m_previousY = m_currentY;
+
+	update();
+}
+
+QVector3D Renderer::arcballVector(qreal x, qreal y)
+{
+	QVector3D p = QVector3D(2.0f * float(x) / float(width()) - 1.0f, -2.0f * float(y) / float(height()) + 1.0f, 0.0);
+
+	float length2 = p.x() * p.x() + p.y() * p.y();
+
+	if (length2 < 1.0f)
+		p.setZ(sqrtf(1.0f - length2));
+	else
+		p.normalize();
+
+	return p;
+}
+
+/*
 void Renderer::mousePressEvent(QMouseEvent* event)
 {
 	if (event->button() == Qt::MouseButton::RightButton) 
@@ -145,20 +182,16 @@ void Renderer::mousePressEvent(QMouseEvent* event)
 	event->accept();
 
 	update();
-}
+}*/
 void Renderer::wheelEvent(QWheelEvent* event)
 {
 	int delta = event->delta();
 	if (event->orientation() == Qt::Vertical) {
 		if (delta > 0) {
-			m_prev = m_div;
-			m_div += delta / 15;
-			m_div = m_div >= m_model->getDimensions().at(1) ? m_model->getDimensions().at(1) - 1 : m_div;
+			m_zCoord = 1.0 < m_zCoord + float(delta) / 120.0 ? 1.0 : m_zCoord + float(delta) / 120.0;
 		}
 		else if (delta < 0) {
-			m_prev = m_div;
-			m_div += delta / 15;
-			m_div = m_div < 0 ? 0 : m_div;
+			m_zCoord = 0.0 > m_zCoord + float(delta) / 120.0 ? 0.0 : m_zCoord + float(delta) / 120.0;
 		}
 		update();
 	}

@@ -1,7 +1,7 @@
 #include "strangevismoviemaker.h"
 #include "customSlider.h"
 #include <QOpenGLWidget>
-
+#include <QFileDialog>
 #include "Toolbox.h"
 #include <Qlabel>
 #include <QPushButton>
@@ -11,10 +11,16 @@
 #include <QSize>
 
 
-strangevismoviemaker::strangevismoviemaker(QWidget *parent)
+strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     : QMainWindow(parent)
 {
+    renderer->setParent(this);
+    m_renderer = renderer;
     ui.setupUi(this);
+       
+    QAction* fileOpenAction = new QAction("Open", this);
+    connect(fileOpenAction, SIGNAL(triggered()), this, SLOT(fileOpen()));
+    ui.menuFile->addAction(fileOpenAction);
 
     this->setMinimumSize(1600, 1200);
 
@@ -95,6 +101,7 @@ strangevismoviemaker::strangevismoviemaker(QWidget *parent)
 
 
     /*
+    * 
     QWidget* container = new QWidget(this);
     container->setGeometry(QRect(0, 0, 1000, 1000));
     QVBoxLayout* contLayout = new QVBoxLayout(container);
@@ -123,15 +130,24 @@ strangevismoviemaker::strangevismoviemaker(QWidget *parent)
     */
 }
 
-void strangevismoviemaker::buttonClicked()
+
+void strangevismoviemaker::fileOpen()
 {
-    /*
-    if (ui.pushButton->text() == "DOnt click me")
+    QString fileName = QFileDialog::getOpenFileName(this, "Open Volume File", QString(), "*.dat");
+
+    if (!fileName.isEmpty())
     {
-        ui.pushButton->setText("Click me");
+        if (m_renderer->getVolume()->load(fileName))
+        {
+            qDebug() << "Loaded volume " << fileName;
+        }
+
+        else
+        {
+            qDebug() << "Failed to load volume " << fileName;
+        }
     }
-    else {
-        ui.pushButton->setText("DOnt click me")
-    }
-    */
+
 }
+
+
