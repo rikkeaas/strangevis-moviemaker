@@ -35,7 +35,7 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     // ui.gridLayout->addWidget(toolbox);
     // ui.toolboxMenu->layout()->addWidget(toolbox);
 
-    Renderer* qtWid = new Renderer();
+    // Renderer* qtWid = new Renderer();
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
     QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
     
@@ -87,7 +87,7 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 
     // setLayout(mainLayout);
     // cw->addWidget(groupBox);
-    cw->addWidget(qtWid);
+    cw->addWidget(m_renderer);
     this->addDockWidget(Qt::LeftDockWidgetArea, toolbox);
     this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
 
