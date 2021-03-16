@@ -1,23 +1,30 @@
 #pragma once
-#include <vector>
+#include <QOpenGLTexture>
+#include <QOpenGLExtraFunctions>
 
-class Model 
+class Model : public QObject, protected QOpenGLExtraFunctions
 {
+Q_OBJECT
 public:
-	Model(const char* filepath);
+	Model(QObject* parent);
 	~Model();
 
-	unsigned short getValue(unsigned int x, unsigned int y, unsigned int z);
 	std::vector<unsigned short> getDimensions();
 
+	bool load(const QString filepath);
+	void bind();
+	void release();
+
 private:
-	bool load(const char* filepath);
 
 	// Model dimensions
-	unsigned int m_height;
-	unsigned int m_width;
-	unsigned int m_depth;
+	unsigned int m_height = 0;
+	unsigned int m_width = 0;
+	unsigned int m_depth = 0;
+
+	bool m_updateNeeded = false;
+	QOpenGLTexture m_volumeTexture;
 
 	// Model data
-	unsigned short* m_Data;
+	QVector<unsigned short> m_Data;
 };
