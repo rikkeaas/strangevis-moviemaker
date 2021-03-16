@@ -5,6 +5,10 @@
 #include "Toolbox.h"
 #include <Qlabel>
 #include <QPushButton>
+#include "Renderer.h"
+#include <QDockWIdget>
+#include <QtWidgets/qgroupbox.h>
+#include <QSize>
 
 
 strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
@@ -18,14 +22,78 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(fileOpenAction, SIGNAL(triggered()), this, SLOT(fileOpen()));
     ui.menuFile->addAction(fileOpenAction);
 
+    this->setMinimumSize(1600, 1200);
+
+    /*
     Toolbox* toolbox = new Toolbox("Cutting Tool", 200, parent);
     auto* anyLayout = new QVBoxLayout();
     anyLayout->addWidget(new QLabel("Some Text in Section", toolbox));
     anyLayout->addWidget(new QPushButton("Button in Section", toolbox));
     toolbox->setContentLayout(*anyLayout);
+    */
 
     // ui.gridLayout->addWidget(toolbox);
-    ui.toolboxMenu->layout()->addWidget(toolbox);
+    // ui.toolboxMenu->layout()->addWidget(toolbox);
+
+    Renderer* qtWid = new Renderer();
+    QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
+    QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
+    
+
+    // QSize size = ui.horizontalLayout->widget()->size();
+    toolbox->setMinimumWidth(this->width()/4);
+    toolbox->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    toolbox->setFeatures(QDockWidget::DockWidgetMovable);
+    keyframes->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    keyframes->setFeatures(QDockWidget::DockWidgetMovable);
+
+
+
+
+    
+
+    toolbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    keyframes->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    /*
+
+    QWidget* sliders = new QWidget();
+    QVBoxLayout* layout = new QVBoxLayout();
+    QPushButton* filter1 = new QPushButton(QLatin1String("Filter number 1"));
+    QPushButton* filter2 = new QPushButton(QLatin1String("Filter number 2"));
+    QPushButton* filter3 = new QPushButton(QLatin1String("Filter number 3"));
+    QPushButton* filter4 = new QPushButton(QLatin1String("Filter number 4"));
+    QPushButton* filter5 = new QPushButton(QLatin1String("Filter number 5"));
+
+    layout->addWidget(filter1);
+    layout->addWidget(filter2);
+    layout->addWidget(filter3);
+    layout->addWidget(filter4);
+    layout->addWidget(filter5);
+    sliders->setLayout(layout);
+    toolbox->setWidget(sliders);
+
+    */
+
+
+    auto* cw = ui.centralWidget->layout();
+
+    /*
+    // ui.horizontalLayout->addWidget(groupBox);
+    QHBoxLayout* mainLayout = new QHBoxLayout;
+    mainLayout->addWidget(groupBox);
+    mainLayout->addWidget(qtWid);
+    */
+
+    // setLayout(mainLayout);
+    // cw->addWidget(groupBox);
+    cw->addWidget(qtWid);
+    this->addDockWidget(Qt::LeftDockWidgetArea, toolbox);
+    this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
+
+
+
+    
 
 
     
