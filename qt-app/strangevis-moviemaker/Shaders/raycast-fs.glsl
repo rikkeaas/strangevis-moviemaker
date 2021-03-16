@@ -4,7 +4,6 @@ uniform mat4 modelViewProjectionMatrix;
 uniform mat4 inverseModelViewProjectionMatrix;
 uniform sampler3D volumeTexture;
 
-
 in vec2 fragCoord;
 out vec4 fragColor;
 
@@ -18,17 +17,16 @@ float calcDepth(vec3 pos)
 }
 
 void main() {
-    vec4 near = modelViewProjectionMatrix * vec4(fragCoord, -1., 1.);
-    near /= near.w;
-
-    vec4 far = modelViewProjectionMatrix * vec4(fragCoord, 1., 1.);
-    far /= far.w;
+    vec4 near = modelViewProjectionMatrix * vec4(fragCoord, -1.0, 1.0);
+    //near /= near.w;
+    vec4 far = modelViewProjectionMatrix * vec4(fragCoord, 1.0, 1.0);
+    //far /= far.w;
 
     vec3 rayOrigin = near.xyz;
     vec3 rayDir = normalize(far.xyz - near.xyz);
 
-	float samplingDistance = 0.001;
-	float renderDistance = 2.0;
+	float samplingDistance = 0.01;
+	float renderDistance = 3.0;
 
 	float firstValues = 0.0;
 	bool notFound = true;
@@ -36,8 +34,9 @@ void main() {
 	vec3 sampligPoint = rayOrigin;
 	for (float i = 0; i <= renderDistance; i += samplingDistance) 
 	{
-		float color = texture(volumeTexture, sampligPoint+1).r;
-		if (color > 0.4) 
+		//vec3 p = (sampligPoint + 1.0)*0.5;
+		float color = texture(volumeTexture, sampligPoint).r;
+		if (color > 0.35) 
 		{
 			notFound = false;
 			firstValues = color;

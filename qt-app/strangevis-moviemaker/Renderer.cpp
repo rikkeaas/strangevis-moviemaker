@@ -6,7 +6,7 @@
 Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
 	m_volume = new Model(this);
-	m_volume->load("C:/Users/rikri/Documents/skole/v2021/inf252/project/strangevis-moviemaker/qt-app/strangevis-moviemaker/data/hand/hand.dat");
+	m_volume->load("./data/hand/hand.dat");
 
 	alpha = 25;
 	beta = -25;
@@ -187,6 +187,8 @@ void Renderer::mousePressEvent(QMouseEvent* event)
 }*/
 void Renderer::wheelEvent(QWheelEvent* event)
 {
+	qDebug() << 1.0 / (float(event->delta()) / 120.0);
+	m_modelViewMatrix.scale(1.0 / (float(event->delta()) / 120.0));
 	int delta = event->delta();
 	if (event->orientation() == Qt::Vertical) {
 		if (delta > 0) {
