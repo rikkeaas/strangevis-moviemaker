@@ -16,6 +16,45 @@ float calcDepth(vec3 pos)
 	return (((far - near) * ndc_depth) + near + far) / 2.0;
 }
 
+
+
+
+// Function to calculate the diffuse component of light at given position (assuming all light sources have the same diffuse intensity)
+/*
+vec3 diffuseComponent(vec3 lightPos, vec3 normal)
+{
+	vec3 color = Kd;
+	
+	vec3 pointToLight = normalize(lightPos - fragment.position);
+	vec3 diffuse = color * max(dot(pointToLight, normal),0.0f) * Id;
+	return diffuse;
+}
+
+// Function to calculate the specular component of light at given position (assuming all light sources have the same specular intensity)
+vec3 specularComponent(vec3 lightPos, vec3 normal)
+{
+	vec3 color = Ks;
+
+	vec3 pointToEye = normalize(worldCameraPosition - fragment.position);
+	vec3 lightToPoint = normalize(fragment.position - lightPos);
+	vec3 reflection = normalize(reflect(lightToPoint, normal));
+	vec3 specular = color * pow(max(dot(reflection, pointToEye), 0.0f), Alpha) * Is;
+	return specular;
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
 void main() {
     vec4 near = modelViewProjectionMatrix * vec4(fragCoord, -1.0, 1.0);
     //near /= near.w;
@@ -23,12 +62,14 @@ void main() {
     //far /= far.w;
 
     vec3 rayOrigin = near.xyz;
+
     vec3 rayDir = normalize(far.xyz - near.xyz);
 
 	float samplingDistance = 0.01;
+	float gd = 0.001;
 	float renderDistance = 3.0;
 
-	float firstValues = 0.0;
+	vec3 firstValues = vec3(0.0);
 	bool notFound = true;
 
 	vec3 sampligPoint = rayOrigin;
@@ -36,10 +77,14 @@ void main() {
 	{
 		//vec3 p = (sampligPoint + 1.0)*0.5;
 		float color = texture(volumeTexture, sampligPoint).r;
-		if (color > 0.35) 
+		if (color > 0.1) 
 		{
+			float x = 0.5*(texture(volumeTexture, vec3(sampligPoint.x+gd, sampligPoint.y, sampligPoint.z)).r - (texture(volumeTexture, vec3(sampligPoint.x-gd, sampligPoint.y, sampligPoint.z)).r));
+			float y = 0.5*(texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y+gd, sampligPoint.z)).r - (texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y-gd, sampligPoint.z)).r));
+			float z = 0.5*(texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y, sampligPoint.z+gd)).r - (texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y, sampligPoint.z-gd)).r));
+			
 			notFound = false;
-			firstValues = color;
+			firstValues = 0.5*(normalize(vec3(x,y,z))+1.0);
 			break;
 		}
 		sampligPoint += rayDir * samplingDistance;
@@ -52,10 +97,13 @@ void main() {
 	}
 	else
 	{
-		fragColor = vec4(firstValues,firstValues,firstValues,1.0);
+		fragColor = vec4(firstValues,1.0);
 		gl_FragDepth = calcDepth(sampligPoint);
 	}
 }
+
+
+
 
 
 

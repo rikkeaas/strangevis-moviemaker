@@ -27,4 +27,5 @@ private:
 
 	// Model data
 	QVector<unsigned short> m_Data;
+
 };

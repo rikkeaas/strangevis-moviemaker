@@ -34,6 +34,9 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="strangevismoviemaker.h">
@@ -42,12 +45,15 @@
     <QtMoc Include="Renderer.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="model.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="customSlider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="model.h">
+    <ClInclude Include="cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
