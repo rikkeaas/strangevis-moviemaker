@@ -9,6 +9,7 @@
 #include <QDockWIdget>
 #include <QtWidgets/qgroupbox.h>
 #include <QSize>
+#include <QDesktopWidget>
 
 
 strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
@@ -41,7 +42,9 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     
 
     // QSize size = ui.horizontalLayout->widget()->size();
-    toolbox->setMinimumWidth(this->width()/4);
+    toolbox->setMinimumSize(QDesktopWidget().availableGeometry(this).size() * 0.15);
+    keyframes->setMinimumSize(QDesktopWidget().availableGeometry(this).size() * 0.15);
+
     toolbox->setFeatures(QDockWidget::NoDockWidgetFeatures);
     toolbox->setFeatures(QDockWidget::DockWidgetMovable);
     keyframes->setFeatures(QDockWidget::NoDockWidgetFeatures);

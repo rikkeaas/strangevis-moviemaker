@@ -13,6 +13,6 @@ int main(int argc, char *argv[])
     w.setCentralWidget(widget);
     w.setStyleSheet("background-color: #323232; color: white;");
     w.setWindowTitle("StrangeVis Movie Maker");
-    w.showMaximized();
+    w.show();
     return a.exec();
 }
