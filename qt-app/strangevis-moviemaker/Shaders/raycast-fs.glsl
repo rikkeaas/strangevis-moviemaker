@@ -20,38 +20,42 @@ float calcDepth(vec3 pos)
 
 
 // Function to calculate the diffuse component of light at given position (assuming all light sources have the same diffuse intensity)
-/*
-vec3 diffuseComponent(vec3 lightPos, vec3 normal)
+
+vec3 diffuseComponent(vec3 lightPos, vec3 pos, vec3 normal)
 {
-	vec3 color = Kd;
+	vec3 color = vec3(0.3,0.0,0.0);
 	
-	vec3 pointToLight = normalize(lightPos - fragment.position);
-	vec3 diffuse = color * max(dot(pointToLight, normal),0.0f) * Id;
+	vec3 pointToLight = normalize(lightPos - pos);
+	vec3 diffuse = color * max(dot(pointToLight, normal),0.0f);
 	return diffuse;
 }
 
 // Function to calculate the specular component of light at given position (assuming all light sources have the same specular intensity)
-vec3 specularComponent(vec3 lightPos, vec3 normal)
+vec3 specularComponent(vec3 lightPos, vec3 pos, vec3 normal)
 {
-	vec3 color = Ks;
+	vec3 color = vec3(0.0,0.3,0.0);
 
-	vec3 pointToEye = normalize(worldCameraPosition - fragment.position);
-	vec3 lightToPoint = normalize(fragment.position - lightPos);
+	vec3 camPos = vec3(0.0);
+	vec3 pointToEye = normalize(camPos - pos);
+	vec3 lightToPoint = normalize(pos - lightPos);
 	vec3 reflection = normalize(reflect(lightToPoint, normal));
-	vec3 specular = color * pow(max(dot(reflection, pointToEye), 0.0f), Alpha) * Is;
+	vec3 specular = color * pow(max(dot(reflection, pointToEye), 0.0f), 10.0);
 	return specular;
 }
-*/
 
-
-
-
-
-
-
-
-
-
+// https://www.willusher.io/webgl/2019/01/13/volume-rendering-with-webgl
+vec2 intersect_box(vec3 orig, vec3 dir) {
+	const vec3 box_min = vec3(0);
+	const vec3 box_max = vec3(1);
+	vec3 inv_dir = 1.0 / dir;
+	vec3 tmin_tmp = (box_min - orig) * inv_dir;
+	vec3 tmax_tmp = (box_max - orig) * inv_dir;
+	vec3 tmin = min(tmin_tmp, tmax_tmp);
+	vec3 tmax = max(tmin_tmp, tmax_tmp);
+	float t0 = max(tmin.x, max(tmin.y, tmin.z));
+	float t1 = min(tmax.x, min(tmax.y, tmax.z));
+	return vec2(t0, t1);
+}
 
 
 
@@ -61,30 +65,57 @@ void main() {
     vec4 far = modelViewProjectionMatrix * vec4(fragCoord, 1.0, 1.0);
     //far /= far.w;
 
-    vec3 rayOrigin = near.xyz;
+	vec3 rayOrigin = near.xyz;
 
     vec3 rayDir = normalize(far.xyz - near.xyz);
 
-	float samplingDistance = 0.01;
+	vec2 t_hit = intersect_box(rayOrigin, rayDir);
+	if (t_hit.x > t_hit.y) {
+		discard;
+	}
+
+	t_hit.x = max(t_hit.x, 0.0);
+
+
+	float samplingDistance = 0.005;
 	float gd = 0.001;
 	float renderDistance = 3.0;
 
 	vec3 firstValues = vec3(0.0);
 	bool notFound = true;
 
-	vec3 sampligPoint = rayOrigin;
+	vec3 sampligPoint = rayOrigin + t_hit.x * rayDir;
+	vec4 color = vec4(0.0);
+
 	for (float i = 0; i <= renderDistance; i += samplingDistance) 
 	{
-		//vec3 p = (sampligPoint + 1.0)*0.5;
-		float color = texture(volumeTexture, sampligPoint).r;
-		if (color > 0.1) 
+		float density = texture(volumeTexture, sampligPoint).r;
+		if (density < 0.1) 
 		{
-			float x = 0.5*(texture(volumeTexture, vec3(sampligPoint.x+gd, sampligPoint.y, sampligPoint.z)).r - (texture(volumeTexture, vec3(sampligPoint.x-gd, sampligPoint.y, sampligPoint.z)).r));
-			float y = 0.5*(texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y+gd, sampligPoint.z)).r - (texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y-gd, sampligPoint.z)).r));
-			float z = 0.5*(texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y, sampligPoint.z+gd)).r - (texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y, sampligPoint.z-gd)).r));
+			sampligPoint += rayDir * samplingDistance;
+			continue;
+		}
+		else if (density < 0.30) 
+		{
+			//float x = 0.5*(texture(volumeTexture, vec3(sampligPoint.x+gd, sampligPoint.y, sampligPoint.z)).r - (texture(volumeTexture, vec3(sampligPoint.x-gd, sampligPoint.y, sampligPoint.z)).r));
+			//float y = 0.5*(texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y+gd, sampligPoint.z)).r - (texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y-gd, sampligPoint.z)).r));
+			//float z = 0.5*(texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y, sampligPoint.z+gd)).r - (texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y, sampligPoint.z-gd)).r));
 			
+			//notFound = false;
+			//firstValues = normalize(vec3(x,y,z));
+			//break;
+			color.rgb += (1.0 - color.a) * 0.05 * vec3(0.3,0.0,0.0);
+			color.a += (1.0 - color.a) * 0.05;
 			notFound = false;
-			firstValues = 0.5*(normalize(vec3(x,y,z))+1.0);
+		}
+		else
+		{
+			color.rgb += (1.0 - color.a) * 1.0 * vec3(0.0,0.4,0.0);
+			color.a = 1.0;
+			notFound = false;
+		}
+		if (color.a >= 0.95) 
+		{
 			break;
 		}
 		sampligPoint += rayDir * samplingDistance;
@@ -92,12 +123,14 @@ void main() {
 
 	if (notFound)
 	{
-		fragColor = vec4(1.0);
-		gl_FragDepth = 1.0;
+		discard;
 	}
 	else
 	{
-		fragColor = vec4(firstValues,1.0);
+		//vec3 lightpos = vec3(0.0);//(modelViewProjectionMatrix * vec4(vec3(0.0),1.0)).xyz;
+		//vec3 t = sampligPoint;//(modelViewProjectionMatrix * vec4(sampligPoint, 1.0)).xyz;//(inverseModelViewProjectionMatrix * vec4(normalize(sampligPoint),1.0)).xyz;//
+		//vec3 tt = firstValues;//(modelViewProjectionMatrix * vec4(firstValues, 1.0)).xyz;//(inverseModelViewProjectionMatrix * vec4(firstValues, 1.0)).xyz;
+		fragColor = color;//vec4(specularComponent(lightpos, t, tt) + diffuseComponent(lightpos, t, tt) + vec3(0.1), 1.0);//vec4(firstValues,1.0);
 		gl_FragDepth = calcDepth(sampligPoint);
 	}
 }

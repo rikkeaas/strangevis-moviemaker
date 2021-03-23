@@ -5,6 +5,7 @@
 
 Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
+	setFocusPolicy(Qt::StrongFocus);
 	m_volume = new Model(this);
 	m_volume->load("./data/hand/hand.dat");
 
@@ -14,6 +15,7 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 
 	m_projectionMatrix.setToIdentity();
 	m_modelViewMatrix.setToIdentity();
+	m_scaleMatrix.setToIdentity();
 	m_modelViewMatrix.translate(0.0, 0.0, -1.0 * sqrt(3.0));
 }
 
@@ -97,8 +99,8 @@ void Renderer::paintGL()
 
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
 	shaderProgram.setUniformValue("volumeTexture", 0);
-	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_projectionMatrix * m_modelViewMatrix);
-	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_modelViewMatrix).inverted());
+	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_projectionMatrix * m_modelViewMatrix * m_scaleMatrix);
+	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_modelViewMatrix * m_scaleMatrix).inverted());
 
 	shaderProgram.setAttributeArray("vertex", vertices.constData());
 	shaderProgram.enableAttributeArray("vertex");
@@ -129,19 +131,7 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 	{
 		if (m_currentX != m_previousX || m_currentY != m_previousY)
 		{
-			QVector3D va = arcballVector(m_previousX, m_previousY);
-			QVector3D vb = arcballVector(m_currentX, m_currentY);
-
-			if (va != vb)
-			{
-				qreal angle = acos(qMax(-1.0f, qMin(1.0f, QVector3D::dotProduct(va, vb))));
-				QVector3D axis = QVector3D::crossProduct(va, vb);
-
-				QMatrix4x4 inverseModelViewMatrix = m_modelViewMatrix.inverted();
-				QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
-
-				m_modelViewMatrix.rotate(qRadiansToDegrees(angle), transformedAxis.toVector3D());
-			}
+			m_modelViewMatrix.translate((m_currentX - m_previousX) * -0.001 , (m_currentY - m_previousY) * 0.001);
 		}
 	}
 
@@ -151,80 +141,64 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 	update();
 }
 
-QVector3D Renderer::arcballVector(qreal x, qreal y)
-{
-	QVector3D p = QVector3D(2.0f * float(x) / float(width()) - 1.0f, -2.0f * float(y) / float(height()) + 1.0f, 0.0);
-
-	float length2 = p.x() * p.x() + p.y() * p.y();
-
-	if (length2 < 1.0f)
-		p.setZ(sqrtf(1.0f - length2));
-	else
-		p.normalize();
-
-	return p;
-}
-
-/*
-void Renderer::mousePressEvent(QMouseEvent* event)
-{
-	if (event->button() == Qt::MouseButton::RightButton) 
-	{
-		m_prev = m_div;
-		m_div += 1;
-		m_div = m_div >= m_model->getDimensions().at(1) ? m_model->getDimensions().at(1) - 1 : m_div;
-	}
-	else
-	{
-		m_prev = m_div;
-		m_div -= 1;
-		m_div = m_div < 0 ? 0 : m_div;
-	}
-	lastMousePosition = event->pos();
-	event->accept();
-
-	update();
-}*/
 void Renderer::wheelEvent(QWheelEvent* event)
 {
-	qDebug() << 1.0 / (float(event->delta()) / 120.0);
-	m_modelViewMatrix.scale(1.0 / (float(event->delta()) / 120.0));
-	int delta = event->delta();
-	if (event->orientation() == Qt::Vertical) {
-		if (delta > 0) {
-			m_zCoord = 1.0 < m_zCoord + float(delta) / 120.0 ? 1.0 : m_zCoord + float(delta) / 120.0;
-		}
-		else if (delta < 0) {
-			m_zCoord = 0.0 > m_zCoord + float(delta) / 120.0 ? 0.0 : m_zCoord + float(delta) / 120.0;
-		}
-		update();
+	float* values = new float[16];
+	m_scaleMatrix.copyDataTo(values);
+	QMatrix4x4 scaledMat = QMatrix4x4(values);
+	delete[] values;
+
+	float scaleFac = 1 + (float(event->delta()) / 120.0);
+	scaleFac = scaleFac < 0 ? 0.0 : scaleFac;
+	scaledMat.scale(scaleFac, scaleFac, scaleFac);
+
+	float currScale = scaledMat.column(0).toVector3D().length();
+	qDebug() << currScale;
+
+	if (currScale > 2.0 || currScale < 0.5)
+	{
+		qDebug() << "Out of scale";
+		event->accept();
+		return;
 	}
+	m_scaleMatrix.scale(scaleFac, scaleFac, scaleFac);
+	update();
+
 	event->accept();
 }
 
-/*
-void Renderer::mouseMoveEvent(QMouseEvent* event)
+
+void Renderer::keyPressEvent(QKeyEvent* event)
 {
-	int deltaX = event->x() - lastMousePosition.x();
-	int deltaY = event->y() - lastMousePosition.y();
-	if (event->buttons() & Qt::LeftButton) {
-		alpha -= deltaX;
-		while (alpha < 0) {
-			alpha += 360;
-		}
-		while (alpha >= 360) {
-			alpha -= 360;
-		}
-		beta -= deltaY;
-		if (beta < -90) {
-			beta = -90;
-		}
-		if (beta > 90) {
-			beta = 90;
-		}
+	if (event->key() == Qt::Key_Left)
+	{
+		m_modelViewMatrix.rotate(5.0, QVector3D(0.0,1.0,0.0));
 		update();
 	}
-	lastMousePosition = event->pos();
+	else if (event->key() == Qt::Key_Right)
+	{
+		m_modelViewMatrix.rotate(-5.0, QVector3D(0.0, 1.0, 0.0));
+		update();
+	}
+	else if (event->key() == Qt::Key_Up)
+	{
+		m_modelViewMatrix.rotate(5.0, QVector3D(1.0, 0.0, 0.0));
+		update();
+	}
+	else if (event->key() == Qt::Key_Down)
+	{
+		m_modelViewMatrix.rotate(-5.0, QVector3D(1.0, 0.0, 0.0));
+		update();
+	}
+	else if (event->key() == Qt::Key_Comma)
+	{
+		m_modelViewMatrix.rotate(5.0, QVector3D(0.0, 0.0, 1.0));
+		update();
+	}
+	else if (event->key() == Qt::Key_Period)
+	{
+		m_modelViewMatrix.rotate(-5.0, QVector3D(0.0, 0.0, 1.0));
+		update();
+	}
 	event->accept();
 }
-*/

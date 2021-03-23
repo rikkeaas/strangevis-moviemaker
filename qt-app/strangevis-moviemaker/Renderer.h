@@ -9,6 +9,7 @@
 #include <QOpenGLShaderProgram>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QKeyEvent>
 
 #include "model.h"
 
@@ -26,6 +27,7 @@ public:
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_modelViewMatrix;
+	QMatrix4x4 m_scaleMatrix;
 	QOpenGLShaderProgram shaderProgram;
 	QVector<QVector3D> vertices;
 
@@ -49,4 +51,5 @@ protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
 	void wheelEvent(QWheelEvent* event);
+	void keyPressEvent(QKeyEvent* event);
 };

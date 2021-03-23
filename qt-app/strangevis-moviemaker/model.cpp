@@ -78,8 +78,8 @@ void Model::bind()
 		m_volumeTexture.setSize(m_width, m_height, m_depth);
 		m_volumeTexture.allocateStorage();
 
-		void* data = reinterpret_cast<void*>(m_Data.data());
-		m_volumeTexture.setData(0, 0, 0, m_width, m_height, m_depth, QOpenGLTexture::Red, QOpenGLTexture::UInt16, data);
+		//void* data = reinterpret_cast<void*>(m_Data.data());
+		m_volumeTexture.setData(0, 0, 0, m_width, m_height, m_depth, QOpenGLTexture::Red, QOpenGLTexture::UInt16, m_Data.data());
 		m_updateNeeded = false;
 	}
 
