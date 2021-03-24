@@ -10,6 +10,7 @@
 #include <QtWidgets/qgroupbox.h>
 #include <QSize>
 #include <QDesktopWidget>
+#include <QtCharts>
 
 
 strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
@@ -25,86 +26,54 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 
     this->setMinimumSize(1600, 1200);
 
-    /*
-    Toolbox* toolbox = new Toolbox("Cutting Tool", 200, parent);
-    auto* anyLayout = new QVBoxLayout();
-    anyLayout->addWidget(new QLabel("Some Text in Section", toolbox));
-    anyLayout->addWidget(new QPushButton("Button in Section", toolbox));
-    toolbox->setContentLayout(*anyLayout);
-    */
+    QBarSet* barChart = new QBarSet("Density");
+    *barChart << 15;
+    QBarSeries* series = new QBarSeries();
+    series->append(barChart);
 
-    // ui.gridLayout->addWidget(toolbox);
-    // ui.toolboxMenu->layout()->addWidget(toolbox);
+    QChart* chart = new QChart();
+    chart->addSeries(series);
+    chart->setTitle("Simple barchart example");
+    chart->setAnimationOptions(QChart::SeriesAnimations);
 
-    // Renderer* qtWid = new Renderer();
+    QStringList categories;
+    categories << "Data";
+    QBarCategoryAxis* axisX = new QBarCategoryAxis();
+    axisX->append(categories);
+    chart->addAxis(axisX, Qt::AlignBottom);
+    series->attachAxis(axisX);
+
+    QValueAxis* axisY = new QValueAxis();
+    axisY->setRange(0, 15);
+    chart->addAxis(axisY, Qt::AlignLeft);
+    series->attachAxis(axisY);
+
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignBottom);
+
+    QChartView* chartView = new QChartView(chart);
+    chartView->setRenderHint(QPainter::Antialiasing);
+
+    auto* cw = ui.centralWidget->layout();
+    cw->addWidget(m_renderer);
+
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
     QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
-    
 
-    // QSize size = ui.horizontalLayout->widget()->size();
-    toolbox->setMinimumSize(QDesktopWidget().availableGeometry(this).size() * 0.15);
-    keyframes->setMinimumSize(QDesktopWidget().availableGeometry(this).size() * 0.15);
+    toolbox->setWidget(chartView);
+    toolbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     toolbox->setFeatures(QDockWidget::NoDockWidgetFeatures);
     toolbox->setFeatures(QDockWidget::DockWidgetMovable);
     keyframes->setFeatures(QDockWidget::NoDockWidgetFeatures);
     keyframes->setFeatures(QDockWidget::DockWidgetMovable);
 
-
-
-
-    
-
-    toolbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    keyframes->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    /*
-
-    QWidget* sliders = new QWidget();
-    QVBoxLayout* layout = new QVBoxLayout();
-    QPushButton* filter1 = new QPushButton(QLatin1String("Filter number 1"));
-    QPushButton* filter2 = new QPushButton(QLatin1String("Filter number 2"));
-    QPushButton* filter3 = new QPushButton(QLatin1String("Filter number 3"));
-    QPushButton* filter4 = new QPushButton(QLatin1String("Filter number 4"));
-    QPushButton* filter5 = new QPushButton(QLatin1String("Filter number 5"));
-
-    layout->addWidget(filter1);
-    layout->addWidget(filter2);
-    layout->addWidget(filter3);
-    layout->addWidget(filter4);
-    layout->addWidget(filter5);
-    sliders->setLayout(layout);
-    toolbox->setWidget(sliders);
-
-    */
-
-
-    auto* cw = ui.centralWidget->layout();
-
-    /*
-    // ui.horizontalLayout->addWidget(groupBox);
-    QHBoxLayout* mainLayout = new QHBoxLayout;
-    mainLayout->addWidget(groupBox);
-    mainLayout->addWidget(qtWid);
-    */
-
-    // setLayout(mainLayout);
-    // cw->addWidget(groupBox);
-    cw->addWidget(m_renderer);
     this->addDockWidget(Qt::LeftDockWidgetArea, toolbox);
     this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
 
-
-
     
-
-
-    
-    
-
 
     /*
-    * 
     QWidget* container = new QWidget(this);
     container->setGeometry(QRect(0, 0, 1000, 1000));
     QVBoxLayout* contLayout = new QVBoxLayout(container);

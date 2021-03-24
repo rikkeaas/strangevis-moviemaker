@@ -97,6 +97,12 @@ void Model::release()
 	}
 }
 
+QVector<unsigned short> Model::getDataset()
+{
+	QVector<unsigned short> copied = m_Data;
+	return copied;
+}
+
 
 std::vector<unsigned short> Model::getDimensions() 
 {

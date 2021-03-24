@@ -8,10 +8,13 @@
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="strangevismoviemaker.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="histogram.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cube.h" />
     <ClInclude Include="customSlider.h" />
+    <ClInclude Include="histogram.h" />
+    <ClInclude Include="barchart.h" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="strangevismoviemaker.h" />

@@ -15,6 +15,8 @@ public:
 	void bind();
 	void release();
 
+	QVector<unsigned short> getDataset();
+
 private:
 
 	// Model dimensions
@@ -27,4 +29,5 @@ private:
 
 	// Model data
 	QVector<unsigned short> m_Data;
+	
 };

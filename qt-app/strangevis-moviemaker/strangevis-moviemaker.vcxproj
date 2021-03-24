@@ -48,7 +48,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>core;gui;opengl;openglextensions;widgets</QtModules>
+    <QtModules>charts;core;gui;opengl;openglextensions;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
@@ -89,6 +89,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="histogram.cpp" />
     <ClCompile Include="Toolbox.cpp" />
     <QtRcc Include="strangevismoviemaker.qrc" />
     <QtUic Include="strangevismoviemaker.ui" />
@@ -101,8 +102,10 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="barchart.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="customSlider.h" />
+    <ClInclude Include="histogram.h" />
     <QtMoc Include="model.h" />
     <QtMoc Include="Toolbox.h" />
     <QtMoc Include="Renderer.h" />
