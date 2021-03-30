@@ -16,6 +16,28 @@ bool Model::load(const QString filepath)
 	// Opening file
 	qDebug() << "Loading " << filepath << "...";
 	QFile file(filepath);
+	QFile metaFile(filepath.left(filepath.length() - 3) + "ini");
+
+	if (!metaFile.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		qDebug() << "Couldnt open " << filepath.left(filepath.length() - 3) + "ini";
+		qDebug() << "Setting voxel spacing to 1,1,1";
+		voxelSpacing = QVector3D(1.0, 1.0, 1.0);
+	}
+	else
+	{
+		QTextStream metaStream(&metaFile);
+		metaStream.readLine(); // Reading title line (not needed)
+		for (int i = 0; i < 3; i++)
+		{
+			QString s = metaStream.readLine();
+			int numLen = s.length() - s.lastIndexOf("=") - 1;
+			qDebug() << i << " " << s.right(numLen);
+			voxelSpacing[i] = s.right(numLen).toFloat();
+		}
+	}
+
+	voxelSpacing /= qMax(qMax(voxelSpacing[0], voxelSpacing[1]), voxelSpacing[2]);
 
 	if (!file.open(QIODevice::ReadOnly))
 	{
@@ -46,6 +68,10 @@ bool Model::load(const QString filepath)
 	m_width = uWidth;
 	m_height = uHeight;
 	m_depth = uDepth;
+
+	dimensionScaling = QVector3D(uWidth, uHeight, uDepth);
+	dimensionScaling /= qMax(qMax(uWidth, uHeight), uDepth);
+
 	m_updateNeeded = true;
 
 	for (long i = 0; i < volumeSize; i++)
@@ -106,3 +132,8 @@ std::vector<unsigned short> Model::getDimensions()
 	dims.push_back(m_depth);
 	return dims;
 }
+
+
+QVector3D Model::getVoxelSpacing() { return voxelSpacing; }
+
+QVector3D Model::getDimensionScale() { return dimensionScaling; }

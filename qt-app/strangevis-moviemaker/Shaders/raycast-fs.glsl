@@ -2,6 +2,10 @@
 
 uniform mat4 modelViewProjectionMatrix;
 uniform mat4 inverseModelViewProjectionMatrix;
+
+uniform vec3 voxelSpacing;
+uniform vec3 dimensionScaling;
+
 uniform sampler3D volumeTexture;
 
 in vec2 fragCoord;
@@ -45,11 +49,9 @@ vec3 specularComponent(vec3 lightPos, vec3 pos, vec3 normal)
 
 // https://www.willusher.io/webgl/2019/01/13/volume-rendering-with-webgl
 vec2 intersect_box(vec3 orig, vec3 dir) {
-	const vec3 box_min = vec3(0);
-	const vec3 box_max = vec3(1);
 	vec3 inv_dir = 1.0 / dir;
-	vec3 tmin_tmp = (box_min - orig) * inv_dir;
-	vec3 tmax_tmp = (box_max - orig) * inv_dir;
+	vec3 tmin_tmp = - orig * inv_dir - inv_dir * voxelSpacing * dimensionScaling;
+	vec3 tmax_tmp = - orig * inv_dir + inv_dir * voxelSpacing * dimensionScaling;
 	vec3 tmin = min(tmin_tmp, tmax_tmp);
 	vec3 tmax = max(tmin_tmp, tmax_tmp);
 	float t0 = max(tmin.x, max(tmin.y, tmin.z));
@@ -59,15 +61,17 @@ vec2 intersect_box(vec3 orig, vec3 dir) {
 
 
 
+
 void main() {
-    vec4 near = modelViewProjectionMatrix * vec4(fragCoord, -1.0, 1.0);
-    //near /= near.w;
-    vec4 far = modelViewProjectionMatrix * vec4(fragCoord, 1.0, 1.0);
-    //far /= far.w;
+    vec4 near = inverseModelViewProjectionMatrix * vec4(fragCoord, -1.0, 1.0);
+    near /= near.w;
+    vec4 far = inverseModelViewProjectionMatrix * vec4(fragCoord, 1.0, 1.0);
+    far /= far.w;
 
 	vec3 rayOrigin = near.xyz;
 
     vec3 rayDir = normalize(far.xyz - near.xyz);
+	vec3 rrayDir = normalize(vec3(rayDir.x, rayDir.y, rayDir.z));
 
 	vec2 t_hit = intersect_box(rayOrigin, rayDir);
 	if (t_hit.x > t_hit.y) {
@@ -85,14 +89,21 @@ void main() {
 	bool notFound = true;
 
 	vec3 sampligPoint = rayOrigin + t_hit.x * rayDir;
+	vec3 ssampligPoint = rayOrigin + t_hit.x * rrayDir;
 	vec4 color = vec4(0.0);
 
+	vec3 scalingFactor = voxelSpacing * dimensionScaling;
 	for (float i = 0; i <= renderDistance; i += samplingDistance) 
 	{
-		float density = texture(volumeTexture, sampligPoint).r;
+		// With no special scaling, we would just do 0.5 + sampligPoint/2 to map from [-1,1] to [0,1] (ie voxelSpacing and dimensionScaling are equal to 1)
+		// With different dimension scales and voxel spacing we need to scale by these factors also. Note both are in interval [0,1].
+		vec3 scaledSamplePoint = 0.5 + sampligPoint / (scalingFactor * 2.0);
+		float density = texture(volumeTexture, scaledSamplePoint).r;
 		if (density < 0.1) 
 		{
+			//sampligPoint += vec3(rayDir.x * voxelSpacing.x, rayDir.y * voxelSpacing.y, rayDir.z * voxelSpacing.z) * samplingDistance;
 			sampligPoint += rayDir * samplingDistance;
+			ssampligPoint += rrayDir * samplingDistance;
 			continue;
 		}
 		else if (density < 0.30) 
@@ -119,6 +130,7 @@ void main() {
 			break;
 		}
 		sampligPoint += rayDir * samplingDistance;
+		ssampligPoint += rrayDir * samplingDistance;
 	}
 
 	if (notFound)
@@ -131,7 +143,7 @@ void main() {
 		//vec3 t = sampligPoint;//(modelViewProjectionMatrix * vec4(sampligPoint, 1.0)).xyz;//(inverseModelViewProjectionMatrix * vec4(normalize(sampligPoint),1.0)).xyz;//
 		//vec3 tt = firstValues;//(modelViewProjectionMatrix * vec4(firstValues, 1.0)).xyz;//(inverseModelViewProjectionMatrix * vec4(firstValues, 1.0)).xyz;
 		fragColor = color;//vec4(specularComponent(lightpos, t, tt) + diffuseComponent(lightpos, t, tt) + vec3(0.1), 1.0);//vec4(firstValues,1.0);
-		gl_FragDepth = calcDepth(sampligPoint);
+		gl_FragDepth = calcDepth(ssampligPoint);
 	}
 }
 

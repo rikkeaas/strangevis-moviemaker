@@ -48,7 +48,7 @@ void Renderer::initializeGL()
 	shaderProgram.bind();
 
 	qDebug() << shaderProgram.isLinked();
-	vertices << QVector3D(-1.0, -1.0, 0.0) << QVector3D(1.0, -1.0, 0.0) << QVector3D(1.0, 1.0, 0.0) << QVector3D(-1.0, 1.0, 0.0);
+	vertices << QVector2D(-1.0, -1.0) << QVector2D(1.0, -1.0) << QVector2D(1.0, 1.0) << QVector2D(-1.0, 1.0);
 }
 
 
@@ -101,6 +101,9 @@ void Renderer::paintGL()
 	shaderProgram.setUniformValue("volumeTexture", 0);
 	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_projectionMatrix * m_modelViewMatrix * m_scaleMatrix);
 	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_modelViewMatrix * m_scaleMatrix).inverted());
+	shaderProgram.setUniformValue("voxelSpacing", m_volume->getVoxelSpacing());
+	shaderProgram.setUniformValue("dimensionScaling", m_volume->getDimensionScale());
+	qDebug() << m_volume->getVoxelSpacing();
 
 	shaderProgram.setAttributeArray("vertex", vertices.constData());
 	shaderProgram.enableAttributeArray("vertex");
