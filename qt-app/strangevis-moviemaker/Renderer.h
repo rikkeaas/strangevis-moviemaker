@@ -26,8 +26,10 @@ public:
 	Model* getVolume();
 private:
 	QMatrix4x4 m_projectionMatrix;
-	QMatrix4x4 m_modelViewMatrix;
+	QMatrix4x4 m_rotateMatrix;
 	QMatrix4x4 m_scaleMatrix;
+	QMatrix4x4 m_translateMatrix;
+
 	QOpenGLShaderProgram shaderProgram;
 	QVector<QVector3D> vertices;
 

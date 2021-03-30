@@ -14,9 +14,10 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	distance = 2.0;
 
 	m_projectionMatrix.setToIdentity();
-	m_modelViewMatrix.setToIdentity();
+	m_rotateMatrix.setToIdentity();
 	m_scaleMatrix.setToIdentity();
-	m_modelViewMatrix.translate(0.0, 0.0, -1.0 * sqrt(3.0));
+	m_translateMatrix.setToIdentity();
+	m_translateMatrix.translate(0.0, 0.0, -1.0 * sqrt(3.0));
 }
 
 
@@ -99,11 +100,10 @@ void Renderer::paintGL()
 
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
 	shaderProgram.setUniformValue("volumeTexture", 0);
-	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_projectionMatrix * m_modelViewMatrix * m_scaleMatrix);
-	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_modelViewMatrix * m_scaleMatrix).inverted());
+	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
+	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());
 	shaderProgram.setUniformValue("voxelSpacing", m_volume->getVoxelSpacing());
 	shaderProgram.setUniformValue("dimensionScaling", m_volume->getDimensionScale());
-	qDebug() << m_volume->getVoxelSpacing();
 
 	shaderProgram.setAttributeArray("vertex", vertices.constData());
 	shaderProgram.enableAttributeArray("vertex");
@@ -134,7 +134,7 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 	{
 		if (m_currentX != m_previousX || m_currentY != m_previousY)
 		{
-			m_modelViewMatrix.translate((m_currentX - m_previousX) * -0.001 , (m_currentY - m_previousY) * 0.001);
+			m_translateMatrix.setColumn(3, m_translateMatrix.column(3) + QVector3D((m_previousX - m_currentX) * -0.001, (m_previousY - m_currentY) * 0.001, 0.0));
 		}
 	}
 
@@ -156,7 +156,7 @@ void Renderer::wheelEvent(QWheelEvent* event)
 	scaledMat.scale(scaleFac, scaleFac, scaleFac);
 
 	float currScale = scaledMat.column(0).toVector3D().length();
-	qDebug() << currScale;
+	//qDebug() << currScale;
 
 	if (currScale > 2.0 || currScale < 0.5)
 	{
@@ -175,32 +175,32 @@ void Renderer::keyPressEvent(QKeyEvent* event)
 {
 	if (event->key() == Qt::Key_Left)
 	{
-		m_modelViewMatrix.rotate(5.0, QVector3D(0.0,1.0,0.0));
+		m_rotateMatrix.rotate(5.0, QVector3D(0.0,1.0,0.0));
 		update();
 	}
 	else if (event->key() == Qt::Key_Right)
 	{
-		m_modelViewMatrix.rotate(-5.0, QVector3D(0.0, 1.0, 0.0));
+		m_rotateMatrix.rotate(-5.0, QVector3D(0.0, 1.0, 0.0));
 		update();
 	}
 	else if (event->key() == Qt::Key_Up)
 	{
-		m_modelViewMatrix.rotate(5.0, QVector3D(1.0, 0.0, 0.0));
+		m_rotateMatrix.rotate(5.0, QVector3D(1.0, 0.0, 0.0));
 		update();
 	}
 	else if (event->key() == Qt::Key_Down)
 	{
-		m_modelViewMatrix.rotate(-5.0, QVector3D(1.0, 0.0, 0.0));
+		m_rotateMatrix.rotate(-5.0, QVector3D(1.0, 0.0, 0.0));
 		update();
 	}
 	else if (event->key() == Qt::Key_Comma)
 	{
-		m_modelViewMatrix.rotate(5.0, QVector3D(0.0, 0.0, 1.0));
+		m_rotateMatrix.rotate(5.0, QVector3D(0.0, 0.0, 1.0));
 		update();
 	}
 	else if (event->key() == Qt::Key_Period)
 	{
-		m_modelViewMatrix.rotate(-5.0, QVector3D(0.0, 0.0, 1.0));
+		m_rotateMatrix.rotate(-5.0, QVector3D(0.0, 0.0, 1.0));
 		update();
 	}
 	event->accept();

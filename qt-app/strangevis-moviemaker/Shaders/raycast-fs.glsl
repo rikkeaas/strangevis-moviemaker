@@ -101,9 +101,7 @@ void main() {
 		float density = texture(volumeTexture, scaledSamplePoint).r;
 		if (density < 0.1) 
 		{
-			//sampligPoint += vec3(rayDir.x * voxelSpacing.x, rayDir.y * voxelSpacing.y, rayDir.z * voxelSpacing.z) * samplingDistance;
 			sampligPoint += rayDir * samplingDistance;
-			ssampligPoint += rrayDir * samplingDistance;
 			continue;
 		}
 		else if (density < 0.30) 
