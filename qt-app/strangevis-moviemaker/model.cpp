@@ -124,13 +124,9 @@ void Model::release()
 }
 
 
-std::vector<unsigned short> Model::getDimensions() 
+QVector3D Model::getDimensions() 
 {
-	std::vector<unsigned short> dims;
-	dims.push_back(m_width);
-	dims.push_back(m_height);
-	dims.push_back(m_depth);
-	return dims;
+	return QVector3D(m_width, m_height, m_depth);
 }
 
 

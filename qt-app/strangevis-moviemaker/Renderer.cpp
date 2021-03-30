@@ -100,10 +100,12 @@ void Renderer::paintGL()
 
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
 	shaderProgram.setUniformValue("volumeTexture", 0);
-	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
+	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
+	//qDebug() << "mvp " << m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix;
 	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());
 	shaderProgram.setUniformValue("voxelSpacing", m_volume->getVoxelSpacing());
 	shaderProgram.setUniformValue("dimensionScaling", m_volume->getDimensionScale());
+	shaderProgram.setUniformValue("voxelDimsInTexCoord", QVector3D(QVector3D(1.0,1.0,1.0) / m_volume->getDimensions()));
 
 	shaderProgram.setAttributeArray("vertex", vertices.constData());
 	shaderProgram.enableAttributeArray("vertex");

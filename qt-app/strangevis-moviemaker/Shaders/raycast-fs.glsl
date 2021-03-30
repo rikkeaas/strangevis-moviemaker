@@ -5,6 +5,7 @@ uniform mat4 inverseModelViewProjectionMatrix;
 
 uniform vec3 voxelSpacing;
 uniform vec3 dimensionScaling;
+uniform vec3 voxelDimsInTexCoord;
 
 uniform sampler3D volumeTexture;
 
@@ -24,22 +25,17 @@ float calcDepth(vec3 pos)
 
 
 // Function to calculate the diffuse component of light at given position (assuming all light sources have the same diffuse intensity)
-
-vec3 diffuseComponent(vec3 lightPos, vec3 pos, vec3 normal)
+vec3 diffuseComponent(vec3 lightPos, vec3 pos, vec3 normal, vec3 color)
 {
-	vec3 color = vec3(0.3,0.0,0.0);
-	
-	vec3 pointToLight = normalize(lightPos - pos);
+	vec3 pointToLight = normalize(pos - lightPos);
 	vec3 diffuse = color * max(dot(pointToLight, normal),0.0f);
 	return diffuse;
 }
 
 // Function to calculate the specular component of light at given position (assuming all light sources have the same specular intensity)
-vec3 specularComponent(vec3 lightPos, vec3 pos, vec3 normal)
+vec3 specularComponent(vec3 lightPos, vec3 pos, vec3 normal, vec3 color)
 {
-	vec3 color = vec3(0.0,0.3,0.0);
-
-	vec3 camPos = vec3(0.0);
+	vec3 camPos = (inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz;
 	vec3 pointToEye = normalize(camPos - pos);
 	vec3 lightToPoint = normalize(pos - lightPos);
 	vec3 reflection = normalize(reflect(lightToPoint, normal));
@@ -81,9 +77,9 @@ void main() {
 	t_hit.x = max(t_hit.x, 0.0);
 
 
-	float samplingDistance = 0.005;
+	float samplingDistance = 0.002;
 	float gd = 0.001;
-	float renderDistance = 3.0;
+	float renderDistance = t_hit.y - t_hit.x;
 
 	vec3 firstValues = vec3(0.0);
 	bool notFound = true;
@@ -93,6 +89,7 @@ void main() {
 	vec4 color = vec4(0.0);
 
 	vec3 scalingFactor = voxelSpacing * dimensionScaling;
+	
 	for (float i = 0; i <= renderDistance; i += samplingDistance) 
 	{
 		// With no special scaling, we would just do 0.5 + sampligPoint/2 to map from [-1,1] to [0,1] (ie voxelSpacing and dimensionScaling are equal to 1)
@@ -104,22 +101,32 @@ void main() {
 			sampligPoint += rayDir * samplingDistance;
 			continue;
 		}
-		else if (density < 0.30) 
+		else if (density < 0.32) 
 		{
-			//float x = 0.5*(texture(volumeTexture, vec3(sampligPoint.x+gd, sampligPoint.y, sampligPoint.z)).r - (texture(volumeTexture, vec3(sampligPoint.x-gd, sampligPoint.y, sampligPoint.z)).r));
-			//float y = 0.5*(texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y+gd, sampligPoint.z)).r - (texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y-gd, sampligPoint.z)).r));
-			//float z = 0.5*(texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y, sampligPoint.z+gd)).r - (texture(volumeTexture, vec3(sampligPoint.x, sampligPoint.y, sampligPoint.z-gd)).r));
+			float x = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x+voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x-voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r));
+			float y = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y+voxelDimsInTexCoord.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y-voxelDimsInTexCoord.y, scaledSamplePoint.z)).r));
+			float z = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z+voxelDimsInTexCoord.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z-voxelDimsInTexCoord.z)).r));
+			
+			vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), vec3(0.3,0.0,0.0));
+			//phong += specularComponent((modelViewProjectionMatrix * vec4(0.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), vec3(0.3,0.3,0.0));
 			
 			//notFound = false;
 			//firstValues = normalize(vec3(x,y,z));
 			//break;
-			color.rgb += (1.0 - color.a) * 0.05 * vec3(0.3,0.0,0.0);
-			color.a += (1.0 - color.a) * 0.05;
+			color.rgb += (1.0 - color.a) * 0.02 * phong;
+			color.a += (1.0 - color.a) * 0.02;
 			notFound = false;
 		}
 		else
 		{
-			color.rgb += (1.0 - color.a) * 1.0 * vec3(0.0,0.4,0.0);
+			float x = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x+voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x-voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r));
+			float y = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y+voxelDimsInTexCoord.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y-voxelDimsInTexCoord.y, scaledSamplePoint.z)).r));
+			float z = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z+voxelDimsInTexCoord.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z-voxelDimsInTexCoord.z)).r));
+			
+			vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), vec3(0.0,0.4,0.0));
+			phong += specularComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), vec3(0.3,0.3,0.3));
+
+			color.rgb += (1.0 - color.a) * 1.0 * phong;
 			color.a = 1.0;
 			notFound = false;
 		}

@@ -10,7 +10,7 @@ public:
 	Model(QObject* parent);
 	~Model();
 
-	std::vector<unsigned short> getDimensions();
+	QVector3D getDimensions();
 	QVector3D getVoxelSpacing();
 	QVector3D getDimensionScale();
 
