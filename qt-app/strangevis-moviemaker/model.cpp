@@ -1,9 +1,12 @@
 #include "model.h"
+#include "histogram.h"
 #include <stdio.h>
 #include <QDebug>
 #include <iostream>
 #include <QFile>
 #include <QDataStream>
+#include <QDockWIdget>
+
 
 Model::Model(QObject* parent) : QObject(parent), m_volumeTexture(QOpenGLTexture::Target3D)
 {}

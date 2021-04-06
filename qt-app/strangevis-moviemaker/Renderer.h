@@ -11,6 +11,7 @@
 #include <QWheelEvent>
 
 #include "model.h"
+#include "histogram.h"
 
 class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 {

@@ -1,11 +1,11 @@
 #pragma once
 #include <QtCharts>
-
+#include "model.h"
 
 class Histogram {
 public:
 	QChartView* getHistogram();
-	Histogram(void);
+	Histogram(QVector<unsigned short>);
 private:
 	QChartView* chartView;
 };

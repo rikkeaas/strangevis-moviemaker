@@ -18,6 +18,7 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 {
     renderer->setParent(this);
     m_renderer = renderer;
+
     ui.setupUi(this);
        
     QAction* fileOpenAction = new QAction("Open", this);
@@ -28,23 +29,6 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 
     auto* cw = ui.centralWidget->layout();
     cw->addWidget(m_renderer);
-
-    QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
-    QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
-
-    Histogram* h = new Histogram();
-    toolbox->setWidget(h->getHistogram());
-    toolbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    toolbox->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    toolbox->setFeatures(QDockWidget::DockWidgetMovable);
-    keyframes->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    keyframes->setFeatures(QDockWidget::DockWidgetMovable);
-
-    this->addDockWidget(Qt::LeftDockWidgetArea, toolbox);
-    this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
-
-    
 
     /*
     QWidget* container = new QWidget(this);
@@ -76,6 +60,8 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 }
 
 
+
+
 void strangevismoviemaker::fileOpen()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Open Volume File", QString(), "*.dat");
@@ -85,6 +71,25 @@ void strangevismoviemaker::fileOpen()
         if (m_renderer->getVolume()->load(fileName))
         {
             qDebug() << "Loaded volume " << fileName;
+            qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset().isEmpty();
+
+            QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
+            Histogram* h = new Histogram(m_renderer->getVolume()->getDataset());
+
+            toolbox->setWidget(h->getHistogram());
+
+            toolbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+            toolbox->setFeatures(QDockWidget::NoDockWidgetFeatures);
+            toolbox->setFeatures(QDockWidget::DockWidgetMovable);
+
+            this->addDockWidget(Qt::LeftDockWidgetArea, toolbox);
+
+            QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
+
+            keyframes->setFeatures(QDockWidget::NoDockWidgetFeatures);
+            keyframes->setFeatures(QDockWidget::DockWidgetMovable);
+
+            this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
         }
 
         else
@@ -94,5 +99,3 @@ void strangevismoviemaker::fileOpen()
     }
 
 }
-
-

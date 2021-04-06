@@ -1,9 +1,23 @@
 #include "histogram.h"
+#include "model.h"
 
 
-Histogram::Histogram() {
+Histogram::Histogram(QVector<unsigned short> values) {
     QBarSet* barChart = new QBarSet("Density");
-    *barChart << 22 << 13 << 18;
+    qDebug() << "Values: " << values.isEmpty();
+
+    if (!values.isEmpty()) {
+        for (int i = 0; i < 100; i++) {
+            qDebug() << "m_Data" << i << ": " << values[i];
+            *barChart << values[i];
+        }
+    }
+    
+
+    // std::list<float> values;
+    // values.push_back(10);
+    // for (float f : values)
+    //     *barChart << f;
     QBarSeries* series = new QBarSeries();
     series->append(barChart);
 
@@ -20,7 +34,9 @@ Histogram::Histogram() {
     series->attachAxis(axisX);
 
     QValueAxis* axisY = new QValueAxis();
-    axisY->setRange(0, 25);
+
+    double max = *std::max_element(values.constBegin(), values.constEnd());
+    axisY->setRange(0, max);
     chart->addAxis(axisY, Qt::AlignLeft);
     series->attachAxis(axisY);
 
@@ -36,4 +52,3 @@ QChartView* Histogram::getHistogram()
 {
 	return chartView;
 }
-
