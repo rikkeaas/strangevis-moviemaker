@@ -1,23 +1,31 @@
 #include "histogram.h"
 #include "model.h"
+#include <cfloat>
 
 
 Histogram::Histogram(QVector<unsigned short> values) {
     QBarSet* barChart = new QBarSet("Density");
-    qDebug() << "Values: " << values.isEmpty();
+    QStringList categories;
 
+    float minVal = FLT_MAX;
+    float maxVal = 0;
     if (!values.isEmpty()) {
         for (int i = 0; i < 100; i++) {
-            qDebug() << "m_Data" << i << ": " << values[i];
-            *barChart << values[i];
+            float val = values[i];
+            *barChart << val;
+            QString str = "d";
+            str.append(i);
+
+            categories << str;
+            if (val > maxVal) {
+                maxVal = val;
+            }
+            else if (val < minVal) {
+                minVal = val;
+            }
         }
     }
-    
 
-    // std::list<float> values;
-    // values.push_back(10);
-    // for (float f : values)
-    //     *barChart << f;
     QBarSeries* series = new QBarSeries();
     series->append(barChart);
 
@@ -25,18 +33,14 @@ Histogram::Histogram(QVector<unsigned short> values) {
     chart->addSeries(series);
     chart->setTitle("Example");
     chart->setAnimationOptions(QChart::SeriesAnimations);
-
-    QStringList categories;
-    categories << "Data";
+    
     QBarCategoryAxis* axisX = new QBarCategoryAxis();
     axisX->append(categories);
     chart->addAxis(axisX, Qt::AlignBottom);
     series->attachAxis(axisX);
 
     QValueAxis* axisY = new QValueAxis();
-
-    double max = *std::max_element(values.constBegin(), values.constEnd());
-    axisY->setRange(0, max);
+    axisY->setRange(0, int(maxVal*1.01));
     chart->addAxis(axisY, Qt::AlignLeft);
     series->attachAxis(axisY);
 
@@ -45,7 +49,6 @@ Histogram::Histogram(QVector<unsigned short> values) {
 
     chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
-
 }
 
 QChartView* Histogram::getHistogram()

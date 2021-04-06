@@ -59,9 +59,6 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     */
 }
 
-
-
-
 void strangevismoviemaker::fileOpen()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Open Volume File", QString(), "*.dat");
@@ -90,10 +87,7 @@ void strangevismoviemaker::fileOpen()
             keyframes->setFeatures(QDockWidget::DockWidgetMovable);
 
             this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
-        }
-
-        else
-        {
+        } else {
             qDebug() << "Failed to load volume " << fileName;
         }
     }
