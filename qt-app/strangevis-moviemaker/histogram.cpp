@@ -5,47 +5,32 @@
 
 Histogram::Histogram(QVector<unsigned short> values) {
     QBarSet* barChart = new QBarSet("Density");
+    barChart->setBorderColor(Qt::white);
+    barChart->setColor(Qt::white);
     QStringList categories;
 
-    float minVal = FLT_MAX;
-    float maxVal = 0;
     if (!values.isEmpty()) {
         for (int i = 0; i < 100; i++) {
             float val = values[i];
             *barChart << val;
             QString str = "d";
             str.append(i);
-
             categories << str;
-            if (val > maxVal) {
-                maxVal = val;
-            }
-            else if (val < minVal) {
-                minVal = val;
-            }
         }
     }
 
     QBarSeries* series = new QBarSeries();
     series->append(barChart);
+    series->setBarWidth(1);
 
     QChart* chart = new QChart();
+    chart->setTheme(QChart::ChartThemeDark);
     chart->addSeries(series);
-    chart->setTitle("Example");
     chart->setAnimationOptions(QChart::SeriesAnimations);
-    
-    QBarCategoryAxis* axisX = new QBarCategoryAxis();
-    axisX->append(categories);
-    chart->addAxis(axisX, Qt::AlignBottom);
-    series->attachAxis(axisX);
 
-    QValueAxis* axisY = new QValueAxis();
-    axisY->setRange(0, int(maxVal*1.01));
-    chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
-
-    chart->legend()->setVisible(true);
-    chart->legend()->setAlignment(Qt::AlignBottom);
+    chart->legend()->setVisible(false);
+    chart->setBackgroundVisible(false);
+    chart->setPlotAreaBackgroundVisible(false);
 
     chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
