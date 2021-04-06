@@ -1,8 +1,8 @@
 #include "strangevismoviemaker.h"
 #include "customSlider.h"
+#include "histogram.h"
 #include <QOpenGLWidget>
 #include <QFileDialog>
-#include "Toolbox.h"
 #include <Qlabel>
 #include <QPushButton>
 #include "Renderer.h"
@@ -26,41 +26,14 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 
     this->setMinimumSize(1600, 1200);
 
-    QBarSet* barChart = new QBarSet("Density");
-    *barChart << 15;
-    QBarSeries* series = new QBarSeries();
-    series->append(barChart);
-
-    QChart* chart = new QChart();
-    chart->addSeries(series);
-    chart->setTitle("Simple barchart example");
-    chart->setAnimationOptions(QChart::SeriesAnimations);
-
-    QStringList categories;
-    categories << "Data";
-    QBarCategoryAxis* axisX = new QBarCategoryAxis();
-    axisX->append(categories);
-    chart->addAxis(axisX, Qt::AlignBottom);
-    series->attachAxis(axisX);
-
-    QValueAxis* axisY = new QValueAxis();
-    axisY->setRange(0, 15);
-    chart->addAxis(axisY, Qt::AlignLeft);
-    series->attachAxis(axisY);
-
-    chart->legend()->setVisible(true);
-    chart->legend()->setAlignment(Qt::AlignBottom);
-
-    QChartView* chartView = new QChartView(chart);
-    chartView->setRenderHint(QPainter::Antialiasing);
-
     auto* cw = ui.centralWidget->layout();
     cw->addWidget(m_renderer);
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
     QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
 
-    toolbox->setWidget(chartView);
+    Histogram* h = new Histogram();
+    toolbox->setWidget(h->getHistogram());
     toolbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     toolbox->setFeatures(QDockWidget::NoDockWidgetFeatures);

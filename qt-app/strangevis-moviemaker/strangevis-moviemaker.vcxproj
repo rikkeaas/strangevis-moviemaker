@@ -90,7 +90,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="histogram.cpp" />
-    <ClCompile Include="Toolbox.cpp" />
     <QtRcc Include="strangevismoviemaker.qrc" />
     <QtUic Include="strangevismoviemaker.ui" />
     <QtMoc Include="strangevismoviemaker.h" />
@@ -102,12 +101,10 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="barchart.h" />
     <ClInclude Include="cube.h" />
     <ClInclude Include="customSlider.h" />
     <ClInclude Include="histogram.h" />
     <QtMoc Include="model.h" />
-    <QtMoc Include="Toolbox.h" />
     <QtMoc Include="Renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

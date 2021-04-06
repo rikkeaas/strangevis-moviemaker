@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="Toolbox.cpp" />
     <ClCompile Include="cube.cpp" />
     <ClCompile Include="customSlider.cpp" />
     <ClCompile Include="model.cpp" />
@@ -14,11 +13,9 @@
     <ClInclude Include="cube.h" />
     <ClInclude Include="customSlider.h" />
     <ClInclude Include="histogram.h" />
-    <ClInclude Include="barchart.h" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="strangevismoviemaker.h" />
-    <QtMoc Include="Toolbox.h" />
     <QtMoc Include="Renderer.h" />
     <QtMoc Include="model.h" />
   </ItemGroup>
