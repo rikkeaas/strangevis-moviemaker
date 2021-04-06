@@ -8,6 +8,7 @@ uniform vec3 dimensionScaling;
 uniform vec3 voxelDimsInTexCoord;
 
 uniform sampler3D volumeTexture;
+uniform sampler2D phaseFunction;
 
 in vec2 fragCoord;
 out vec4 fragColor;
@@ -96,40 +97,26 @@ void main() {
 		// With different dimension scales and voxel spacing we need to scale by these factors also. Note both are in interval [0,1].
 		vec3 scaledSamplePoint = 0.5 + sampligPoint / (scalingFactor * 2.0);
 		float density = texture(volumeTexture, scaledSamplePoint).r;
-		if (density < 0.1) 
+
+		
+		vec4 pfColor = texture(phaseFunction, vec2(density,0.0));
+		if (pfColor.a <= 0.015)
 		{
 			sampligPoint += rayDir * samplingDistance;
 			continue;
 		}
-		else if (density < 0.32) 
-		{
-			float x = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x+voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x-voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r));
-			float y = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y+voxelDimsInTexCoord.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y-voxelDimsInTexCoord.y, scaledSamplePoint.z)).r));
-			float z = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z+voxelDimsInTexCoord.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z-voxelDimsInTexCoord.z)).r));
-			
-			vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), vec3(0.3,0.0,0.0));
-			//phong += specularComponent((modelViewProjectionMatrix * vec4(0.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), vec3(0.3,0.3,0.0));
-			
-			//notFound = false;
-			//firstValues = normalize(vec3(x,y,z));
-			//break;
-			color.rgb += (1.0 - color.a) * 0.02 * phong;
-			color.a += (1.0 - color.a) * 0.02;
-			notFound = false;
-		}
-		else
-		{
-			float x = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x+voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x-voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r));
-			float y = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y+voxelDimsInTexCoord.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y-voxelDimsInTexCoord.y, scaledSamplePoint.z)).r));
-			float z = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z+voxelDimsInTexCoord.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z-voxelDimsInTexCoord.z)).r));
-			
-			vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), vec3(0.0,0.4,0.0));
-			phong += specularComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), vec3(0.3,0.3,0.3));
 
-			color.rgb += (1.0 - color.a) * 1.0 * phong;
-			color.a = 1.0;
-			notFound = false;
-		}
+		float x = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x+voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x-voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r));
+		float y = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y+voxelDimsInTexCoord.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y-voxelDimsInTexCoord.y, scaledSamplePoint.z)).r));
+		float z = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z+voxelDimsInTexCoord.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z-voxelDimsInTexCoord.z)).r));
+			
+		vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), pfColor.rgb);
+		
+		color.rgb += (1.0 - color.a) * pfColor.a * phong;
+		color.a += (1.0 - color.a) * pfColor.a;
+		notFound = false;
+
+
 		if (color.a >= 0.95) 
 		{
 			break;

@@ -12,6 +12,7 @@
 #include <QKeyEvent>
 
 #include "model.h"
+#include "phasefunction.h"
 
 class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 {
@@ -51,6 +52,7 @@ private:
 	QVector3D arcballVector(qreal x, qreal y);
 
 	Model* m_volume;
+	PhaseFunction* m_phasefunction;
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);

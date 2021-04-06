@@ -9,6 +9,8 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_volume = new Model(this);
 	m_volume->load("./data/hand/hand.dat");
 
+	m_phasefunction = new PhaseFunction();
+
 	alpha = 25;
 	beta = -25;
 	distance = 2.0;
@@ -23,6 +25,8 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 
 Renderer::~Renderer()
 {
+	m_volume->~Model();
+	m_phasefunction->~PhaseFunction();
 }
 
 
@@ -97,9 +101,12 @@ void Renderer::paintGL()
 
 	glActiveTexture(GL_TEXTURE0);
 	m_volume->bind();
+	glActiveTexture(GL_TEXTURE0+1);
+	m_phasefunction->bind();
 
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
 	shaderProgram.setUniformValue("volumeTexture", 0);
+	shaderProgram.setUniformValue("phaseFunction", 1);
 	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
 	//qDebug() << "mvp " << m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix;
 	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());
@@ -112,6 +119,8 @@ void Renderer::paintGL()
 	glDrawArrays(GL_QUADS, 0, vertices.size());
 	shaderProgram.disableAttributeArray("vertex");
 
+	glActiveTexture(GL_TEXTURE0+1);
+	m_phasefunction->release();
 	glActiveTexture(GL_TEXTURE0);
 	m_volume->release();
 	
