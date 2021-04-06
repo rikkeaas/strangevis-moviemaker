@@ -1,6 +1,7 @@
 #pragma once
 #include <QOpenGLTexture>
 #include <QOpenGLExtraFunctions>
+#include <QVector3d>
 
 class Model : public QObject, protected QOpenGLExtraFunctions
 {
@@ -9,13 +10,17 @@ public:
 	Model(QObject* parent);
 	~Model();
 
-	std::vector<unsigned short> getDimensions();
+	QVector3D getDimensions();
+	QVector3D getVoxelSpacing();
+	QVector3D getDimensionScale();
 
 	bool load(const QString filepath);
 	void bind();
 	void release();
 
 private:
+	QVector3D voxelSpacing;
+	QVector3D dimensionScaling = QVector3D(1.0,1.0,1.0);
 
 	// Model dimensions
 	unsigned int m_height = 0;
@@ -27,4 +32,5 @@ private:
 
 	// Model data
 	QVector<unsigned short> m_Data;
+
 };

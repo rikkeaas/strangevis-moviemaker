@@ -1,14 +1,15 @@
 #include "cube.h"
+#include <QVector2D>
 #include <QVector3D>
 #include <QDebug>
 
 Cube::Cube() : m_quadVertexBuffer(QOpenGLBuffer::VertexBuffer), m_quadIndexBuffer(QOpenGLBuffer::IndexBuffer), m_cubeVertexBuffer(QOpenGLBuffer::VertexBuffer), m_cubeIndexBuffer(QOpenGLBuffer::IndexBuffer)
 {
-    QVector3D verticesQuad[] = {
-      QVector3D(-1.0f, -1.0f, 0.0f), // bottom left corner
-      QVector3D(-1.0f,  1.0f, 0.0f), // top left corner
-      QVector3D(1.0f,  1.0f, 0.0f), // top right corner
-      QVector3D(1.0f, -1.0f, 0.0f)  // bottom right corner
+    QVector2D verticesQuad[] = {
+      QVector2D(-1.0f, -1.0f), // bottom left corner
+      QVector2D(-1.0f,  1.0f), // top left corner
+      QVector2D(1.0f,  1.0f), // top right corner
+      QVector2D(1.0f, -1.0f)  // bottom right corner
     };
 
     GLushort indicesQuad[] = {
@@ -77,7 +78,7 @@ void Cube::bindQuad()
 
 void Cube::drawQuad()
 {
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, nullptr);
+    glDrawArrays(GL_QUADS, 0, m_quadVertexBuffer.size());
 }
 
 void Cube::bindCube()

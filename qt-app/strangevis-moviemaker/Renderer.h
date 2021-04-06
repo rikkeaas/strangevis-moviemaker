@@ -9,6 +9,7 @@
 #include <QOpenGLShaderProgram>
 #include <QMouseEvent>
 #include <QWheelEvent>
+#include <QKeyEvent>
 
 #include "model.h"
 
@@ -25,7 +26,10 @@ public:
 	Model* getVolume();
 private:
 	QMatrix4x4 m_projectionMatrix;
-	QMatrix4x4 m_modelViewMatrix;
+	QMatrix4x4 m_rotateMatrix;
+	QMatrix4x4 m_scaleMatrix;
+	QMatrix4x4 m_translateMatrix;
+
 	QOpenGLShaderProgram shaderProgram;
 	QVector<QVector3D> vertices;
 
@@ -35,6 +39,8 @@ private:
 	double beta;
 	double distance;
 	QPoint lastMousePosition;
+
+	bool m_rotating = false; // True if shift is held down, false otherwise. To allow users to rotate with trackpad/mouse while holding shift, otherwise trackpad/mouse is used for translation
 
 	int m_div = 100;
 	int m_prev = 100;
@@ -49,4 +55,6 @@ protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
 	void wheelEvent(QWheelEvent* event);
+	void keyPressEvent(QKeyEvent* event);
+	void keyReleaseEvent(QKeyEvent* event);
 };
