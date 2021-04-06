@@ -17,7 +17,7 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_rotateMatrix.setToIdentity();
 	m_scaleMatrix.setToIdentity();
 	m_translateMatrix.setToIdentity();
-	m_translateMatrix.translate(0.0, 0.0, -1.0 * sqrt(3.0));
+	m_translateMatrix.translate(0.0, 0.0, -2.0 * sqrt(3.0));
 }
 
 
@@ -136,7 +136,26 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 	{
 		if (m_currentX != m_previousX || m_currentY != m_previousY)
 		{
-			m_translateMatrix.setColumn(3, m_translateMatrix.column(3) + QVector3D((m_previousX - m_currentX) * -0.001, (m_previousY - m_currentY) * 0.001, 0.0));
+			if (m_rotating)
+			{
+				QVector3D va = arcballVector(m_previousX, m_previousY);
+				QVector3D vb = arcballVector(m_currentX, m_currentY);
+
+				if (va != vb)
+				{
+					qreal angle = acos(qMax(-1.0f, qMin(1.0f, QVector3D::dotProduct(va, vb))));
+					QVector3D axis = QVector3D::crossProduct(va, vb);
+
+					QMatrix4x4 inverseModelViewMatrix = m_rotateMatrix.inverted();
+					QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
+
+					m_rotateMatrix.rotate(qRadiansToDegrees(angle), transformedAxis.toVector3D());
+				}
+			}
+			else
+			{
+				m_translateMatrix.setColumn(3, m_translateMatrix.column(3) + QVector3D((m_previousX - m_currentX) * -0.001, (m_previousY - m_currentY) * 0.001, 0.0));
+			}
 		}
 	}
 
@@ -172,38 +191,34 @@ void Renderer::wheelEvent(QWheelEvent* event)
 	event->accept();
 }
 
+void Renderer::keyReleaseEvent(QKeyEvent* event)
+{
+	if (event->key() == Qt::Key_Shift)
+	{
+		m_rotating = false;
+	}
+}
+
 
 void Renderer::keyPressEvent(QKeyEvent* event)
 {
-	if (event->key() == Qt::Key_Left)
+	if (event->key() == Qt::Key_Shift)
 	{
-		m_rotateMatrix.rotate(5.0, QVector3D(0.0,1.0,0.0));
-		update();
-	}
-	else if (event->key() == Qt::Key_Right)
-	{
-		m_rotateMatrix.rotate(-5.0, QVector3D(0.0, 1.0, 0.0));
-		update();
-	}
-	else if (event->key() == Qt::Key_Up)
-	{
-		m_rotateMatrix.rotate(5.0, QVector3D(1.0, 0.0, 0.0));
-		update();
-	}
-	else if (event->key() == Qt::Key_Down)
-	{
-		m_rotateMatrix.rotate(-5.0, QVector3D(1.0, 0.0, 0.0));
-		update();
-	}
-	else if (event->key() == Qt::Key_Comma)
-	{
-		m_rotateMatrix.rotate(5.0, QVector3D(0.0, 0.0, 1.0));
-		update();
-	}
-	else if (event->key() == Qt::Key_Period)
-	{
-		m_rotateMatrix.rotate(-5.0, QVector3D(0.0, 0.0, 1.0));
-		update();
+		m_rotating = true;
 	}
 	event->accept();
+}
+
+QVector3D Renderer::arcballVector(qreal x, qreal y)
+{
+	QVector3D p = QVector3D(2.0f * float(x) / float(width()) - 1.0f, -2.0f * float(y) / float(height()) + 1.0f, 0.0);
+
+	float length2 = p.x() * p.x() + p.y() * p.y();
+
+	if (length2 < 1.0f)
+		p.setZ(sqrtf(1.0f - length2));
+	else
+		p.normalize();
+
+	return p;
 }
