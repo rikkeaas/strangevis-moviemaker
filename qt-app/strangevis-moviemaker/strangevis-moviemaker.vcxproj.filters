@@ -15,14 +15,42 @@
     <ClInclude Include="histogram.h" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="strangevismoviemaker.h" />
-    <QtMoc Include="Renderer.h" />
-    <QtMoc Include="model.h" />
+    <ClCompile Include="strangevismoviemaker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="customSlider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cube.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtRcc Include="strangevismoviemaker.qrc" />
+    <QtMoc Include="strangevismoviemaker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Renderer.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="model.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <QtUic Include="strangevismoviemaker.ui" />
+    <ClInclude Include="customSlider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cube.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

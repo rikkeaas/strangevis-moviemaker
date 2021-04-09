@@ -6,14 +6,19 @@
 
 Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
+	setFocusPolicy(Qt::StrongFocus);
 	m_volume = new Model(this);
+	m_volume->load("./data/hand/hand.dat");
+
 	alpha = 25;
 	beta = -25;
 	distance = 2.0;
 
-	//m_projectionMatrix.setToIdentity();
-	m_modelViewMatrix.setToIdentity();
-	m_modelViewMatrix.translate(0.0, 0.0, -2.0 * sqrt(3.0));
+	m_projectionMatrix.setToIdentity();
+	m_rotateMatrix.setToIdentity();
+	m_scaleMatrix.setToIdentity();
+	m_translateMatrix.setToIdentity();
+	m_translateMatrix.translate(0.0, 0.0, -2.0 * sqrt(3.0));
 }
 
 
@@ -32,17 +37,20 @@ void Renderer::initializeGL()
 
 	initializeOpenGLFunctions();
 
-	Cube::instance();
+	//Cube::instance();
 
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	// Set global information
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, "Shaders/vertexShader.glsl");
-	shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, "Shaders/fragmentShader.glsl");
+	shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, "Shaders/raycast-vs.glsl");
+	shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, "Shaders/raycast-fs.glsl");
 	shaderProgram.link();
 	shaderProgram.bind();
+
+	qDebug() << shaderProgram.isLinked();
+	vertices << QVector2D(-1.0, -1.0) << QVector2D(1.0, -1.0) << QVector2D(1.0, 1.0) << QVector2D(-1.0, 1.0);
 }
 
 
@@ -59,6 +67,11 @@ void Renderer::resizeGL(int width, int height)
 
 	m_projectionMatrix.setToIdentity();
 	m_projectionMatrix.perspective(fov, aspectRatio, nearPlane, farPlane);
+	
+	//m_projectionMatrix.setToIdentity();
+	//m_projectionMatrix.perspective(60.0, (float)width / (float)height, 0.001, 1000);
+
+	glViewport(0, 0, width, height);
 }
 
 void Renderer::paintGL()
@@ -67,8 +80,8 @@ void Renderer::paintGL()
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	//glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LESS);
 
 
 	QMatrix4x4 mMatrix;
@@ -87,18 +100,18 @@ void Renderer::paintGL()
 	m_volume->bind();
 
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
-	shaderProgram.setUniformValue("texture1", 0);
-	shaderProgram.setUniformValue("mvpMatrix", m_projectionMatrix * m_modelViewMatrix);
-	shaderProgram.setUniformValue("color", QColor(Qt::white));
+	shaderProgram.setUniformValue("volumeTexture", 0);
+	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
+	//qDebug() << "mvp " << m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix;
+	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());
+	shaderProgram.setUniformValue("voxelSpacing", m_volume->getVoxelSpacing());
+	shaderProgram.setUniformValue("dimensionScaling", m_volume->getDimensionScale());
+	shaderProgram.setUniformValue("voxelDimsInTexCoord", QVector3D(QVector3D(1.0,1.0,1.0) / m_volume->getDimensions()));
 
-	Cube::instance()->bindCube();
-
-	int location = shaderProgram.attributeLocation("vertexPosition");
-	shaderProgram.enableAttributeArray(location);
-	shaderProgram.setAttributeBuffer(location, GL_FLOAT, 0, 3, sizeof(QVector3D));
-
-	Cube::instance()->drawCube();
-	//glDrawArrays(GL_QUADS, 0, vertices.size());
+	shaderProgram.setAttributeArray("vertex", vertices.constData());
+	shaderProgram.enableAttributeArray("vertex");
+	glDrawArrays(GL_QUADS, 0, vertices.size());
+	shaderProgram.disableAttributeArray("vertex");
 
 	glActiveTexture(GL_TEXTURE0);
 	m_volume->release();
@@ -124,28 +137,77 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 	{
 		if (m_currentX != m_previousX || m_currentY != m_previousY)
 		{
-			QVector3D va = arcballVector(m_previousX, m_previousY);
-			QVector3D vb = arcballVector(m_currentX, m_currentY);
-
-			if (va != vb)
+			if (m_rotating)
 			{
-				qreal angle = acos(qMax(-1.0f, qMin(1.0f, QVector3D::dotProduct(va, vb))));
-				QVector3D axis = QVector3D::crossProduct(va, vb);
+				QVector3D va = arcballVector(m_previousX, m_previousY);
+				QVector3D vb = arcballVector(m_currentX, m_currentY);
 
-				QMatrix4x4 inverseModelViewMatrix = m_modelViewMatrix.inverted();
-				QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
+				if (va != vb)
+				{
+					qreal angle = acos(qMax(-1.0f, qMin(1.0f, QVector3D::dotProduct(va, vb))));
+					QVector3D axis = QVector3D::crossProduct(va, vb);
 
-				m_modelViewMatrix.rotate(qRadiansToDegrees(angle), transformedAxis.toVector3D());
+					QMatrix4x4 inverseModelViewMatrix = m_rotateMatrix.inverted();
+					QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
+
+					m_rotateMatrix.rotate(qRadiansToDegrees(angle), transformedAxis.toVector3D());
+				}
+			}
+			else
+			{
+				m_translateMatrix.setColumn(3, m_translateMatrix.column(3) + QVector3D((m_previousX - m_currentX) * -0.001, (m_previousY - m_currentY) * 0.001, 0.0));
 			}
 		}
-
-
 	}
 
 	m_previousX = m_currentX;
 	m_previousY = m_currentY;
 
 	update();
+}
+
+void Renderer::wheelEvent(QWheelEvent* event)
+{
+	float* values = new float[16];
+	m_scaleMatrix.copyDataTo(values);
+	QMatrix4x4 scaledMat = QMatrix4x4(values);
+	delete[] values;
+
+	float scaleFac = 1 + (float(event->delta()) / 120.0);
+	scaleFac = scaleFac < 0 ? 0.0 : scaleFac;
+	scaledMat.scale(scaleFac, scaleFac, scaleFac);
+
+	float currScale = scaledMat.column(0).toVector3D().length();
+	//qDebug() << currScale;
+
+	if (currScale > 2.0 || currScale < 0.5)
+	{
+		qDebug() << "Out of scale";
+		event->accept();
+		return;
+	}
+	m_scaleMatrix.scale(scaleFac, scaleFac, scaleFac);
+	update();
+
+	event->accept();
+}
+
+void Renderer::keyReleaseEvent(QKeyEvent* event)
+{
+	if (event->key() == Qt::Key_Shift)
+	{
+		m_rotating = false;
+	}
+}
+
+
+void Renderer::keyPressEvent(QKeyEvent* event)
+{
+	if (event->key() == Qt::Key_Shift)
+	{
+		m_rotating = true;
+	}
+	event->accept();
 }
 
 QVector3D Renderer::arcballVector(qreal x, qreal y)
@@ -161,65 +223,3 @@ QVector3D Renderer::arcballVector(qreal x, qreal y)
 
 	return p;
 }
-
-/*
-void Renderer::mousePressEvent(QMouseEvent* event)
-{
-	if (event->button() == Qt::MouseButton::RightButton) 
-	{
-		m_prev = m_div;
-		m_div += 1;
-		m_div = m_div >= m_model->getDimensions().at(1) ? m_model->getDimensions().at(1) - 1 : m_div;
-	}
-	else
-	{
-		m_prev = m_div;
-		m_div -= 1;
-		m_div = m_div < 0 ? 0 : m_div;
-	}
-	lastMousePosition = event->pos();
-	event->accept();
-
-	update();
-}*/
-void Renderer::wheelEvent(QWheelEvent* event)
-{
-	int delta = event->delta();
-	if (event->orientation() == Qt::Vertical) {
-		if (delta > 0) {
-			m_zCoord = 1.0 < m_zCoord + float(delta) / 120.0 ? 1.0 : m_zCoord + float(delta) / 120.0;
-		}
-		else if (delta < 0) {
-			m_zCoord = 0.0 > m_zCoord + float(delta) / 120.0 ? 0.0 : m_zCoord + float(delta) / 120.0;
-		}
-		update();
-	}
-	event->accept();
-}
-
-/*
-void Renderer::mouseMoveEvent(QMouseEvent* event)
-{
-	int deltaX = event->x() - lastMousePosition.x();
-	int deltaY = event->y() - lastMousePosition.y();
-	if (event->buttons() & Qt::LeftButton) {
-		alpha -= deltaX;
-		while (alpha < 0) {
-			alpha += 360;
-		}
-		while (alpha >= 360) {
-			alpha -= 360;
-		}
-		beta -= deltaY;
-		if (beta < -90) {
-			beta = -90;
-		}
-		if (beta > 90) {
-			beta = 90;
-		}
-		update();
-	}
-	lastMousePosition = event->pos();
-	event->accept();
-}
-*/
