@@ -20,5 +20,6 @@ public slots:
 private:
     Ui::strangevismoviemakerClass ui;
     Renderer* m_renderer;
+    void appendDockWidgets();
     // class Histogram* m_histogram_widget{};
 };

@@ -1,5 +1,6 @@
 #include "model.h"
 #include "histogram.h"
+#include "strangevismoviemaker.h"
 #include <stdio.h>
 #include <QDebug>
 #include <iostream>

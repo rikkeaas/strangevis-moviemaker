@@ -30,6 +30,8 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     auto* cw = ui.centralWidget->layout();
     cw->addWidget(m_renderer);
 
+    appendDockWidgets();
+
     /*
     QWidget* container = new QWidget(this);
     container->setGeometry(QRect(0, 0, 1000, 1000));
@@ -67,29 +69,32 @@ void strangevismoviemaker::fileOpen()
     {
         if (m_renderer->getVolume()->load(fileName))
         {
-            qDebug() << "Loaded volume " << fileName;
-            qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset().isEmpty();
-
-            QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
-            Histogram* h = new Histogram(m_renderer->getVolume()->getDataset());
-
-            toolbox->setWidget(h->getHistogram());
-
-            toolbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-            toolbox->setFeatures(QDockWidget::NoDockWidgetFeatures);
-            toolbox->setFeatures(QDockWidget::DockWidgetMovable);
-
-            this->addDockWidget(Qt::LeftDockWidgetArea, toolbox);
-
-            QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
-
-            keyframes->setFeatures(QDockWidget::NoDockWidgetFeatures);
-            keyframes->setFeatures(QDockWidget::DockWidgetMovable);
-
-            this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
+            qDebug() << "Loaded volume " << fileName; 
         } else {
             qDebug() << "Failed to load volume " << fileName;
         }
     }
+}
 
+void strangevismoviemaker::appendDockWidgets()
+{
+    qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset().isEmpty();
+
+    QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
+    Histogram* h = new Histogram(m_renderer->getVolume()->getDataset());
+
+    toolbox->setWidget(h->getHistogram());
+
+    toolbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    toolbox->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    toolbox->setFeatures(QDockWidget::DockWidgetMovable);
+
+    this->addDockWidget(Qt::LeftDockWidgetArea, toolbox);
+
+    QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
+
+    keyframes->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    keyframes->setFeatures(QDockWidget::DockWidgetMovable);
+
+    this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
 }
