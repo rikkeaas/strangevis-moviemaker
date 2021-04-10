@@ -52,11 +52,20 @@ Histogram::Histogram(QVector<unsigned short> values) {
     chart->setAnimationOptions(QChart::SeriesAnimations);
 
     chart->legend()->setVisible(false);
-    chart->setBackgroundVisible(false);
+    // chart->setBackgroundVisible(false);
+    chart->setBackgroundBrush(QColor(92,91,91));
     chart->setPlotAreaBackgroundVisible(false);
+    chart->setBackgroundRoundness(15);
+    chart->setMaximumHeight(QDesktopWidget().availableGeometry().height() * 0.20);
+    // chart->setMargins({ 0, 0, 0, 0 });
+    chart->setContentsMargins(0, 0, 0, 0);
+    chart->layout()->setContentsMargins(0, 0, 0, 0);
+
 
     chartView = new QChartView(chart);
     chartView->setRenderHint(QPainter::Antialiasing);
+
+
 }
 
 std::map<float, int> Histogram::binData(QVector<unsigned short> values, int skipStep, int roundTo) {

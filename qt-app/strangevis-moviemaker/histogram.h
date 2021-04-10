@@ -1,5 +1,6 @@
 #pragma once
 #include <QtCharts>
+#include <QColor>
 #include "model.h"
 
 class Histogram {
