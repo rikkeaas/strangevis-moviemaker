@@ -103,6 +103,32 @@ void strangevismoviemaker::appendDockWidgets()
 
     QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
     formatDockWidgets(keyframes);
+    QWidget* keyframeWrapper = new QWidget();
+    QGridLayout* keyframeGrid = new QGridLayout();
+    QSize* square = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
+
+    keyframeWrapper->heightForWidth(true);
+
+    // placeholder for keyframes
+    int row = 0;
+    int col = 0;
+    for (int i = 0; i < 8; i++) {
+        auto k = new QWidget();
+        k->setFixedSize(*square*0.3);
+        k->setStyleSheet("background-color:#C4C4C4;");
+        keyframeGrid->addWidget(k, row, col);
+        col++;
+        if (col == 3) {
+            col = 0;
+            row++;
+        }
+    }
+
+    keyframeWrapper->setLayout(keyframeGrid);
+    keyframeWrapper->setFixedSize(*square);
+    keyframeWrapper->setStyleSheet("background-color:#3C3C3C;");
+    keyframes->setWidget(keyframeWrapper);
+    keyframes->setMaximumWidth(QDesktopWidget().availableGeometry().width() * 0.15);
     this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
 }
 
@@ -119,8 +145,6 @@ QWidget* strangevismoviemaker::toolbarContent(QWidget* content, QString header) 
     QVBoxLayout* dockLayout = new QVBoxLayout();
     QLabel* label = new QLabel();
 
-    auto c = content;
-
     int id = QFontDatabase::addApplicationFont("fonts/Roboto-Bold.ttf");
     QString robotoHeader = QFontDatabase::applicationFontFamilies(id).at(0);
     QFont f(robotoHeader, 15);
@@ -132,7 +156,7 @@ QWidget* strangevismoviemaker::toolbarContent(QWidget* content, QString header) 
     dockContent->setStyleSheet("background-color:#3C3C3C;border-radius:18px;");
     dockContent->setLayout(dockLayout);
     dockLayout->addWidget(label);
-    dockLayout->addWidget(c);
+    dockLayout->addWidget(content);
 
     return dockContent;
 }
