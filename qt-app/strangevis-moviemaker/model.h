@@ -18,6 +18,8 @@ public:
 	void bind();
 	void release();
 
+	QVector<unsigned short> getDataset();
+
 private:
 	QVector3D voxelSpacing;
 	QVector3D dimensionScaling = QVector3D(1.0,1.0,1.0);

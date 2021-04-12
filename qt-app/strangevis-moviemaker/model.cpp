@@ -1,9 +1,13 @@
 #include "model.h"
+#include "histogram.h"
+#include "strangevismoviemaker.h"
 #include <stdio.h>
 #include <QDebug>
 #include <iostream>
 #include <QFile>
 #include <QDataStream>
+#include <QDockWIdget>
+
 
 Model::Model(QObject* parent) : QObject(parent), m_volumeTexture(QOpenGLTexture::Target3D)
 {}
@@ -121,6 +125,12 @@ void Model::release()
 	{
 		m_volumeTexture.release();
 	}
+}
+
+QVector<unsigned short> Model::getDataset()
+{
+	QVector<unsigned short> copied = m_Data;
+	return copied;
 }
 
 

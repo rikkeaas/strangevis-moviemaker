@@ -1,14 +1,16 @@
 #include "strangevismoviemaker.h"
 #include "customSlider.h"
+#include "histogram.h"
 #include <QOpenGLWidget>
 #include <QFileDialog>
-#include "Toolbox.h"
 #include <Qlabel>
 #include <QPushButton>
 #include "Renderer.h"
 #include <QDockWIdget>
 #include <QtWidgets/qgroupbox.h>
 #include <QSize>
+#include <QDesktopWidget>
+#include <QtCharts>
 
 
 strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
@@ -16,6 +18,7 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 {
     renderer->setParent(this);
     m_renderer = renderer;
+
     ui.setupUi(this);
        
     QAction* fileOpenAction = new QAction("Open", this);
@@ -24,84 +27,12 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 
     this->setMinimumSize(1600, 1200);
 
-    /*
-    Toolbox* toolbox = new Toolbox("Cutting Tool", 200, parent);
-    auto* anyLayout = new QVBoxLayout();
-    anyLayout->addWidget(new QLabel("Some Text in Section", toolbox));
-    anyLayout->addWidget(new QPushButton("Button in Section", toolbox));
-    toolbox->setContentLayout(*anyLayout);
-    */
-
-    // ui.gridLayout->addWidget(toolbox);
-    // ui.toolboxMenu->layout()->addWidget(toolbox);
-
-    // Renderer* qtWid = new Renderer();
-    QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
-    QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
-    
-
-    // QSize size = ui.horizontalLayout->widget()->size();
-    toolbox->setMinimumWidth(this->width()/4);
-    toolbox->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    toolbox->setFeatures(QDockWidget::DockWidgetMovable);
-    keyframes->setFeatures(QDockWidget::NoDockWidgetFeatures);
-    keyframes->setFeatures(QDockWidget::DockWidgetMovable);
-
-
-
-
-    
-
-    toolbox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    keyframes->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    /*
-
-    QWidget* sliders = new QWidget();
-    QVBoxLayout* layout = new QVBoxLayout();
-    QPushButton* filter1 = new QPushButton(QLatin1String("Filter number 1"));
-    QPushButton* filter2 = new QPushButton(QLatin1String("Filter number 2"));
-    QPushButton* filter3 = new QPushButton(QLatin1String("Filter number 3"));
-    QPushButton* filter4 = new QPushButton(QLatin1String("Filter number 4"));
-    QPushButton* filter5 = new QPushButton(QLatin1String("Filter number 5"));
-
-    layout->addWidget(filter1);
-    layout->addWidget(filter2);
-    layout->addWidget(filter3);
-    layout->addWidget(filter4);
-    layout->addWidget(filter5);
-    sliders->setLayout(layout);
-    toolbox->setWidget(sliders);
-
-    */
-
-
     auto* cw = ui.centralWidget->layout();
-
-    /*
-    // ui.horizontalLayout->addWidget(groupBox);
-    QHBoxLayout* mainLayout = new QHBoxLayout;
-    mainLayout->addWidget(groupBox);
-    mainLayout->addWidget(qtWid);
-    */
-
-    // setLayout(mainLayout);
-    // cw->addWidget(groupBox);
     cw->addWidget(m_renderer);
-    this->addDockWidget(Qt::LeftDockWidgetArea, toolbox);
-    this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
 
-
-
-    
-
-
-    
-    
-
+    appendDockWidgets();
 
     /*
-    * 
     QWidget* container = new QWidget(this);
     container->setGeometry(QRect(0, 0, 1000, 1000));
     QVBoxLayout* contLayout = new QVBoxLayout(container);
@@ -130,7 +61,6 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     */
 }
 
-
 void strangevismoviemaker::fileOpen()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Open Volume File", QString(), "*.dat");
@@ -139,15 +69,94 @@ void strangevismoviemaker::fileOpen()
     {
         if (m_renderer->getVolume()->load(fileName))
         {
-            qDebug() << "Loaded volume " << fileName;
-        }
-
-        else
-        {
+            qDebug() << "Loaded volume " << fileName; 
+        } else {
             qDebug() << "Failed to load volume " << fileName;
         }
     }
-
 }
 
+void strangevismoviemaker::appendDockWidgets()
+{
+    qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset().isEmpty();
 
+    auto dockLayout = new QVBoxLayout();
+    auto dockContentWrapper = new QWidget();
+    dockContentWrapper->setLayout(dockLayout);
+    dockContentWrapper->setStyleSheet("background-color:#6D6D6D;");
+
+    QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
+    Histogram* h = new Histogram(m_renderer->getVolume()->getDataset());
+
+    QWidget* histoWrapper = new QWidget();
+    QVBoxLayout* histoLayout = new QVBoxLayout();
+    histoLayout->addWidget(h->getHistogram());
+    histoWrapper->setLayout(histoLayout);
+    histoLayout->setContentsMargins(0, 0, 0, 0);
+
+    dockLayout->addWidget(toolbarContent(histoWrapper, QString("Layers")));
+
+    dockContentWrapper->setLayout(dockLayout);
+    toolbox->setWidget(dockContentWrapper);
+    formatDockWidgets(toolbox);
+    this->addDockWidget(Qt::LeftDockWidgetArea, toolbox);
+
+    QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
+    formatDockWidgets(keyframes);
+    QWidget* keyframeWrapper = new QWidget();
+    QGridLayout* keyframeGrid = new QGridLayout();
+    QSize* square = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
+
+    keyframeWrapper->heightForWidth(true);
+
+    // placeholder for keyframes
+    int row = 0;
+    int col = 0;
+    for (int i = 0; i < 8; i++) {
+        auto k = new QWidget();
+        k->setFixedSize(*square*0.3);
+        k->setStyleSheet("background-color:#C4C4C4;");
+        keyframeGrid->addWidget(k, row, col);
+        col++;
+        if (col == 3) {
+            col = 0;
+            row++;
+        }
+    }
+
+    keyframeWrapper->setLayout(keyframeGrid);
+    keyframeWrapper->setFixedSize(*square);
+    keyframeWrapper->setStyleSheet("background-color:#3C3C3C;");
+    keyframes->setWidget(keyframeWrapper);
+    keyframes->setMaximumWidth(QDesktopWidget().availableGeometry().width() * 0.15);
+    this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
+}
+
+void strangevismoviemaker::formatDockWidgets(QDockWidget* dw) {
+    QDockWidget* dockWidget = dw;
+    dw->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    dw->setFeatures(QDockWidget::NoDockWidgetFeatures);
+    dw->setFeatures(QDockWidget::DockWidgetMovable);
+    QWidget* titleWidget = new QWidget(); /* where this a QMainWindow object */
+    dw->setTitleBarWidget(titleWidget);
+}
+
+QWidget* strangevismoviemaker::toolbarContent(QWidget* content, QString header) {
+    QVBoxLayout* dockLayout = new QVBoxLayout();
+    QLabel* label = new QLabel();
+
+    int id = QFontDatabase::addApplicationFont("fonts/Roboto-Bold.ttf");
+    QString robotoHeader = QFontDatabase::applicationFontFamilies(id).at(0);
+    QFont f(robotoHeader, 15);
+
+    label->setText(header);
+    label->setFont(f);
+
+    auto dockContent = new QWidget();
+    dockContent->setStyleSheet("background-color:#3C3C3C;border-radius:18px;");
+    dockContent->setLayout(dockLayout);
+    dockLayout->addWidget(label);
+    dockLayout->addWidget(content);
+
+    return dockContent;
+}

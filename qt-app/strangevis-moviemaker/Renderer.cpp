@@ -1,6 +1,7 @@
 
 #include "Renderer.h"
 #include "cube.h"
+#include "strangevismoviemaker.h"
 #include <QtMath>
 
 Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
