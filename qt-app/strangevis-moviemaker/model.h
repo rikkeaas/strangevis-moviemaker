@@ -2,6 +2,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLExtraFunctions>
 #include <QVector3d>
+#include <vector>
 
 class Model : public QObject, protected QOpenGLExtraFunctions
 {
@@ -32,5 +33,4 @@ private:
 
 	// Model data
 	QVector<unsigned short> m_Data;
-
 };

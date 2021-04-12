@@ -10,9 +10,14 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QKeyEvent>
+#include <QTime>
+
+#include <chrono>
 
 #include "model.h"
 #include "phasefunction.h"
+
+
 
 class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 {
@@ -53,6 +58,11 @@ private:
 
 	Model* m_volume;
 	PhaseFunction* m_phasefunction;
+
+	QTime timer;
+	std::chrono::steady_clock::time_point lastTime;
+	int nbFrames = 0;
+
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);

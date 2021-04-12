@@ -28,7 +28,7 @@ float calcDepth(vec3 pos)
 // Function to calculate the diffuse component of light at given position (assuming all light sources have the same diffuse intensity)
 vec3 diffuseComponent(vec3 lightPos, vec3 pos, vec3 normal, vec3 color)
 {
-	vec3 pointToLight = normalize(pos - lightPos);
+	vec3 pointToLight = normalize(lightPos - pos);
 	vec3 diffuse = color * max(dot(pointToLight, normal),0.0f);
 	return diffuse;
 }
@@ -57,6 +57,10 @@ vec2 intersect_box(vec3 orig, vec3 dir) {
 }
 
 
+vec3 scalePoint(vec3 point)
+{
+	return 0.5 + point / (voxelSpacing * dimensionScaling * 2.0);
+}
 
 
 void main() {
@@ -78,12 +82,14 @@ void main() {
 	t_hit.x = max(t_hit.x, 0.0);
 
 
-	float samplingDistance = 0.002;
+	float samplingDistance = 0.001;
 	float gd = 0.001;
 	float renderDistance = t_hit.y - t_hit.x;
 
 	vec3 firstValues = vec3(0.0);
 	bool notFound = true;
+
+	//samplingDistance = renderDistance / 1000.0;
 
 	vec3 sampligPoint = rayOrigin + t_hit.x * rayDir;
 	vec3 ssampligPoint = rayOrigin + t_hit.x * rrayDir;
@@ -96,22 +102,33 @@ void main() {
 		// With no special scaling, we would just do 0.5 + sampligPoint/2 to map from [-1,1] to [0,1] (ie voxelSpacing and dimensionScaling are equal to 1)
 		// With different dimension scales and voxel spacing we need to scale by these factors also. Note both are in interval [0,1].
 		vec3 scaledSamplePoint = 0.5 + sampligPoint / (scalingFactor * 2.0);
-		float density = texture(volumeTexture, scaledSamplePoint).r;
+		vec4 densityAndGradient = texture(volumeTexture, scaledSamplePoint);
+
 
 		
-		vec4 pfColor = texture(phaseFunction, vec2(density,0.0));
+		vec4 pfColor = texture(phaseFunction, vec2(densityAndGradient.r,0.0));
 		if (pfColor.a <= 0.015)
 		{
 			sampligPoint += rayDir * samplingDistance;
 			continue;
 		}
 
-		float x = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x+voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x-voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r));
-		float y = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y+voxelDimsInTexCoord.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y-voxelDimsInTexCoord.y, scaledSamplePoint.z)).r));
-		float z = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z+voxelDimsInTexCoord.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z-voxelDimsInTexCoord.z)).r));
-			
-		vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), pfColor.rgb);
+		float x = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.x + voxelDimsInTexCoord.x, sampligPoint.yz))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.x - voxelDimsInTexCoord.x, sampligPoint.yz))).r));
+		float y = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.x, sampligPoint.y + voxelDimsInTexCoord.y, sampligPoint.z))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.x, sampligPoint.y - voxelDimsInTexCoord.y, sampligPoint.z))).r));
+		float z = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.xy, sampligPoint.z + voxelDimsInTexCoord.z))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.xy, sampligPoint.z - voxelDimsInTexCoord.z))).r));
 		
+		//float x = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x+voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x-voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r));
+		//float y = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y+voxelDimsInTexCoord.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y-voxelDimsInTexCoord.y, scaledSamplePoint.z)).r));
+		//float z = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z+voxelDimsInTexCoord.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z-voxelDimsInTexCoord.z)).r));
+		//vec3 phong = (normalize(densityAndGradient.yzw) + 1) * 0.5;
+		//vec3 phong = (normalize(vec3(x,y,z)) + 1) * 0.5;
+		//vec4 light = inverseModelViewProjectionMatrix * vec4(vec3(0.0, 0.0, -10.0), 1.0);
+		//light /= light.w;
+		//vec3 phong = diffuseComponent(light.xyz, sampligPoint, normalize(densityAndGradient.yzw), pfColor.rgb);
+
+		//vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(densityAndGradient.yzw), pfColor.rgb);
+		vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), pfColor.rgb);
+		phong += pfColor.rgb * 0.2;
 		color.rgb += (1.0 - color.a) * pfColor.a * phong;
 		color.a += (1.0 - color.a) * pfColor.a;
 		notFound = false;

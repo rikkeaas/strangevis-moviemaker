@@ -4,6 +4,7 @@
 #include <iostream>
 #include <QFile>
 #include <QDataStream>
+#include <QVector3D>
 
 Model::Model(QObject* parent) : QObject(parent), m_volumeTexture(QOpenGLTexture::Target3D)
 {}
@@ -64,7 +65,7 @@ bool Model::load(const QString filepath)
 	}
 
 	// Setting member variables
-	m_Data.resize(volumeSize);
+	m_Data.resize(volumeSize*4);
 	m_width = uWidth;
 	m_height = uHeight;
 	m_depth = uDepth;
@@ -76,9 +77,41 @@ bool Model::load(const QString filepath)
 
 	for (long i = 0; i < volumeSize; i++)
 	{
-		m_Data[i] = data[i] * 16; // Upscaling values from 12bit to 16bit range
+		m_Data[i*4] = data[i] * 16; // Upscaling values from 12bit to 16bit range
 	}
 
+	/*
+	qDebug() << "Computing gradients";
+
+	for (long z = 0; z < uDepth; z++) 
+	{
+		long nextZ = z == 0 ? 0 : z - 1;
+		long prevZ = z + 1 == uDepth ? z : z + 1;
+		for (long y = 0; y < uHeight; y++) 
+		{
+			long nextY = y == 0 ? 0 : y - 1;
+			long prevY = y + 1 == uHeight ? y : y + 1;
+			for (long x = 0; x < uWidth; x++) 
+			{
+				long nextX = x == 0 ? 0 : x - 1;
+				long prevX = x + 1 == uWidth ? x : x + 1;
+
+				//QVector3D gradient = QVector3D(0.5 * (m_Data[4 * (nextX + uWidth * (y + z * uHeight))] - m_Data[4 * (prevX + uWidth * (y + z * uHeight))]),
+				//							   0.5 * (m_Data[4 * (x + uWidth * (nextY + z * uHeight))] - m_Data[4 * (x + uWidth * (prevY + z * uHeight))]),
+				//							   0.5 * (m_Data[4 * (x + uWidth * (y + nextZ * uHeight))] - m_Data[4 * (x + uWidth * (y + prevZ * uHeight))]));
+
+				QVector3D gradient = QVector3D(0.5 * (data[(nextX + uWidth * (y + z * uHeight))] - data[(prevX + uWidth * (y + z * uHeight))]),
+					0.5 * (data[(x + uWidth * (nextY + z * uHeight))] - data[(x + uWidth * (prevY + z * uHeight))]),
+					0.5 * (data[(x + uWidth * (y + nextZ * uHeight))] - data[(x + uWidth * (y + prevZ * uHeight))]));
+
+				m_Data[1 + 4*(x + uWidth * (y + z * uHeight))] = gradient.x();
+				m_Data[2 + 4*(x + uWidth * (y + z * uHeight))] = gradient.y();
+				m_Data[3 + 4*(x + uWidth * (y + z * uHeight))] = gradient.z();
+			}
+		}
+	}
+	*/
+	
 	qDebug() << "Successfully loaded " << filepath;
 
 	return true;
@@ -97,7 +130,7 @@ void Model::bind()
 
 		m_volumeTexture.setBorderColor(0, 0, 0, 0);
 		m_volumeTexture.setWrapMode(QOpenGLTexture::ClampToBorder);
-		m_volumeTexture.setFormat(QOpenGLTexture::R16F);
+		m_volumeTexture.setFormat(QOpenGLTexture::RGBA16F);
 		m_volumeTexture.setMinificationFilter(QOpenGLTexture::Linear);
 		m_volumeTexture.setMagnificationFilter(QOpenGLTexture::Linear);
 		m_volumeTexture.setAutoMipMapGenerationEnabled(false);
@@ -105,8 +138,10 @@ void Model::bind()
 		m_volumeTexture.allocateStorage();
 
 		//void* data = reinterpret_cast<void*>(m_Data.data());
-		m_volumeTexture.setData(0, 0, 0, m_width, m_height, m_depth, QOpenGLTexture::Red, QOpenGLTexture::UInt16, m_Data.data());
+		m_volumeTexture.setData(0, 0, 0, m_width, m_height, m_depth, QOpenGLTexture::RGBA, QOpenGLTexture::UInt16, m_Data.data());
 		m_updateNeeded = false;
+
+
 	}
 
 	if (m_volumeTexture.isCreated())

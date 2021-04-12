@@ -20,6 +20,8 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_scaleMatrix.setToIdentity();
 	m_translateMatrix.setToIdentity();
 	m_translateMatrix.translate(0.0, 0.0, -2.0 * sqrt(3.0));
+
+
 }
 
 
@@ -54,6 +56,8 @@ void Renderer::initializeGL()
 
 	qDebug() << shaderProgram.isLinked();
 	vertices << QVector2D(-1.0, -1.0) << QVector2D(1.0, -1.0) << QVector2D(1.0, 1.0) << QVector2D(-1.0, 1.0);
+
+	timer.start();
 }
 
 
@@ -79,6 +83,15 @@ void Renderer::resizeGL(int width, int height)
 
 void Renderer::paintGL()
 {
+	nbFrames++;
+	if (timer.elapsed() >= 1000.0) { // If last prinf() was more than 1 sec ago
+		// printf and reset timer
+		qDebug() << ("%f fps\n", nbFrames / ((double)timer.elapsed() / 1000.0));
+		nbFrames = 0;
+		timer.restart();
+	}
+
+
 	// Clear
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

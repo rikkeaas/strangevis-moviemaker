@@ -89,6 +89,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="phasefunction.cpp" />
     <ClCompile Include="Toolbox.cpp" />
     <QtRcc Include="strangevismoviemaker.qrc" />
     <QtUic Include="strangevismoviemaker.ui" />
@@ -103,6 +104,7 @@
   <ItemGroup>
     <ClInclude Include="cube.h" />
     <ClInclude Include="customSlider.h" />
+    <ClInclude Include="phasefunction.h" />
     <QtMoc Include="model.h" />
     <QtMoc Include="Toolbox.h" />
     <QtMoc Include="Renderer.h" />
