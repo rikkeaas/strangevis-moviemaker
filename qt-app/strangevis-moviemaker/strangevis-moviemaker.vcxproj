@@ -90,7 +90,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="phasefunction.cpp" />
-    <ClCompile Include="Toolbox.cpp" />
+    <ClCompile Include="histogram.cpp" />
     <QtRcc Include="strangevismoviemaker.qrc" />
     <QtUic Include="strangevismoviemaker.ui" />
     <QtMoc Include="strangevismoviemaker.h" />
@@ -105,8 +105,8 @@
     <ClInclude Include="cube.h" />
     <ClInclude Include="customSlider.h" />
     <ClInclude Include="phasefunction.h" />
+    <ClInclude Include="histogram.h" />
     <QtMoc Include="model.h" />
-    <QtMoc Include="Toolbox.h" />
     <QtMoc Include="Renderer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
