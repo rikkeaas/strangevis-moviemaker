@@ -4,13 +4,13 @@
 using namespace std;
 
 
-Histogram::Histogram(QVector<unsigned short> values) {
+Histogram::Histogram(QVector<unsigned short>* values) {
     QBarSet* barChart = new QBarSet("Density");
     barChart->setBorderColor(Qt::white);
     barChart->setColor(Qt::white);
     QStringList categories;
 
-    if (!values.isEmpty()) {
+    if (!values->isEmpty()) {
         int showValuesAbove = 100;
         int skipStep = 50;
         int roundTo = 10;
@@ -68,10 +68,10 @@ Histogram::Histogram(QVector<unsigned short> values) {
 
 }
 
-std::map<float, int> Histogram::binData(QVector<unsigned short> values, int skipStep, int roundTo) {
+std::map<float, int> Histogram::binData(QVector<unsigned short>* values, int skipStep, int roundTo) {
     std::map<float, int> occurences;
-    for (int i = 0; i < values.size(); i += skipStep) {
-        float val = roundNearest(roundTo, values[i]);
+    for (int i = 0; i*4 < values->size(); i += skipStep) {
+        float val = roundNearest(roundTo, values->at(i*4));
         if (occurences.count(val) > 0) {
             occurences[val] += 1;
         }

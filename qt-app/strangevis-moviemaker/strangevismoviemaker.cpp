@@ -78,7 +78,7 @@ void strangevismoviemaker::fileOpen()
 
 void strangevismoviemaker::appendDockWidgets()
 {
-    qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset().isEmpty();
+    qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset()->isEmpty();
 
     auto dockLayout = new QVBoxLayout();
     auto dockContentWrapper = new QWidget();

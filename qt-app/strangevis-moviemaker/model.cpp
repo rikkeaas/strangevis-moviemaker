@@ -70,6 +70,7 @@ bool Model::load(const QString filepath)
 
 	// Setting member variables
 	m_Data.resize(volumeSize*4);
+	//m_Data.resize(volumeSize);
 	m_width = uWidth;
 	m_height = uHeight;
 	m_depth = uDepth;
@@ -82,6 +83,7 @@ bool Model::load(const QString filepath)
 	for (long i = 0; i < volumeSize; i++)
 	{
 		m_Data[i*4] = data[i] * 16; // Upscaling values from 12bit to 16bit range
+		//m_Data[i] = data[i] * 16;
 	}
 
 	/*
@@ -162,10 +164,10 @@ void Model::release()
 	}
 }
 
-QVector<unsigned short> Model::getDataset()
+QVector<unsigned short>* Model::getDataset()
 {
 	QVector<unsigned short> copied = m_Data;
-	return copied;
+	return &copied;
 }
 
 
