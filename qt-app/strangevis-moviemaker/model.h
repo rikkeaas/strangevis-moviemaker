@@ -19,6 +19,7 @@ public:
 	void release();
 
 	QVector<unsigned short> getDataset();
+	QString getFilename();
 
 private:
 	QVector3D voxelSpacing;
@@ -34,5 +35,6 @@ private:
 
 	// Model data
 	QVector<unsigned short> m_Data;
+	QString modelFilename;
 
 };

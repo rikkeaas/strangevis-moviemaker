@@ -10,6 +10,8 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_volume = new Model(this);
 	m_volume->load("./data/hand/hand.dat");
 
+	m_keyframeHandler = new KeyframeHandler();
+
 	alpha = 25;
 	beta = -25;
 	distance = 2.0;
@@ -30,6 +32,11 @@ Renderer::~Renderer()
 Model* Renderer::getVolume()
 {
 	return m_volume;
+}
+
+KeyframeHandler* Renderer::getKeyframeHandler()
+{
+	return m_keyframeHandler;
 }
 
 void Renderer::initializeGL()
@@ -197,6 +204,9 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 	if (event->key() == Qt::Key_Shift)
 	{
 		m_rotating = false;
+	} 
+	else if (event->key() == Qt::Key_K) {
+		m_keyframeHandler->saveState(m_volume->getFilename());
 	}
 }
 

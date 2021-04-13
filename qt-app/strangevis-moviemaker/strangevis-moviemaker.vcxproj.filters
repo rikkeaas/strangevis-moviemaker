@@ -8,11 +8,13 @@
     <ClCompile Include="strangevismoviemaker.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="histogram.cpp" />
+    <ClCompile Include="keyframeHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cube.h" />
     <ClInclude Include="customSlider.h" />
     <ClInclude Include="histogram.h" />
+    <ClInclude Include="keyframeHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="strangevismoviemaker.cpp">
@@ -35,15 +37,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="strangevismoviemaker.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Renderer.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="model.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
+    <QtMoc Include="strangevismoviemaker.h" />
+    <QtMoc Include="model.h" />
+    <QtMoc Include="Renderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="customSlider.h">
@@ -52,5 +48,11 @@
     <ClInclude Include="cube.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="strangevismoviemaker.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtUic Include="strangevismoviemaker.ui" />
   </ItemGroup>
 </Project>

@@ -16,6 +16,7 @@ public:
 
 public slots:
     void fileOpen();
+    void saveState();
 
 private:
     Ui::strangevismoviemakerClass ui;

@@ -1,6 +1,7 @@
 #include "strangevismoviemaker.h"
 #include "customSlider.h"
 #include "histogram.h"
+#include "keyframeHandler.h"
 #include <QOpenGLWidget>
 #include <QFileDialog>
 #include <Qlabel>
@@ -25,10 +26,16 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(fileOpenAction, SIGNAL(triggered()), this, SLOT(fileOpen()));
     ui.menuFile->addAction(fileOpenAction);
 
+    QAction* saveStateAction = new QAction("Save Current State", this);
+    connect(saveStateAction, SIGNAL(triggered()), this, SLOT(saveState()));
+    ui.menuFile->addAction(saveStateAction);
+
     this->setMinimumSize(1600, 1200);
 
     auto* cw = ui.centralWidget->layout();
     cw->addWidget(m_renderer);
+
+    
 
     appendDockWidgets();
 
@@ -65,6 +72,7 @@ void strangevismoviemaker::fileOpen()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Open Volume File", QString(), "*.dat");
 
+
     if (!fileName.isEmpty())
     {
         if (m_renderer->getVolume()->load(fileName))
@@ -74,6 +82,11 @@ void strangevismoviemaker::fileOpen()
             qDebug() << "Failed to load volume " << fileName;
         }
     }
+}
+
+void strangevismoviemaker::saveState()
+{
+    m_renderer->getKeyframeHandler()->saveState(m_renderer->getVolume()->getFilename());
 }
 
 void strangevismoviemaker::appendDockWidgets()
