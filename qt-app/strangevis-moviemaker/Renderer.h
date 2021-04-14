@@ -27,7 +27,7 @@ public:
 	void resizeGL(int width, int height);
 	void paintGL();
 	Model* getVolume();
-	KeyframeHandler* getKeyframeHandler();
+	void setState();
 
 private:
 	QMatrix4x4 m_projectionMatrix;

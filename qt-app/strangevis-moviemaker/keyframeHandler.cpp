@@ -5,7 +5,7 @@
 #include <QDebug>
 
 
-void KeyframeHandler::saveState(QString filename)
+void KeyframeHandler::saveState(QString filename, QList<float*> matrices)
 {
     QString f = QString("states/%1_state.txt").arg(filename);
     QFile file(f);
@@ -14,7 +14,13 @@ void KeyframeHandler::saveState(QString filename)
 
     QTextStream out(&file);
 
-    out << "Test112";
-    file.close();
+    foreach(auto& x, matrices) {
+        QList<float> matrix;
+        for (int i = 0; i < 16; i++) {
+            matrix.append(x[i]);
+            out << QString::number(x[i]) << " ";
+        }
+    }
     qDebug() << "Saved state to file: " << f;
+    file.close();
 }

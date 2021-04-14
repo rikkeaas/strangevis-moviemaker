@@ -3,5 +3,5 @@
 
 class KeyframeHandler {
 public:
-	void saveState(QString);
+	void saveState(QString, QList<float*>);
 };

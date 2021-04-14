@@ -86,7 +86,7 @@ void strangevismoviemaker::fileOpen()
 
 void strangevismoviemaker::saveState()
 {
-    m_renderer->getKeyframeHandler()->saveState(m_renderer->getVolume()->getFilename());
+    m_renderer->setState();
 }
 
 void strangevismoviemaker::appendDockWidgets()

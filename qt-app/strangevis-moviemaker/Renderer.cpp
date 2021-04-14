@@ -34,9 +34,14 @@ Model* Renderer::getVolume()
 	return m_volume;
 }
 
-KeyframeHandler* Renderer::getKeyframeHandler()
+void Renderer::setState()
 {
-	return m_keyframeHandler;
+	QList<float*> mx;
+	mx.append(m_projectionMatrix.data());
+	mx.append(m_rotateMatrix.data());
+	mx.append(m_scaleMatrix.data());
+	mx.append(m_translateMatrix.data());
+	m_keyframeHandler->saveState(m_volume->getFilename(), mx);
 }
 
 void Renderer::initializeGL()
@@ -206,7 +211,7 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		m_rotating = false;
 	} 
 	else if (event->key() == Qt::Key_K) {
-		m_keyframeHandler->saveState(m_volume->getFilename());
+		setState();
 	}
 }
 
