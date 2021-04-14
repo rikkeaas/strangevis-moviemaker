@@ -35,7 +35,7 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     auto* cw = ui.centralWidget->layout();
     cw->addWidget(m_renderer);
 
-    
+    qDebug() << ui.centralWidget->rect();
 
     appendDockWidgets();
 
@@ -87,6 +87,7 @@ void strangevismoviemaker::fileOpen()
 void strangevismoviemaker::saveState()
 {
     m_renderer->setState();
+
 }
 
 void strangevismoviemaker::appendDockWidgets()

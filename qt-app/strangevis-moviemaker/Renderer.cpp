@@ -3,6 +3,8 @@
 #include "cube.h"
 #include "strangevismoviemaker.h"
 #include <QtMath>
+#include <QPixmap>
+
 
 Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
@@ -41,7 +43,7 @@ void Renderer::setState()
 	mx.append(m_rotateMatrix.data());
 	mx.append(m_scaleMatrix.data());
 	mx.append(m_translateMatrix.data());
-	m_keyframeHandler->saveState(m_volume->getFilename(), mx);
+	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx);
 }
 
 void Renderer::initializeGL()
