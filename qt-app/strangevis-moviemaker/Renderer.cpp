@@ -5,7 +5,6 @@
 #include <QtMath>
 #include <QPixmap>
 
-
 Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
 	setFocusPolicy(Qt::StrongFocus);

@@ -4,6 +4,9 @@
 #include <QTextStream>
 #include <QList>
 #include <QDebug>
+#include <QSize>
+#include <QDesktopWidget>
+
 
 void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*> matrices)
 {
@@ -29,8 +32,8 @@ void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*>
 }
 
 void KeyframeHandler::takeQtScreenShot(QWidget* widget, QString filename) {
+    QSize* height = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
     QString f = QString("snapshots/%1_snapshot_%2.png").arg(filename, QString::number(numberofStates));
-    widget->grab().save(f);
+    widget->grab().scaledToHeight(height->height() * 0.3).save(f);
     qDebug() << "Saved snapshot: " << f;
-
 }

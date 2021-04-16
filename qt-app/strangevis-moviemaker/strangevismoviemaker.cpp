@@ -87,7 +87,7 @@ void strangevismoviemaker::fileOpen()
 void strangevismoviemaker::saveState()
 {
     m_renderer->setState();
-
+    updateKeyframes();
 }
 
 void strangevismoviemaker::appendDockWidgets()
@@ -117,34 +117,63 @@ void strangevismoviemaker::appendDockWidgets()
 
     QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
     formatDockWidgets(keyframes);
-    QWidget* keyframeWrapper = new QWidget();
-    QGridLayout* keyframeGrid = new QGridLayout();
-    QSize* square = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
-
-    keyframeWrapper->heightForWidth(true);
-
-    // placeholder for keyframes
-    int row = 0;
-    int col = 0;
-    for (int i = 0; i < 8; i++) {
-        auto k = new QWidget();
-        k->setFixedSize(*square*0.3);
-        k->setStyleSheet("background-color:#C4C4C4;");
-        keyframeGrid->addWidget(k, row, col);
-        col++;
-        if (col == 3) {
-            col = 0;
-            row++;
-        }
-    }
-
-    keyframeWrapper->setLayout(keyframeGrid);
+    keyframeWrapper = new QWidget();
+    updateKeyframes();
     keyframeWrapper->setFixedSize(*square);
     keyframeWrapper->setStyleSheet("background-color:#3C3C3C;");
     keyframes->setWidget(keyframeWrapper);
     keyframes->setMaximumWidth(QDesktopWidget().availableGeometry().width() * 0.15);
     this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
 }
+
+void strangevismoviemaker::updateKeyframes() {
+    if (keyframeWrapper->layout() != NULL)
+    {
+        QLayoutItem* item;
+        while ((item = keyframeWrapper->layout()->takeAt(0)) != NULL)
+        {
+            delete item->widget();
+            delete item;
+        }
+        delete keyframeWrapper->layout();
+    }
+    QGridLayout* keyframeGrid = new QGridLayout();
+    square = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
+
+    keyframeWrapper->heightForWidth(true);
+
+    int row = 2;
+    int col = 1;
+    QDir directory("snapshots/");
+    QStringList images = directory.entryList(QStringList() << "*.png" << "*.PNG", QDir::Files);
+    std::reverse(images.begin(), images.end());
+    int imLength = images.length();
+    for (int i = 0; i < 8; i++) {
+        auto k = new QWidget();
+        k->setFixedSize(*square * 0.3);
+        if (i < imLength) {
+            QString path = "background-image: url(./snapshots/";
+            path.append(images[i]);
+            path.append("); background-position: center;");
+            k->setStyleSheet(path);
+        }
+        else {
+            k->setStyleSheet("background-color:#C4C4C4;");
+        }
+        keyframeGrid->addWidget(k, row, col);
+        if (col == 0) {
+            col = 2;
+            row--;
+        }
+        else {
+            col--;
+        }
+
+    }
+    keyframeWrapper->setLayout(keyframeGrid);
+}
+
+
 
 void strangevismoviemaker::formatDockWidgets(QDockWidget* dw) {
     QDockWidget* dockWidget = dw;
@@ -173,4 +202,19 @@ QWidget* strangevismoviemaker::toolbarContent(QWidget* content, QString header) 
     dockLayout->addWidget(content);
 
     return dockContent;
+}
+
+// deletes any generated keyframes and states on application exit
+void strangevismoviemaker::closeEvent(QCloseEvent* event)
+{
+    QDirIterator it("./snapshots/", { "*.png" });
+
+    while (it.hasNext())
+        QFile(it.next()).remove();
+
+    QDirIterator at("./states/", { "*.txt" });
+
+    while (at.hasNext())
+        QFile(at.next()).remove();
+
 }
