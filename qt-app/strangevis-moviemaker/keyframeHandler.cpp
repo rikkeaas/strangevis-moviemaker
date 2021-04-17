@@ -62,12 +62,12 @@ QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* squar
     std::reverse(images.begin(), images.end());
     std::reverse(states.begin(), states.end());
 
-    int imLength = images.length();
+    numberofStates = images.length();
     for (int i = 0; i < 8; i++) {
         auto k = new Keyframe(this);
         QObject::connect(k, &Keyframe::clicked, this, &KeyframeHandler::readStates);
         k->setFixedSize(*square * 0.3);
-        if (i < imLength) {
+        if (i < numberofStates) {
             QString statePath = "./states/";
             statePath.append(states[i]);
             k->setStatePath(statePath);

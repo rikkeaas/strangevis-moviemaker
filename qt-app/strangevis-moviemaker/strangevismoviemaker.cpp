@@ -12,6 +12,7 @@
 #include <QSize>
 #include <QDesktopWidget>
 #include <QtCharts>
+#include <QDateTime>
 
 
 strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
@@ -26,9 +27,13 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(fileOpenAction, SIGNAL(triggered()), this, SLOT(fileOpen()));
     ui.menuFile->addAction(fileOpenAction);
 
-    QAction* saveStateAction = new QAction("Save Current State", this);
-    connect(saveStateAction, SIGNAL(triggered()), this, SLOT(saveState()));
-    ui.menuFile->addAction(saveStateAction);
+    QAction* highresScreenshot = new QAction("Screenshot", this);
+    connect(highresScreenshot, SIGNAL(triggered()), this, SLOT(highresScreenshot()));
+    ui.menuFile->addAction(highresScreenshot);
+
+    QAction* clearStates = new QAction("Clear All States", this);
+    connect(clearStates, SIGNAL(triggered()), this, SLOT(clearStates()));
+    ui.menuEdit->addAction(clearStates);
 
     this->setMinimumSize(1600, 1200);
 
@@ -56,9 +61,30 @@ void strangevismoviemaker::fileOpen()
     }
 }
 
-void strangevismoviemaker::saveState()
+void strangevismoviemaker::highresScreenshot()
 {
-    m_renderer->setState();
+    QTimeEdit* timeEdit = new QTimeEdit();
+    QTime currentTime = timeEdit->time().currentTime();
+    currentTime.toString().replace(":", "");
+    qDebug() << currentTime.toString();
+    QString filename = "screenshots/screenshot";
+    filename.append(currentTime.toString().replace(":", ""));
+    filename.append(".png");
+    QString f = QString(filename);
+    m_renderer->grab().save(f);
+}
+
+void strangevismoviemaker::clearStates()
+{
+    QDirIterator it("./states/", { "*.png" });
+
+    while (it.hasNext())
+        QFile(it.next()).remove();
+
+    QDirIterator at("./states/", { "*.txt" });
+
+    while (at.hasNext())
+        QFile(at.next()).remove();
     m_renderer->setKeyframes(keyframeWrapper, square);
 }
 
@@ -131,14 +157,16 @@ QWidget* strangevismoviemaker::toolbarContent(QWidget* content, QString header) 
 // deletes any generated keyframes and states on application exit
 void strangevismoviemaker::closeEvent(QCloseEvent* event)
 {
-    QDirIterator it("./states/", { "*.png" });
+    bool keepStatesOnClose = true;
+    if (!keepStatesOnClose) {
+        QDirIterator it("./states/", { "*.png" });
 
-    while (it.hasNext())
-        QFile(it.next()).remove();
+        while (it.hasNext())
+            QFile(it.next()).remove();
 
-    QDirIterator at("./states/", { "*.txt" });
+        QDirIterator at("./states/", { "*.txt" });
 
-    while (at.hasNext())
-        QFile(at.next()).remove();
-
+        while (at.hasNext())
+            QFile(at.next()).remove();
+    }
 }
