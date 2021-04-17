@@ -12,6 +12,7 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_volume->load("./data/hand/hand.dat");
 
 	m_keyframeHandler = new KeyframeHandler();
+	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
 
 	alpha = 25;
 	beta = -25;
@@ -42,7 +43,6 @@ void Renderer::setState()
 	mx.append(m_rotateMatrix.data());
 	mx.append(m_scaleMatrix.data());
 	mx.append(m_translateMatrix.data());
-	qDebug() << m_projectionMatrix;
 	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx);
 	m_keyframeHandler->takeQtScreenShot(this, m_volume->getFilename());
 }
@@ -229,14 +229,14 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		setState();
 		setKeyframes(keyframeWrapper, square);
 	}
-	else if (event->key() == Qt::Key_S) {
-		QList<QMatrix4x4> newMatrix = m_keyframeHandler->readStates(1);
-		m_projectionMatrix = newMatrix[0].transposed();
-		m_rotateMatrix = newMatrix[1].transposed();
-		m_scaleMatrix = newMatrix[2].transposed();
-		m_translateMatrix = newMatrix[3].transposed();
-		update();
-	}
+}
+
+void Renderer::setMatrices(QList<QMatrix4x4> matrices) {
+	m_projectionMatrix = matrices[0].transposed();
+	m_rotateMatrix = matrices[1].transposed();
+	m_scaleMatrix = matrices[2].transposed();
+	m_translateMatrix = matrices[3].transposed();
+	update();
 }
 
 
