@@ -29,7 +29,6 @@ public:
 	Model* getVolume();
 	void setState();
 	QWidget* setKeyframes(QWidget*, QSize*);
-
 	void setKeyframeWrapper(QWidget* qw);
 
 private:

@@ -5,10 +5,11 @@
 
 class KeyframeHandler {
 public:
-	void saveState(QWidget*, QString, QList<float*>);
+	void saveState(QWidget* widget, QString filename, QList<float*> matrices);
 	QWidget* updateKeyframes(QWidget* keyframeWrapper, QSize*);
+	QList<QMatrix4x4> readStates(int index);
+	void takeQtScreenShot(QWidget* widget, QString);
 
 private:
-	void takeQtScreenShot(QWidget* widget, QString);
 	int numberofStates;
 };

@@ -43,6 +43,7 @@ void Renderer::setState()
 	mx.append(m_scaleMatrix.data());
 	mx.append(m_translateMatrix.data());
 	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx);
+	m_keyframeHandler->takeQtScreenShot(this, m_volume->getFilename());
 }
 
 QWidget* Renderer::setKeyframes(QWidget* keyframeWrapper, QSize* sq) {
@@ -226,6 +227,14 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 	else if (event->key() == Qt::Key_K) {
 		setState();
 		setKeyframes(keyframeWrapper, square);
+	}
+	else if (event->key() == Qt::Key_S) {
+		QList<QMatrix4x4> newMatrix = m_keyframeHandler->readStates(1);
+		m_projectionMatrix = newMatrix[0];
+		m_rotateMatrix = newMatrix[1];
+		m_scaleMatrix.setToIdentity();
+		m_translateMatrix = newMatrix[3];
+		update();
 	}
 }
 
