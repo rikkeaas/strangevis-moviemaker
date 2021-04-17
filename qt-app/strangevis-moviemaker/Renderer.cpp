@@ -45,6 +45,18 @@ void Renderer::setState()
 	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx);
 }
 
+QWidget* Renderer::setKeyframes(QWidget* keyframeWrapper, QSize* sq) {
+	square = sq;
+	keyframeWrapper = m_keyframeHandler->updateKeyframes(keyframeWrapper, square);
+	keyframeWrapper->setFixedSize(*square);
+	keyframeWrapper->setStyleSheet("background-color: #3C3C3C;");
+	return keyframeWrapper;
+}
+
+void Renderer::setKeyframeWrapper(QWidget* qw) {
+	keyframeWrapper = qw;
+}
+
 void Renderer::initializeGL()
 {
 
@@ -213,6 +225,7 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 	} 
 	else if (event->key() == Qt::Key_K) {
 		setState();
+		setKeyframes(keyframeWrapper, square);
 	}
 }
 

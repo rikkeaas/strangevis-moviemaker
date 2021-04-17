@@ -28,6 +28,9 @@ public:
 	void paintGL();
 	Model* getVolume();
 	void setState();
+	QWidget* setKeyframes(QWidget*, QSize*);
+
+	void setKeyframeWrapper(QWidget* qw);
 
 private:
 	QMatrix4x4 m_projectionMatrix;
@@ -57,6 +60,8 @@ private:
 
 	Model* m_volume;
 	KeyframeHandler* m_keyframeHandler;
+	QWidget* keyframeWrapper;
+	QSize* square;
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);

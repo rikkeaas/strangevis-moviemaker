@@ -38,34 +38,6 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     qDebug() << ui.centralWidget->rect();
 
     appendDockWidgets();
-
-    /*
-    QWidget* container = new QWidget(this);
-    container->setGeometry(QRect(0, 0, 1000, 1000));
-    QVBoxLayout* contLayout = new QVBoxLayout(container);
-
-    customSlider* slider = new customSlider(10, QRect(100, 50, 200, 16), 0, 300, container);
-    customSlider* slider2 = new customSlider(2, QRect(100, 100, 300, 16), 0, 10, container);
-    customSlider* slider3 = new customSlider(3, QRect(100, 150, 200, 16), 0, 255, container);
-
-    contLayout->addWidget(slider);
-    contLayout->addWidget(slider2);
-    contLayout->addWidget(slider3);
-
-
-    QHBoxLayout* layout = new QHBoxLayout(this);
-    layout->addWidget(container);
-    
-    //layout->addWidget(new QPushButton("Test"));
-    setCentralWidget(container);
-    //this->setLayout(layout);
-    this->setMinimumSize(QSize(1000, 1000));
-    this->show();
-
-    //ui.horizontalSlider->setStyleSheet("QSlider::groove:horizontal {color:black; background-color:red;}"
-    //                                   "QSlider::handle:horizontal {background-color:blue; height:16px; width: 16px;}");
-    //connect(ui.spinBox, SIGNAL(valueChanged(int)), ui.horizontalSlider, SLOT(setValue(int)));
-    */
 }
 
 void strangevismoviemaker::fileOpen()
@@ -87,7 +59,7 @@ void strangevismoviemaker::fileOpen()
 void strangevismoviemaker::saveState()
 {
     m_renderer->setState();
-    updateKeyframes();
+    m_renderer->setKeyframes(keyframeWrapper, square);
 }
 
 void strangevismoviemaker::appendDockWidgets()
@@ -97,7 +69,7 @@ void strangevismoviemaker::appendDockWidgets()
     auto dockLayout = new QVBoxLayout();
     auto dockContentWrapper = new QWidget();
     dockContentWrapper->setLayout(dockLayout);
-    dockContentWrapper->setStyleSheet("background-color:#6D6D6D;");
+    dockContentWrapper->setStyleSheet("background-color: #6D6D6D;");
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
     Histogram* h = new Histogram(m_renderer->getVolume()->getDataset());
@@ -117,60 +89,12 @@ void strangevismoviemaker::appendDockWidgets()
 
     QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
     formatDockWidgets(keyframes);
-    keyframeWrapper = new QWidget();
-    updateKeyframes();
-    keyframeWrapper->setFixedSize(*square);
-    keyframeWrapper->setStyleSheet("background-color:#3C3C3C;");
+    square = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
+    keyframeWrapper = m_renderer->setKeyframes(new QWidget(), square);
+    m_renderer->setKeyframeWrapper(keyframeWrapper);
     keyframes->setWidget(keyframeWrapper);
     keyframes->setMaximumWidth(QDesktopWidget().availableGeometry().width() * 0.15);
     this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
-}
-
-void strangevismoviemaker::updateKeyframes() {
-    if (keyframeWrapper->layout() != NULL)
-    {
-        QLayoutItem* item;
-        while ((item = keyframeWrapper->layout()->takeAt(0)) != NULL)
-        {
-            delete item->widget();
-            delete item;
-        }
-        delete keyframeWrapper->layout();
-    }
-    QGridLayout* keyframeGrid = new QGridLayout();
-    square = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
-
-    keyframeWrapper->heightForWidth(true);
-
-    int row = 2;
-    int col = 1;
-    QDir directory("snapshots/");
-    QStringList images = directory.entryList(QStringList() << "*.png" << "*.PNG", QDir::Files);
-    std::reverse(images.begin(), images.end());
-    int imLength = images.length();
-    for (int i = 0; i < 8; i++) {
-        auto k = new QWidget();
-        k->setFixedSize(*square * 0.3);
-        if (i < imLength) {
-            QString path = "background-image: url(./snapshots/";
-            path.append(images[i]);
-            path.append("); background-position: center;");
-            k->setStyleSheet(path);
-        }
-        else {
-            k->setStyleSheet("background-color:#C4C4C4;");
-        }
-        keyframeGrid->addWidget(k, row, col);
-        if (col == 0) {
-            col = 2;
-            row--;
-        }
-        else {
-            col--;
-        }
-
-    }
-    keyframeWrapper->setLayout(keyframeGrid);
 }
 
 
@@ -196,7 +120,7 @@ QWidget* strangevismoviemaker::toolbarContent(QWidget* content, QString header) 
     label->setFont(f);
 
     auto dockContent = new QWidget();
-    dockContent->setStyleSheet("background-color:#3C3C3C;border-radius:18px;");
+    dockContent->setStyleSheet("background-color: #3C3C3C;border-radius:18px;");
     dockContent->setLayout(dockLayout);
     dockLayout->addWidget(label);
     dockLayout->addWidget(content);
@@ -207,7 +131,7 @@ QWidget* strangevismoviemaker::toolbarContent(QWidget* content, QString header) 
 // deletes any generated keyframes and states on application exit
 void strangevismoviemaker::closeEvent(QCloseEvent* event)
 {
-    QDirIterator it("./snapshots/", { "*.png" });
+    QDirIterator it("./states/", { "*.png" });
 
     while (it.hasNext())
         QFile(it.next()).remove();
