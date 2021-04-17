@@ -96,6 +96,7 @@
     <ClCompile Include="cube.cpp" />
     <ClCompile Include="customSlider.cpp" />
     <ClCompile Include="keyframeHandler.cpp" />
+    <ClCompile Include="keyframes.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="strangevismoviemaker.cpp" />
@@ -105,7 +106,8 @@
     <ClInclude Include="cube.h" />
     <ClInclude Include="customSlider.h" />
     <ClInclude Include="histogram.h" />
-    <ClInclude Include="keyframeHandler.h" />
+    <QtMoc Include="keyframeHandler.h" />
+    <QtMoc Include="keyframes.h" />
     <QtMoc Include="model.h" />
     <QtMoc Include="Renderer.h" />
   </ItemGroup>

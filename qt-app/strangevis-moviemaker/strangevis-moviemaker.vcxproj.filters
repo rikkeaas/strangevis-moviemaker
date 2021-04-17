@@ -9,12 +9,12 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="histogram.cpp" />
     <ClCompile Include="keyframeHandler.cpp" />
+    <ClCompile Include="keyframes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cube.h" />
     <ClInclude Include="customSlider.h" />
     <ClInclude Include="histogram.h" />
-    <ClInclude Include="keyframeHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="strangevismoviemaker.cpp">
@@ -40,6 +40,8 @@
     <QtMoc Include="strangevismoviemaker.h" />
     <QtMoc Include="model.h" />
     <QtMoc Include="Renderer.h" />
+    <QtMoc Include="keyframeHandler.h" />
+    <QtMoc Include="keyframes.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="customSlider.h">

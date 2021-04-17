@@ -526,3 +526,5 @@ MigrationBackup/
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,visualstudio,c++,qt,qtcreator,cmake:
 
+screenshots/
+states/

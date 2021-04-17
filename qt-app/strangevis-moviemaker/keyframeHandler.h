@@ -1,14 +1,19 @@
 #pragma once
 #include <QFile>
 #include <QOpenGLWidget>
+#include <QMatrix4x4>
 
 
-class KeyframeHandler {
+class KeyframeHandler : public QWidget {
+	Q_OBJECT
 public:
-	void saveState(QWidget*, QString, QList<float*>);
+	void saveState(QWidget* widget, QString filename, QList<float*> matrices);
 	QWidget* updateKeyframes(QWidget* keyframeWrapper, QSize*);
-
-private:
 	void takeQtScreenShot(QWidget* widget, QString);
+public slots:
+	void readStates(QString statePath);
+signals:
+	void matricesUpdated(QList<QMatrix4x4>);
+private:
 	int numberofStates;
 };

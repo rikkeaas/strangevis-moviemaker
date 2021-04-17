@@ -10,7 +10,6 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QKeyEvent>
-
 #include "model.h"
 #include "histogram.h"
 #include "keyframeHandler.h"
@@ -29,9 +28,9 @@ public:
 	Model* getVolume();
 	void setState();
 	QWidget* setKeyframes(QWidget*, QSize*);
-
 	void setKeyframeWrapper(QWidget* qw);
-
+public slots:
+	void setMatrices(QList<QMatrix4x4> matrices);
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
@@ -68,5 +67,6 @@ protected:
 	void wheelEvent(QWheelEvent* event);
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);
+
 
 };
