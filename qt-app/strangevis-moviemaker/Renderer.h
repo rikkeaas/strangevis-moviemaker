@@ -13,6 +13,8 @@
 
 #include "model.h"
 #include "histogram.h"
+#include "keyframeHandler.h"
+
 
 class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 {
@@ -25,6 +27,11 @@ public:
 	void resizeGL(int width, int height);
 	void paintGL();
 	Model* getVolume();
+	void setState();
+	QWidget* setKeyframes(QWidget*, QSize*);
+
+	void setKeyframeWrapper(QWidget* qw);
+
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
@@ -52,10 +59,14 @@ private:
 	QVector3D arcballVector(qreal x, qreal y);
 
 	Model* m_volume;
+	KeyframeHandler* m_keyframeHandler;
+	QWidget* keyframeWrapper;
+	QSize* square;
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
 	void wheelEvent(QWheelEvent* event);
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);
+
 };
