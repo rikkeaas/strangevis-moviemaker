@@ -18,19 +18,20 @@
 #include "phasefunction.h"
 
 
-#include "histogram.h"
-
 class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 {
 	Q_OBJECT
 
 public:
+	Renderer();
 	Renderer(QWidget* parent, Qt::WindowFlags f = Qt::WindowFlags());
 	~Renderer();
 	void initializeGL();
 	void resizeGL(int width, int height);
 	void paintGL();
 	Model* getVolume();
+
+	PhaseFunction* getPhaseFunction();
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
@@ -63,6 +64,8 @@ private:
 	QTime timer;
 	std::chrono::steady_clock::time_point lastTime;
 	int nbFrames = 0;
+
+	int clicks = 0;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);

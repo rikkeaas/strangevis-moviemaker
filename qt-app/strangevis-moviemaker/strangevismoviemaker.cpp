@@ -69,6 +69,11 @@ void strangevismoviemaker::fileOpen()
     {
         if (m_renderer->getVolume()->load(fileName))
         {
+            for (QDockWidget* dw : this->findChildren<QDockWidget *>())
+            {
+                this->removeDockWidget(dw);
+            }
+            appendDockWidgets();
             qDebug() << "Loaded volume " << fileName; 
         } else {
             qDebug() << "Failed to load volume " << fileName;
@@ -78,7 +83,7 @@ void strangevismoviemaker::fileOpen()
 
 void strangevismoviemaker::appendDockWidgets()
 {
-    qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset()->isEmpty();
+    qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset().isEmpty();
 
     auto dockLayout = new QVBoxLayout();
     auto dockContentWrapper = new QWidget();
@@ -86,13 +91,16 @@ void strangevismoviemaker::appendDockWidgets()
     dockContentWrapper->setStyleSheet("background-color:#6D6D6D;");
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
-    Histogram* h = new Histogram(m_renderer->getVolume()->getDataset());
-
+    Histogram* h = new Histogram(m_renderer);
+    //h->m_renderer = m_renderer;
     QWidget* histoWrapper = new QWidget();
     QVBoxLayout* histoLayout = new QVBoxLayout();
     histoLayout->addWidget(h->getHistogram());
     histoWrapper->setLayout(histoLayout);
     histoLayout->setContentsMargins(0, 0, 0, 0);
+
+    customSlider* slider = new customSlider(10, QRect(100, 50, 200, 16), 0, 300, histoWrapper);
+    histoLayout->addWidget(slider);
 
     dockLayout->addWidget(toolbarContent(histoWrapper, QString("Layers")));
 

@@ -1,8 +1,10 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
+#include <QSlider>
+#include <QSpinBox>
 #include "ui_strangevismoviemaker.h"
-/*
+
 
 class customSlider : public QWidget
 {
@@ -22,5 +24,3 @@ private:
     QSlider* m_horizontalSlider;
 
 };
-
-*/

@@ -4,6 +4,9 @@
 #include "strangevismoviemaker.h"
 #include <QtMath>
 
+Renderer::Renderer() : QOpenGLWidget(nullptr, Qt::WindowFlags())
+{}
+
 Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
 	setFocusPolicy(Qt::StrongFocus);
@@ -148,6 +151,19 @@ void Renderer::mousePressEvent(QMouseEvent* event)
 
 	m_previousX = m_currentX;
 	m_previousY = m_currentY;
+
+	QVector<float> data;
+	for (int i = 0; i < 256; i++)
+	{
+		if (clicks % 3 == 0)
+			data << 1.0 << 0.0 << 0.0 << 1.0;
+		else if (clicks % 3 == 1)
+			data << 0.0 << 1.0 << 0.0 << 1.0;
+		else 
+			data << 0.0 << 0.0 << 1.0 << 1.0;
+	}
+	m_phasefunction->updatePhaseFunction(0, 256, &data);
+	clicks++;
 }
 
 void Renderer::mouseMoveEvent(QMouseEvent* event)
@@ -244,4 +260,10 @@ QVector3D Renderer::arcballVector(qreal x, qreal y)
 		p.normalize();
 
 	return p;
+}
+
+
+PhaseFunction* Renderer::getPhaseFunction()
+{
+	return m_phasefunction;
 }

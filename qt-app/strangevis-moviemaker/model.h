@@ -19,7 +19,7 @@ public:
 	void bind();
 	void release();
 
-	QVector<unsigned short>* getDataset();
+	QVector<unsigned short> getDataset();
 
 private:
 	QVector3D voxelSpacing;

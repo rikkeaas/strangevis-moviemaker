@@ -104,11 +104,11 @@ void main() {
 		vec3 scaledSamplePoint = 0.5 + sampligPoint / (scalingFactor * 2.0);
 		vec4 densityAndGradient = texture(volumeTexture, scaledSamplePoint);
 
-		if (densityAndGradient.x <= 0.1)
-		{
-			sampligPoint += rayDir * samplingDistance;
-			continue;
-		}
+		//if (densityAndGradient.x <= 0.1)
+		//{
+		//	sampligPoint += rayDir * samplingDistance;
+		//	continue;
+		//}
 
 		vec4 pfColor = texture(phaseFunction, vec2(densityAndGradient.r,0.5));
 		if (pfColor.a <= 0.015)
