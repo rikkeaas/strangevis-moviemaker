@@ -90,6 +90,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="histogramChartView.cpp" />
+    <ClCompile Include="layer.cpp" />
+    <ClCompile Include="layerHandler.cpp" />
     <ClCompile Include="phasefunction.cpp" />
     <ClCompile Include="histogram.cpp" />
     <QtRcc Include="strangevismoviemaker.qrc" />
@@ -103,7 +105,9 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="customSlider.h" />
-    <ClInclude Include="histogramChartView.h" />
+    <QtMoc Include="histogramChartView.h" />
+    <QtMoc Include="layerHandler.h" />
+    <QtMoc Include="layer.h" />
     <ClInclude Include="phasefunction.h" />
     <ClInclude Include="histogram.h" />
     <QtMoc Include="model.h" />

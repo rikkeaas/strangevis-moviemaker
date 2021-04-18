@@ -1,5 +1,4 @@
 #include "strangevismoviemaker.h"
-#include "customSlider.h"
 #include "histogram.h"
 #include <QOpenGLWidget>
 #include <QFileDialog>
@@ -93,16 +92,13 @@ void strangevismoviemaker::appendDockWidgets()
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
     Histogram* h = new Histogram(m_renderer);
     //h->m_renderer = m_renderer;
-    QWidget* histoWrapper = new QWidget();
-    QVBoxLayout* histoLayout = new QVBoxLayout();
-    histoLayout->addWidget(h->getHistogram());
-    histoWrapper->setLayout(histoLayout);
-    histoLayout->setContentsMargins(0, 0, 0, 0);
+   // QWidget* histoWrapper = new QWidget();
+    //QVBoxLayout* histoLayout = new QVBoxLayout();
+    //histoLayout->addWidget(h->getHistogram());
+    //histoWrapper->setLayout(histoLayout);
+    //histoLayout->setContentsMargins(0, 0, 0, 0);
 
-    customSlider* slider = new customSlider(10, QRect(100, 50, 200, 16), 0, 300, histoWrapper);
-    histoLayout->addWidget(slider);
-
-    dockLayout->addWidget(toolbarContent(histoWrapper, QString("Layers")));
+    dockLayout->addWidget(toolbarContent(h, QString("Layers")));
 
     dockContentWrapper->setLayout(dockLayout);
     toolbox->setWidget(dockContentWrapper);

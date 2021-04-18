@@ -4,6 +4,8 @@
 #include <QVector>
 #include "model.h"
 #include "Renderer.h"
+#include "layerHandler.h"
+#include "histogramChartView.h"
 
 class Histogram : public QWidget {
 public:
@@ -12,7 +14,7 @@ public:
 
 private:
 	std::map<float, int> binData(QVector<unsigned short>, int, int);
-	QChartView* chartViewP;
+	HistogramChartView* chartViewP;
 	float roundNearest(int, float);
 
 	void showHovering(bool status, int index);
@@ -25,5 +27,7 @@ private:
 	QGraphicsRectItem hoverItem;
 
 	Renderer* m_renderer;
+
+	LayerHandler* m_layerHandler;
 };
 

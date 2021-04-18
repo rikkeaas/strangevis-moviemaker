@@ -27,6 +27,8 @@ void PhaseFunction::bind()
 		m_phasefunction.setSize(256);
 		m_phasefunction.allocateStorage();
 
+
+
 		/*
 		QVector<float> data;
 		data << 1.0 << 0.0 << 0.0 << 0.0
