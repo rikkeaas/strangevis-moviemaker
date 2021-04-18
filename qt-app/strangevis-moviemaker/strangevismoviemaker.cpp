@@ -74,20 +74,6 @@ void strangevismoviemaker::highresScreenshot()
     m_renderer->grab().save(f);
 }
 
-void strangevismoviemaker::clearStates()
-{
-    QDirIterator it("./states/", { "*.png" });
-
-    while (it.hasNext())
-        QFile(it.next()).remove();
-
-    QDirIterator at("./states/", { "*.txt" });
-
-    while (at.hasNext())
-        QFile(at.next()).remove();
-    m_renderer->setKeyframes(keyframeWrapper, square);
-}
-
 void strangevismoviemaker::appendDockWidgets()
 {
     qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset().isEmpty();
@@ -169,4 +155,9 @@ void strangevismoviemaker::closeEvent(QCloseEvent* event)
         while (at.hasNext())
             QFile(at.next()).remove();
     }
+}
+
+void strangevismoviemaker::clearStates()
+{
+    m_renderer->clearStates();
 }

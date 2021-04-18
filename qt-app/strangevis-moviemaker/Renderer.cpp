@@ -4,6 +4,7 @@
 #include "strangevismoviemaker.h"
 #include <QtMath>
 #include <QPixmap>
+#include <QMessageBox>
 
 Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
@@ -13,6 +14,8 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 
 	m_keyframeHandler = new KeyframeHandler();
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
+
+	interpolater = new LinearInterpolation();
 
 	alpha = 25;
 	beta = -25;
@@ -143,7 +146,18 @@ void Renderer::paintGL()
 	glActiveTexture(GL_TEXTURE0);
 	m_volume->release();
 	
+	
 	shaderProgram.release();
+	float elapsedTime = timer.restart()/1000.f;
+	t += elapsedTime;
+	if (t < 1) {
+		QList<QMatrix4x4> newMatrices = interpolater->interpolate(fromKeyframe, toKeyframe, t);
+		m_projectionMatrix = newMatrices[0];
+		m_rotateMatrix = newMatrices[1];
+		m_scaleMatrix = newMatrices[2];
+		m_translateMatrix = newMatrices[3];
+		update();
+	}
 }
 
 void Renderer::mousePressEvent(QMouseEvent* event)
@@ -199,8 +213,7 @@ void Renderer::wheelEvent(QWheelEvent* event)
 	m_scaleMatrix.copyDataTo(values);
 	QMatrix4x4 scaledMat = QMatrix4x4(values);
 	delete[] values;
-
-	float scaleFac = 1 + (float(event->delta()) / 120.0);
+	float scaleFac = 1 + (float(event->delta()) / 1200.0);
 	scaleFac = scaleFac < 0 ? 0.0 : scaleFac;
 	scaledMat.scale(scaleFac, scaleFac, scaleFac);
 
@@ -229,13 +242,26 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		setState();
 		setKeyframes(keyframeWrapper, square);
 	}
+	else if (event->key() == Qt::Key_C) {
+		bool ok;
+		QMessageBox msgBox;
+		msgBox.setWindowTitle("Clearing states");
+		msgBox.setText("Do you want to clear all states?");
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::Yes);
+		int ret = msgBox.exec();
+		if (ret == QMessageBox::Yes) {
+			clearStates();
+		}
+	}
 }
 
 void Renderer::setMatrices(QList<QMatrix4x4> matrices) {
-	m_projectionMatrix = matrices[0].transposed();
-	m_rotateMatrix = matrices[1].transposed();
-	m_scaleMatrix = matrices[2].transposed();
-	m_translateMatrix = matrices[3].transposed();
+	t = 0;
+	timer.restart();
+	fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
+	toKeyframe = matrices;
+
 	update();
 }
 
@@ -261,4 +287,18 @@ QVector3D Renderer::arcballVector(qreal x, qreal y)
 		p.normalize();
 
 	return p;
+}
+
+void Renderer::clearStates()
+{
+	QDirIterator it("./states/", { "*.png" });
+
+	while (it.hasNext())
+		QFile(it.next()).remove();
+
+	QDirIterator at("./states/", { "*.txt" });
+
+	while (at.hasNext())
+		QFile(at.next()).remove();
+	setKeyframes(keyframeWrapper, square);
 }
