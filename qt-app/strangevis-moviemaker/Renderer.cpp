@@ -14,6 +14,7 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 
 	m_keyframeHandler = new KeyframeHandler();
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
+	QObject::connect(m_keyframeHandler, &KeyframeHandler::addedKeyframe, this, &Renderer::addNewKeyframe);
 
 	interpolater = new LinearInterpolation();
 
@@ -48,6 +49,12 @@ void Renderer::setState()
 	mx.append(m_translateMatrix.data());
 	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx);
 	m_keyframeHandler->takeQtScreenShot(this, m_volume->getFilename());
+}
+
+void Renderer::addNewKeyframe()
+{
+	setState();
+	setKeyframes(keyframeWrapper, square);
 }
 
 QWidget* Renderer::setKeyframes(QWidget* keyframeWrapper, QSize* sq) {
@@ -239,8 +246,7 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		m_rotating = false;
 	} 
 	else if (event->key() == Qt::Key_K) {
-		setState();
-		setKeyframes(keyframeWrapper, square);
+		addNewKeyframe();
 	}
 	else if (event->key() == Qt::Key_C) {
 		bool ok;

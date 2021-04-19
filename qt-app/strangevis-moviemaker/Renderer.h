@@ -26,13 +26,13 @@ public:
 	void resizeGL(int width, int height);
 	void paintGL();
 	Model* getVolume();
-	void setState();
 	QWidget* setKeyframes(QWidget*, QSize*);
 	void setKeyframeWrapper(QWidget* qw);
 	void clearStates();
 
 public slots:
 	void setMatrices(QList<QMatrix4x4> matrices);
+	void addNewKeyframe();
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
@@ -65,6 +65,8 @@ private:
 	Model* m_volume;
 	KeyframeHandler* m_keyframeHandler;
 	QWidget* keyframeWrapper;
+	void setState();
+
 	QSize* square;
 	float t = 1;
 	QElapsedTimer timer;

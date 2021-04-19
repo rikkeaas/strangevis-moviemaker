@@ -66,7 +66,6 @@ void strangevismoviemaker::highresScreenshot()
     QTimeEdit* timeEdit = new QTimeEdit();
     QTime currentTime = timeEdit->time().currentTime();
     currentTime.toString().replace(":", "");
-    qDebug() << currentTime.toString();
     QString filename = "screenshots/screenshot";
     filename.append(currentTime.toString().replace(":", ""));
     filename.append(".png");

@@ -42,10 +42,12 @@ QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* squar
     if (keyframeWrapper->layout() != NULL)
     {
         QLayoutItem* item;
-        while ((item = keyframeWrapper->layout()->takeAt(0)) != NULL)
+        int counter = 0;
+        while ((item = keyframeWrapper->layout()->takeAt(0)) != NULL && counter < 8)
         {
             delete item->widget();
             delete item;
+            counter++;
         }
         delete keyframeWrapper->layout();
     }
@@ -88,6 +90,28 @@ QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* squar
             col--;
         }
     }
+
+    auto add = new AddButton(this);
+    QObject::connect(add, &AddButton::clicked, this, &KeyframeHandler::addButton);
+    QGridLayout* layout = new QGridLayout();
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            auto w = new QWidget();
+            if (i == 2 || j == 2) {
+                w->setStyleSheet("background: #C4C4C4;");
+            }
+            else {
+                w->setStyleSheet("background: transparent;");
+            }
+            layout->addWidget(w, i, j);
+        }
+    }
+    layout->setSpacing(0);
+    add->setStyleSheet(":hover{background: #323232}");
+    add->setLayout(layout);
+    add->setContentsMargins(13, 13, 13, 13);
+    add->setFixedSize(*square * 0.3);
+    keyframeGrid->addWidget(add, 2, 2);
     keyframeWrapper->setLayout(keyframeGrid);
     return keyframeWrapper;
 }
@@ -116,4 +140,8 @@ void KeyframeHandler::readStates(QString statePath) {
         m_out.append(QMatrix4x4(matrices[48], matrices[49], matrices[50], matrices[51], matrices[52], matrices[53], matrices[54], matrices[55], matrices[56], matrices[57], matrices[58], matrices[59], matrices[60], matrices[61], matrices[62], matrices[63]).transposed());
         matricesUpdated(m_out);
     }
+}
+
+void KeyframeHandler::addButton() {
+    addedKeyframe();
 }
