@@ -8,6 +8,7 @@
 #include "histogramChartView.h"
 
 class Histogram : public QWidget {
+	Q_OBJECT
 public:
 	QChartView* getHistogram();
 	Histogram(Renderer* renderer);
@@ -29,5 +30,8 @@ private:
 	Renderer* m_renderer;
 
 	LayerHandler* m_layerHandler;
+
+public slots:
+	void updatePhaseFunction(int start, int end, QVector<float>);
 };
 

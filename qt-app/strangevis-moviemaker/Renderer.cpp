@@ -152,6 +152,7 @@ void Renderer::mousePressEvent(QMouseEvent* event)
 	m_previousX = m_currentX;
 	m_previousY = m_currentY;
 
+	/*
 	QVector<float> data;
 	for (int i = 0; i < 256; i++)
 	{
@@ -163,6 +164,7 @@ void Renderer::mousePressEvent(QMouseEvent* event)
 			data << 0.0 << 0.0 << 1.0 << 1.0;
 	}
 	m_phasefunction->updatePhaseFunction(0, 256, &data);
+	*/
 	clicks++;
 }
 

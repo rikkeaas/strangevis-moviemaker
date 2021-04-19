@@ -123,7 +123,8 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
     QObject::connect(m_layerHandler, &LayerHandler::undisplayLayer, chartViewP, &HistogramChartView::unshowLayerSelection);
 
     QObject::connect(chartViewP, &HistogramChartView::addLayer, m_layerHandler, &LayerHandler::addLayer);
-    qDebug() << chartViewP->chart();
+
+    QObject::connect(m_layerHandler, &LayerHandler::updatePhaseFunction, this, &Histogram::updatePhaseFunction);
 }
 
 std::map<float, int> Histogram::binData(QVector<unsigned short> values, int skipStep, int roundTo) {
@@ -227,3 +228,7 @@ void Histogram::registerClick(int index)
 
 }
 
+void Histogram::updatePhaseFunction(int start, int end, QVector<float> textureData)
+{
+    m_renderer->getPhaseFunction()->updatePhaseFunction(start, end, &textureData);
+}

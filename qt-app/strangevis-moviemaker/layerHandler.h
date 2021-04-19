@@ -2,6 +2,7 @@
 #include <QWidget>
 #include <QVector4D>
 #include "layer.h"
+#include <QList>
 
 class LayerHandler : public QWidget
 {
@@ -10,6 +11,10 @@ public:
 	LayerHandler();
 private:
 	Layer* m_selectedLayer;
+	QList<Layer*>  m_layers;
+	int minX, maxX;
+	QVector<float> m_phaseFuncData;
+	void updatePhaseFuncData();
 public slots:
 	void addLayer(QRect area);
 	void layerSelected(Layer* selectedLayer, bool remove);
@@ -24,4 +29,5 @@ signals:
 	void updateGreenSlider(int green);
 	void updateBlueSlider(int blue);
 	void updateAlphaSlider(int alpha);
+	void updatePhaseFunction(int start, int end, QVector<float> data);
 };

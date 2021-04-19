@@ -7,10 +7,10 @@ class Layer : public QWidget
 public:
 	Layer(QWidget* parent, QRect area);
 	QRect m_selectedArea;
-	int red;
-	int green;
-	int blue;
-	int alpha;
+	int red = 0;
+	int green = 0;
+	int blue = 0;
+	int alpha = 0;
 
 signals:
 	void clicked(Layer* selectedLayer, bool remove);

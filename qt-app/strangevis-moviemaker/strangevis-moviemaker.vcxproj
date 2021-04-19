@@ -109,7 +109,7 @@
     <QtMoc Include="layerHandler.h" />
     <QtMoc Include="layer.h" />
     <ClInclude Include="phasefunction.h" />
-    <ClInclude Include="histogram.h" />
+    <QtMoc Include="histogram.h" />
     <QtMoc Include="model.h" />
     <QtMoc Include="Renderer.h" />
   </ItemGroup>
