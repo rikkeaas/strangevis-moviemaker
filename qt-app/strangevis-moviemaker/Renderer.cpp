@@ -65,7 +65,7 @@ void Renderer::updateKeyframes()
 
 QWidget* Renderer::setKeyframes(QWidget* keyframeWrapper, QSize* sq) {
 	square = sq;
-	keyframeWrapper = m_keyframeHandler->updateKeyframes(keyframeWrapper, square);
+	keyframeWrapper = m_keyframeHandler->updateKeyframes(keyframeWrapper, square, m_volume->getFilename());
 	keyframeWrapper->setFixedSize(*square);
 	keyframeWrapper->setStyleSheet("background-color: #3C3C3C;");
 	return keyframeWrapper;

@@ -8,7 +8,7 @@ class KeyframeHandler : public QWidget {
 	Q_OBJECT
 public:
 	void saveState(QWidget* widget, QString filename, QList<float*> matrices);
-	QWidget* updateKeyframes(QWidget* keyframeWrapper, QSize*);
+	QWidget* updateKeyframes(QWidget* keyframeWrapper, QSize*, QString filename);
 	void takeQtScreenShot(QWidget* widget, QString);
 	bool toDelete = false;
 public slots:
@@ -22,4 +22,8 @@ signals:
 	void deletedKeyframe();
 private:
 	int numberofStates;
+	int filenameNumber;
+	void setFilenameNumber();
+	QList<QStringList> getFiles();
+	QString filename;
 };
