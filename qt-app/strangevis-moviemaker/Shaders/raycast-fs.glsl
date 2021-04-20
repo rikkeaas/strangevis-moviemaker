@@ -72,7 +72,6 @@ void main() {
 	vec3 rayOrigin = near.xyz;
 
     vec3 rayDir = normalize(far.xyz - near.xyz);
-	vec3 rrayDir = normalize(vec3(rayDir.x, rayDir.y, rayDir.z));
 
 	vec2 t_hit = intersect_box(rayOrigin, rayDir);
 	if (t_hit.x > t_hit.y) {
@@ -92,7 +91,6 @@ void main() {
 	//samplingDistance = renderDistance / 1000.0;
 
 	vec3 sampligPoint = rayOrigin + t_hit.x * rayDir;
-	vec3 ssampligPoint = rayOrigin + t_hit.x * rrayDir;
 	vec4 color = vec4(0.0);
 
 	vec3 scalingFactor = voxelSpacing * dimensionScaling;
@@ -143,7 +141,6 @@ void main() {
 			break;
 		}
 		sampligPoint += rayDir * samplingDistance;
-		ssampligPoint += rrayDir * samplingDistance;
 	}
 
 	if (notFound)
@@ -156,7 +153,7 @@ void main() {
 		//vec3 t = sampligPoint;//(modelViewProjectionMatrix * vec4(sampligPoint, 1.0)).xyz;//(inverseModelViewProjectionMatrix * vec4(normalize(sampligPoint),1.0)).xyz;//
 		//vec3 tt = firstValues;//(modelViewProjectionMatrix * vec4(firstValues, 1.0)).xyz;//(inverseModelViewProjectionMatrix * vec4(firstValues, 1.0)).xyz;
 		fragColor = color;//vec4(specularComponent(lightpos, t, tt) + diffuseComponent(lightpos, t, tt) + vec3(0.1), 1.0);//vec4(firstValues,1.0);
-		gl_FragDepth = calcDepth(ssampligPoint);
+		gl_FragDepth = calcDepth(sampligPoint);
 	}
 }
 
