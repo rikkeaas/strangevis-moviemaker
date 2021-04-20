@@ -11,8 +11,10 @@
 
 void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*> matrices)
 {
+    setFilenameNumber();
     numberofStates++;
-    QString f = QString("states/%1_state_%2.txt").arg(filename, QString::number(numberofStates));
+    QString n = QStringLiteral("%1").arg(numberofStates, 2, 10, QLatin1Char('0'));
+    QString f = QString("states/%1_state_%2.txt").arg(filename, n);
     QFile file(f);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return;
@@ -26,19 +28,18 @@ void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*>
         }
     }
     qDebug() << "Saved state to file: " << f;
-    file.close();
 }
 
 void KeyframeHandler::takeQtScreenShot(QWidget* widget, QString filename) {
-    QSize* height = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
-    QString f = QString("states/%1_snapshot_%2.png").arg(filename, QString::number(numberofStates));
+    QSize* height = new QSize(QDesktopWidget().availableGeometry().width() * 0.2, QDesktopWidget().availableGeometry().width() * 0.2);
+    QString n = QStringLiteral("%1").arg(numberofStates, 2, 10, QLatin1Char('0'));
+    QString f = QString("states/%1_snapshot_%2.png").arg(filename, n);
     widget->grab().scaledToHeight(height->height() * 0.3).save(f);
     qDebug() << "Saved snapshot: " << f;
 }
 
 
-
-QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* square) {
+QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* square, QString filename) {
     if (keyframeWrapper->layout() != NULL)
     {
         QLayoutItem* item;
@@ -51,15 +52,16 @@ QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* squar
         }
         delete keyframeWrapper->layout();
     }
-
+    this->filename = filename;
     QGridLayout* keyframeGrid = new QGridLayout();
     keyframeWrapper->heightForWidth(true);
 
     int row = 2;
     int col = 1;
-    QDir directory("states/");
-    QStringList images = directory.entryList(QStringList() << "*.png" << "*.PNG", QDir::Files);
-    QStringList states = directory.entryList(QStringList() << "*.txt" << "*.TXT", QDir::Files);
+
+    QList<QStringList> files = getFiles();
+    QStringList images = files.at(0);
+    QStringList states = files.at(1);
 
     std::reverse(images.begin(), images.end());
     std::reverse(states.begin(), states.end());
@@ -68,11 +70,15 @@ QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* squar
     for (int i = 0; i < 8; i++) {
         auto k = new Keyframe(this);
         QObject::connect(k, &Keyframe::clicked, this, &KeyframeHandler::readStates);
+        QObject::connect(k, &Keyframe::clickForRemove, this, &KeyframeHandler::deleteKeyframe);
         k->setFixedSize(*square * 0.3);
         if (i < numberofStates) {
             QString statePath = "./states/";
             statePath.append(states[i]);
             k->setStatePath(statePath);
+            QString snapshotPath("./states/");
+            snapshotPath.append(images[i]);
+            k->setSnapshotPath(snapshotPath);
             QString path = "background-image: url(./states/";
             path.append(images[i]);
             path.append("); background-position: center;");
@@ -142,6 +148,55 @@ void KeyframeHandler::readStates(QString statePath) {
     }
 }
 
+void KeyframeHandler::deleteKeyframe(QString statePath, QString snapshotPath)
+{
+    if (!statePath.isEmpty() && !snapshotPath.isEmpty()) {
+        QFile(statePath).remove();
+        QFile(snapshotPath).remove();
+    }
+    deletedKeyframe();
+}
+
 void KeyframeHandler::addButton() {
     addedKeyframe();
+}
+
+QList<QStringList> KeyframeHandler::getFiles() {
+    QList<QStringList> out;
+    QDir directory("states/");
+    directory.setSorting(QDir::Name);
+    QString imString = filename;
+    imString.append("_snapshot_*.png");
+    QString sString = filename;
+    sString.append("_state_*.txt");
+    QStringList images = directory.entryList(QStringList() << imString, QDir::Files);
+    QStringList states = directory.entryList(QStringList() << sString, QDir::Files);
+    out.append(images);
+    out.append(states);
+    return out;
+}
+
+void KeyframeHandler::setFilenameNumber() {
+    QStringList states = getFiles().at(1);
+    if (!states.isEmpty()) {
+
+        qDebug() << states;
+        int highest = 0;
+        for (int f = 0; f < states.length(); f++) {
+            QString file = states[states.length() - 1];
+            int indexOfUnderScore = file.lastIndexOf("_");
+            int indexOfDot = file.lastIndexOf(".");
+            QString out;
+            for (int i = indexOfUnderScore + 1; i < indexOfDot; i++) {
+                out += file.at(i);
+            }
+            if (out.toInt() > highest) {
+                highest = out.toInt();
+            }
+        }
+        numberofStates = highest;
+    }
+    else {
+        numberofStates = 0;
+    }
 }

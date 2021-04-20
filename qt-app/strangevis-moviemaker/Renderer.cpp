@@ -18,6 +18,7 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_keyframeHandler = new KeyframeHandler();
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::addedKeyframe, this, &Renderer::addNewKeyframe);
+	QObject::connect(m_keyframeHandler, &KeyframeHandler::deletedKeyframe, this, &Renderer::updateKeyframes);
 
 	interpolater = new LinearInterpolation();
 
@@ -66,9 +67,14 @@ void Renderer::addNewKeyframe()
 	setKeyframes(keyframeWrapper, square);
 }
 
+void Renderer::updateKeyframes()
+{
+	setKeyframes(keyframeWrapper, square);
+}
+
 QWidget* Renderer::setKeyframes(QWidget* keyframeWrapper, QSize* sq) {
 	square = sq;
-	keyframeWrapper = m_keyframeHandler->updateKeyframes(keyframeWrapper, square);
+	keyframeWrapper = m_keyframeHandler->updateKeyframes(keyframeWrapper, square, m_volume->getFilename());
 	keyframeWrapper->setFixedSize(*square);
 	keyframeWrapper->setStyleSheet("background-color: #3C3C3C;");
 	return keyframeWrapper;
@@ -274,6 +280,7 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 	if (event->key() == Qt::Key_Shift)
 	{
 		m_rotating = false;
+		m_keyframeHandler->toDelete = false;
 	} 
 	else if (event->key() == Qt::Key_K) {
 		addNewKeyframe();
@@ -307,6 +314,7 @@ void Renderer::keyPressEvent(QKeyEvent* event)
 	if (event->key() == Qt::Key_Shift)
 	{
 		m_rotating = true;
+		m_keyframeHandler->toDelete = true;
 	}
 	event->accept();
 }

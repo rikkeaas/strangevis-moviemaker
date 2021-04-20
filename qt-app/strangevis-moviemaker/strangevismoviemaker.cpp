@@ -104,11 +104,11 @@ void strangevismoviemaker::appendDockWidgets()
 
     QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
     formatDockWidgets(keyframes);
-    square = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
+    square = new QSize(QDesktopWidget().availableGeometry().width() * 0.2, QDesktopWidget().availableGeometry().width() * 0.2);
     keyframeWrapper = m_renderer->setKeyframes(new QWidget(), square);
     m_renderer->setKeyframeWrapper(keyframeWrapper);
     keyframes->setWidget(keyframeWrapper);
-    keyframes->setMaximumWidth(QDesktopWidget().availableGeometry().width() * 0.15);
+    keyframes->setMaximumWidth(QDesktopWidget().availableGeometry().width() * 0.2);
     this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
 }
 
