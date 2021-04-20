@@ -15,6 +15,7 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_keyframeHandler = new KeyframeHandler();
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::addedKeyframe, this, &Renderer::addNewKeyframe);
+	QObject::connect(m_keyframeHandler, &KeyframeHandler::deletedKeyframe, this, &Renderer::updateKeyframes);
 
 	interpolater = new LinearInterpolation();
 
@@ -54,6 +55,11 @@ void Renderer::setState()
 void Renderer::addNewKeyframe()
 {
 	setState();
+	setKeyframes(keyframeWrapper, square);
+}
+
+void Renderer::updateKeyframes()
+{
 	setKeyframes(keyframeWrapper, square);
 }
 
@@ -244,6 +250,7 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 	if (event->key() == Qt::Key_Shift)
 	{
 		m_rotating = false;
+		m_keyframeHandler->toDelete = false;
 	} 
 	else if (event->key() == Qt::Key_K) {
 		addNewKeyframe();
@@ -277,6 +284,7 @@ void Renderer::keyPressEvent(QKeyEvent* event)
 	if (event->key() == Qt::Key_Shift)
 	{
 		m_rotating = true;
+		m_keyframeHandler->toDelete = true;
 	}
 	event->accept();
 }

@@ -30,7 +30,7 @@ void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*>
 }
 
 void KeyframeHandler::takeQtScreenShot(QWidget* widget, QString filename) {
-    QSize* height = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
+    QSize* height = new QSize(QDesktopWidget().availableGeometry().width() * 0.2, QDesktopWidget().availableGeometry().width() * 0.2);
     QString f = QString("states/%1_snapshot_%2.png").arg(filename, QString::number(numberofStates));
     widget->grab().scaledToHeight(height->height() * 0.3).save(f);
     qDebug() << "Saved snapshot: " << f;
@@ -68,11 +68,15 @@ QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* squar
     for (int i = 0; i < 8; i++) {
         auto k = new Keyframe(this);
         QObject::connect(k, &Keyframe::clicked, this, &KeyframeHandler::readStates);
+        QObject::connect(k, &Keyframe::clickForRemove, this, &KeyframeHandler::deleteKeyframe);
         k->setFixedSize(*square * 0.3);
         if (i < numberofStates) {
             QString statePath = "./states/";
             statePath.append(states[i]);
             k->setStatePath(statePath);
+            QString snapshotPath("./states/");
+            snapshotPath.append(images[i]);
+            k->setSnapshotPath(snapshotPath);
             QString path = "background-image: url(./states/";
             path.append(images[i]);
             path.append("); background-position: center;");
@@ -140,6 +144,15 @@ void KeyframeHandler::readStates(QString statePath) {
         m_out.append(QMatrix4x4(matrices[48], matrices[49], matrices[50], matrices[51], matrices[52], matrices[53], matrices[54], matrices[55], matrices[56], matrices[57], matrices[58], matrices[59], matrices[60], matrices[61], matrices[62], matrices[63]).transposed());
         matricesUpdated(m_out);
     }
+}
+
+void KeyframeHandler::deleteKeyframe(QString statePath, QString snapshotPath)
+{
+    if (!statePath.isEmpty() && !snapshotPath.isEmpty()) {
+        QFile(statePath).remove();
+        QFile(snapshotPath).remove();
+    }
+    deletedKeyframe();
 }
 
 void KeyframeHandler::addButton() {

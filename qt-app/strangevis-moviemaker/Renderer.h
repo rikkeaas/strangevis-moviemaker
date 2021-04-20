@@ -33,6 +33,7 @@ public:
 public slots:
 	void setMatrices(QList<QMatrix4x4> matrices);
 	void addNewKeyframe();
+	void updateKeyframes();
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
