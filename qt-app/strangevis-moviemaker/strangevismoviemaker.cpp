@@ -70,26 +70,11 @@ void strangevismoviemaker::highresScreenshot()
     QTimeEdit* timeEdit = new QTimeEdit();
     QTime currentTime = timeEdit->time().currentTime();
     currentTime.toString().replace(":", "");
-    qDebug() << currentTime.toString();
     QString filename = "screenshots/screenshot";
     filename.append(currentTime.toString().replace(":", ""));
     filename.append(".png");
     QString f = QString(filename);
     m_renderer->grab().save(f);
-}
-
-void strangevismoviemaker::clearStates()
-{
-    QDirIterator it("./states/", { "*.png" });
-
-    while (it.hasNext())
-        QFile(it.next()).remove();
-
-    QDirIterator at("./states/", { "*.txt" });
-
-    while (at.hasNext())
-        QFile(at.next()).remove();
-    m_renderer->setKeyframes(keyframeWrapper, square);
 }
 
 void strangevismoviemaker::appendDockWidgets()
@@ -173,4 +158,9 @@ void strangevismoviemaker::closeEvent(QCloseEvent* event)
         while (at.hasNext())
             QFile(at.next()).remove();
     }
+}
+
+void strangevismoviemaker::clearStates()
+{
+    m_renderer->clearStates();
 }

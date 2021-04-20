@@ -10,11 +10,13 @@
     <ClCompile Include="histogram.cpp" />
     <ClCompile Include="keyframeHandler.cpp" />
     <ClCompile Include="keyframes.cpp" />
+    <ClCompile Include="interpolation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cube.h" />
     <ClInclude Include="customSlider.h" />
     <ClInclude Include="histogram.h" />
+    <ClInclude Include="interpolation.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="strangevismoviemaker.cpp">

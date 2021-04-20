@@ -98,6 +98,7 @@
     <QtUic Include="strangevismoviemaker.ui" />
     <QtMoc Include="strangevismoviemaker.h" />
     <ClCompile Include="customSlider.cpp" />
+    <ClCompile Include="interpolation.cpp" />
     <ClCompile Include="keyframeHandler.cpp" />
     <ClCompile Include="keyframes.cpp" />
     <ClCompile Include="model.cpp" />
@@ -112,7 +113,7 @@
     <QtMoc Include="layer.h" />
     <ClInclude Include="phasefunction.h" />
     <QtMoc Include="histogram.h" />
-
+    <ClInclude Include="interpolation.h" />
     <QtMoc Include="keyframeHandler.h" />
     <QtMoc Include="keyframes.h" />
     <QtMoc Include="model.h" />

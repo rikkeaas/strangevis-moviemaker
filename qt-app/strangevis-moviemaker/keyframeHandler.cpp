@@ -42,10 +42,12 @@ QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* squar
     if (keyframeWrapper->layout() != NULL)
     {
         QLayoutItem* item;
-        while ((item = keyframeWrapper->layout()->takeAt(0)) != NULL)
+        int counter = 0;
+        while ((item = keyframeWrapper->layout()->takeAt(0)) != NULL && counter < 8)
         {
             delete item->widget();
             delete item;
+            counter++;
         }
         delete keyframeWrapper->layout();
     }
@@ -88,6 +90,28 @@ QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* squar
             col--;
         }
     }
+
+    auto add = new AddButton(this);
+    QObject::connect(add, &AddButton::clicked, this, &KeyframeHandler::addButton);
+    QGridLayout* layout = new QGridLayout();
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            auto w = new QWidget();
+            if (i == 2 || j == 2) {
+                w->setStyleSheet("background: #C4C4C4;");
+            }
+            else {
+                w->setStyleSheet("background: transparent;");
+            }
+            layout->addWidget(w, i, j);
+        }
+    }
+    layout->setSpacing(0);
+    add->setStyleSheet(":hover{background: #323232}");
+    add->setLayout(layout);
+    add->setContentsMargins(13, 13, 13, 13);
+    add->setFixedSize(*square * 0.3);
+    keyframeGrid->addWidget(add, 2, 2);
     keyframeWrapper->setLayout(keyframeGrid);
     return keyframeWrapper;
 }
@@ -110,10 +134,14 @@ void KeyframeHandler::readStates(QString statePath) {
     if (matrices.length() > 0) {
         int point = 0;
         QList<QMatrix4x4> m_out;
-        m_out.append(QMatrix4x4(matrices[0], matrices[1], matrices[2], matrices[3], matrices[4], matrices[5], matrices[6], matrices[7], matrices[8], matrices[9], matrices[10], matrices[11], matrices[12], matrices[13], matrices[14], matrices[15]));
-        m_out.append(QMatrix4x4(matrices[16], matrices[17], matrices[18], matrices[19], matrices[20], matrices[21], matrices[22], matrices[23], matrices[24], matrices[25], matrices[26], matrices[27], matrices[28], matrices[29], matrices[30], matrices[31]));
-        m_out.append(QMatrix4x4(matrices[32], matrices[33], matrices[34], matrices[35], matrices[36], matrices[37], matrices[38], matrices[39], matrices[40], matrices[41], matrices[42], matrices[43], matrices[44], matrices[45], matrices[46], matrices[47]));
-        m_out.append(QMatrix4x4(matrices[48], matrices[49], matrices[50], matrices[51], matrices[52], matrices[53], matrices[54], matrices[55], matrices[56], matrices[57], matrices[58], matrices[59], matrices[60], matrices[61], matrices[62], matrices[63]));
+        m_out.append(QMatrix4x4(matrices[0], matrices[1], matrices[2], matrices[3], matrices[4], matrices[5], matrices[6], matrices[7], matrices[8], matrices[9], matrices[10], matrices[11], matrices[12], matrices[13], matrices[14], matrices[15]).transposed());
+        m_out.append(QMatrix4x4(matrices[16], matrices[17], matrices[18], matrices[19], matrices[20], matrices[21], matrices[22], matrices[23], matrices[24], matrices[25], matrices[26], matrices[27], matrices[28], matrices[29], matrices[30], matrices[31]).transposed());
+        m_out.append(QMatrix4x4(matrices[32], matrices[33], matrices[34], matrices[35], matrices[36], matrices[37], matrices[38], matrices[39], matrices[40], matrices[41], matrices[42], matrices[43], matrices[44], matrices[45], matrices[46], matrices[47]).transposed());
+        m_out.append(QMatrix4x4(matrices[48], matrices[49], matrices[50], matrices[51], matrices[52], matrices[53], matrices[54], matrices[55], matrices[56], matrices[57], matrices[58], matrices[59], matrices[60], matrices[61], matrices[62], matrices[63]).transposed());
         matricesUpdated(m_out);
     }
+}
+
+void KeyframeHandler::addButton() {
+    addedKeyframe();
 }
