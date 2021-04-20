@@ -75,6 +75,7 @@ void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 	{
 		undisplayLayer(selectedLayer->m_selectedArea);
 		layout()->removeWidget(selectedLayer);
+		if (m_selectedLayer == selectedLayer) m_selectedLayer = NULL;
 		delete selectedLayer;
 
 	}
