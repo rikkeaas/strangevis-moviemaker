@@ -23,6 +23,12 @@ bool Model::load(const QString filepath)
 	QFile file(filepath);
 	QFile metaFile(filepath.left(filepath.length() - 3) + "ini");
 
+	QStringList fp = filepath.split("/");
+
+	modelFilename = fp.at(fp.size()-1).split(".").at(0);
+
+	qDebug() << modelFilename;
+
 	if (!metaFile.open(QIODevice::ReadOnly | QIODevice::Text))
 	{
 		qDebug() << "Couldnt open " << filepath.left(filepath.length() - 3) + "ini";
@@ -168,6 +174,11 @@ QVector<unsigned short> Model::getDataset()
 {
 	QVector<unsigned short> copied = m_Data;
 	return copied;
+}
+
+QString Model::getFilename()
+{
+	return modelFilename;
 }
 
 

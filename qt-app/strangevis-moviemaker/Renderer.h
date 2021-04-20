@@ -15,6 +15,7 @@
 #include <chrono>
 
 #include "model.h"
+#include "keyframeHandler.h"
 #include "phasefunction.h"
 
 
@@ -30,8 +31,14 @@ public:
 	void resizeGL(int width, int height);
 	void paintGL();
 	Model* getVolume();
-
+	void setState();
+	QWidget* setKeyframes(QWidget*, QSize*);
+	void setKeyframeWrapper(QWidget* qw);
 	PhaseFunction* getPhaseFunction();
+public slots:
+	void setMatrices(QList<QMatrix4x4> matrices);
+
+	
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
@@ -67,10 +74,15 @@ private:
 
 	int clicks = 0;
 
+	KeyframeHandler* m_keyframeHandler;
+	QWidget* keyframeWrapper;
+	QSize* square;
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
 	void wheelEvent(QWheelEvent* event);
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);
+
+
 };

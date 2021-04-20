@@ -1,5 +1,6 @@
 #include "strangevismoviemaker.h"
 #include "histogram.h"
+#include "keyframeHandler.h"
 #include <QOpenGLWidget>
 #include <QFileDialog>
 #include <Qlabel>
@@ -10,6 +11,7 @@
 #include <QSize>
 #include <QDesktopWidget>
 #include <QtCharts>
+#include <QDateTime>
 
 
 strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
@@ -24,45 +26,28 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(fileOpenAction, SIGNAL(triggered()), this, SLOT(fileOpen()));
     ui.menuFile->addAction(fileOpenAction);
 
+    QAction* highresScreenshot = new QAction("Screenshot", this);
+    connect(highresScreenshot, SIGNAL(triggered()), this, SLOT(highresScreenshot()));
+    ui.menuFile->addAction(highresScreenshot);
+
+    QAction* clearStates = new QAction("Clear All States", this);
+    connect(clearStates, SIGNAL(triggered()), this, SLOT(clearStates()));
+    ui.menuEdit->addAction(clearStates);
+
     this->setMinimumSize(1600, 1200);
 
     auto* cw = ui.centralWidget->layout();
     cw->addWidget(m_renderer);
 
+    qDebug() << ui.centralWidget->rect();
+
     appendDockWidgets();
-
-    /*
-    QWidget* container = new QWidget(this);
-    container->setGeometry(QRect(0, 0, 1000, 1000));
-    QVBoxLayout* contLayout = new QVBoxLayout(container);
-
-    customSlider* slider = new customSlider(10, QRect(100, 50, 200, 16), 0, 300, container);
-    customSlider* slider2 = new customSlider(2, QRect(100, 100, 300, 16), 0, 10, container);
-    customSlider* slider3 = new customSlider(3, QRect(100, 150, 200, 16), 0, 255, container);
-
-    contLayout->addWidget(slider);
-    contLayout->addWidget(slider2);
-    contLayout->addWidget(slider3);
-
-
-    QHBoxLayout* layout = new QHBoxLayout(this);
-    layout->addWidget(container);
-    
-    //layout->addWidget(new QPushButton("Test"));
-    setCentralWidget(container);
-    //this->setLayout(layout);
-    this->setMinimumSize(QSize(1000, 1000));
-    this->show();
-
-    //ui.horizontalSlider->setStyleSheet("QSlider::groove:horizontal {color:black; background-color:red;}"
-    //                                   "QSlider::handle:horizontal {background-color:blue; height:16px; width: 16px;}");
-    //connect(ui.spinBox, SIGNAL(valueChanged(int)), ui.horizontalSlider, SLOT(setValue(int)));
-    */
 }
 
 void strangevismoviemaker::fileOpen()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Open Volume File", QString(), "*.dat");
+
 
     if (!fileName.isEmpty())
     {
@@ -80,6 +65,33 @@ void strangevismoviemaker::fileOpen()
     }
 }
 
+void strangevismoviemaker::highresScreenshot()
+{
+    QTimeEdit* timeEdit = new QTimeEdit();
+    QTime currentTime = timeEdit->time().currentTime();
+    currentTime.toString().replace(":", "");
+    qDebug() << currentTime.toString();
+    QString filename = "screenshots/screenshot";
+    filename.append(currentTime.toString().replace(":", ""));
+    filename.append(".png");
+    QString f = QString(filename);
+    m_renderer->grab().save(f);
+}
+
+void strangevismoviemaker::clearStates()
+{
+    QDirIterator it("./states/", { "*.png" });
+
+    while (it.hasNext())
+        QFile(it.next()).remove();
+
+    QDirIterator at("./states/", { "*.txt" });
+
+    while (at.hasNext())
+        QFile(at.next()).remove();
+    m_renderer->setKeyframes(keyframeWrapper, square);
+}
+
 void strangevismoviemaker::appendDockWidgets()
 {
     qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset().isEmpty();
@@ -87,7 +99,7 @@ void strangevismoviemaker::appendDockWidgets()
     auto dockLayout = new QVBoxLayout();
     auto dockContentWrapper = new QWidget();
     dockContentWrapper->setLayout(dockLayout);
-    dockContentWrapper->setStyleSheet("background-color:#6D6D6D;");
+    dockContentWrapper->setStyleSheet("background-color: #6D6D6D;");
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
     Histogram* h = new Histogram(m_renderer);
@@ -107,34 +119,15 @@ void strangevismoviemaker::appendDockWidgets()
 
     QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
     formatDockWidgets(keyframes);
-    QWidget* keyframeWrapper = new QWidget();
-    QGridLayout* keyframeGrid = new QGridLayout();
-    QSize* square = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
-
-    keyframeWrapper->heightForWidth(true);
-
-    // placeholder for keyframes
-    int row = 0;
-    int col = 0;
-    for (int i = 0; i < 8; i++) {
-        auto k = new QWidget();
-        k->setFixedSize(*square*0.3);
-        k->setStyleSheet("background-color:#C4C4C4;");
-        keyframeGrid->addWidget(k, row, col);
-        col++;
-        if (col == 3) {
-            col = 0;
-            row++;
-        }
-    }
-
-    keyframeWrapper->setLayout(keyframeGrid);
-    keyframeWrapper->setFixedSize(*square);
-    keyframeWrapper->setStyleSheet("background-color:#3C3C3C;");
+    square = new QSize(QDesktopWidget().availableGeometry().width() * 0.15, QDesktopWidget().availableGeometry().width() * 0.15);
+    keyframeWrapper = m_renderer->setKeyframes(new QWidget(), square);
+    m_renderer->setKeyframeWrapper(keyframeWrapper);
     keyframes->setWidget(keyframeWrapper);
     keyframes->setMaximumWidth(QDesktopWidget().availableGeometry().width() * 0.15);
     this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
 }
+
+
 
 void strangevismoviemaker::formatDockWidgets(QDockWidget* dw) {
     QDockWidget* dockWidget = dw;
@@ -157,10 +150,27 @@ QWidget* strangevismoviemaker::toolbarContent(QWidget* content, QString header) 
     label->setFont(f);
 
     auto dockContent = new QWidget();
-    dockContent->setStyleSheet("background-color:#3C3C3C;border-radius:18px;");
+    dockContent->setStyleSheet("background-color: #3C3C3C;border-radius:18px;");
     dockContent->setLayout(dockLayout);
     dockLayout->addWidget(label);
     dockLayout->addWidget(content);
 
     return dockContent;
+}
+
+// deletes any generated keyframes and states on application exit
+void strangevismoviemaker::closeEvent(QCloseEvent* event)
+{
+    bool keepStatesOnClose = true;
+    if (!keepStatesOnClose) {
+        QDirIterator it("./states/", { "*.png" });
+
+        while (it.hasNext())
+            QFile(it.next()).remove();
+
+        QDirIterator at("./states/", { "*.txt" });
+
+        while (at.hasNext())
+            QFile(at.next()).remove();
+    }
 }

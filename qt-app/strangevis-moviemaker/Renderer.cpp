@@ -3,6 +3,7 @@
 #include "cube.h"
 #include "strangevismoviemaker.h"
 #include <QtMath>
+#include <QPixmap>
 
 Renderer::Renderer() : QOpenGLWidget(nullptr, Qt::WindowFlags())
 {}
@@ -12,6 +13,9 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	setFocusPolicy(Qt::StrongFocus);
 	m_volume = new Model(this);
 	m_volume->load("./data/hand/hand.dat");
+
+	m_keyframeHandler = new KeyframeHandler();
+	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
 
 	m_phasefunction = new PhaseFunction();
 
@@ -39,6 +43,29 @@ Renderer::~Renderer()
 Model* Renderer::getVolume()
 {
 	return m_volume;
+}
+
+void Renderer::setState()
+{
+	QList<float*> mx;
+	mx.append(m_projectionMatrix.data());
+	mx.append(m_rotateMatrix.data());
+	mx.append(m_scaleMatrix.data());
+	mx.append(m_translateMatrix.data());
+	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx);
+	m_keyframeHandler->takeQtScreenShot(this, m_volume->getFilename());
+}
+
+QWidget* Renderer::setKeyframes(QWidget* keyframeWrapper, QSize* sq) {
+	square = sq;
+	keyframeWrapper = m_keyframeHandler->updateKeyframes(keyframeWrapper, square);
+	keyframeWrapper->setFixedSize(*square);
+	keyframeWrapper->setStyleSheet("background-color: #3C3C3C;");
+	return keyframeWrapper;
+}
+
+void Renderer::setKeyframeWrapper(QWidget* qw) {
+	keyframeWrapper = qw;
 }
 
 void Renderer::initializeGL()
@@ -237,7 +264,19 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 	if (event->key() == Qt::Key_Shift)
 	{
 		m_rotating = false;
+	} 
+	else if (event->key() == Qt::Key_K) {
+		setState();
+		setKeyframes(keyframeWrapper, square);
 	}
+}
+
+void Renderer::setMatrices(QList<QMatrix4x4> matrices) {
+	m_projectionMatrix = matrices[0].transposed();
+	m_rotateMatrix = matrices[1].transposed();
+	m_scaleMatrix = matrices[2].transposed();
+	m_translateMatrix = matrices[3].transposed();
+	update();
 }
 
 
