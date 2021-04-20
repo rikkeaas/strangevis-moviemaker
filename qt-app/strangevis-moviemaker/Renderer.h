@@ -13,7 +13,7 @@
 #include "model.h"
 #include "histogram.h"
 #include "keyframeHandler.h"
-
+#include "interpolation.h"
 
 class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 {
@@ -26,16 +26,21 @@ public:
 	void resizeGL(int width, int height);
 	void paintGL();
 	Model* getVolume();
-	void setState();
 	QWidget* setKeyframes(QWidget*, QSize*);
 	void setKeyframeWrapper(QWidget* qw);
+	void clearStates();
+
 public slots:
 	void setMatrices(QList<QMatrix4x4> matrices);
+	void addNewKeyframe();
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
 	QMatrix4x4 m_scaleMatrix;
 	QMatrix4x4 m_translateMatrix;
+
+	QList<QMatrix4x4> fromKeyframe;
+	QList<QMatrix4x4> toKeyframe;
 
 	QOpenGLShaderProgram shaderProgram;
 	QVector<QVector3D> vertices;
@@ -60,13 +65,17 @@ private:
 	Model* m_volume;
 	KeyframeHandler* m_keyframeHandler;
 	QWidget* keyframeWrapper;
+	void setState();
+
 	QSize* square;
+	float t = 1;
+	QElapsedTimer timer;
+	LinearInterpolation* interpolater;
+
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
 	void wheelEvent(QWheelEvent* event);
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);
-
-
 };

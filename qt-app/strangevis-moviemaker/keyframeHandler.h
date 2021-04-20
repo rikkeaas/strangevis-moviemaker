@@ -12,8 +12,11 @@ public:
 	void takeQtScreenShot(QWidget* widget, QString);
 public slots:
 	void readStates(QString statePath);
+	void addButton();
+
 signals:
 	void matricesUpdated(QList<QMatrix4x4>);
+	void addedKeyframe();
 private:
 	int numberofStates;
 };

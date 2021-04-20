@@ -15,6 +15,20 @@ private:
 signals:
 	void clicked(QString);
 protected:
-	void mouseDoubleClickEvent(QMouseEvent* event);
+	void mousePressEvent(QMouseEvent* event);
+	void paintEvent(QPaintEvent* event);
+};
+
+class AddButton : public QWidget {
+	Q_OBJECT
+public:
+	AddButton(KeyframeHandler* keyframeHandler);
+private:
+	KeyframeHandler* keyframeHandler;
+
+signals:
+	void clicked();
+protected:
+	void mousePressEvent(QMouseEvent* event);
 	void paintEvent(QPaintEvent* event);
 };
