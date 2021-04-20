@@ -1,6 +1,8 @@
 #include "keyframes.h"
 #include <QStyleOption>
 #include <QPainter>
+#include <QKeyEvent>
+
 
 Keyframe::Keyframe(KeyframeHandler* keyframeHandler) : QWidget(keyframeHandler)
 {
@@ -12,9 +14,18 @@ void Keyframe::setStatePath(QString statePath)
 	this->statePath = statePath;
 }
 
+void Keyframe::setSnapshotPath(QString snapshotPath)
+{
+	this->snapshotPath = snapshotPath;
+}
+
 void Keyframe::mousePressEvent(QMouseEvent* event)
 {
-	clicked(statePath);
+	if (keyframeHandler->toDelete) {
+		clickForRemove(statePath, snapshotPath);
+	} else {
+		clicked(statePath);
+	}
 }
 
 // some hacky code from Stack Overflow

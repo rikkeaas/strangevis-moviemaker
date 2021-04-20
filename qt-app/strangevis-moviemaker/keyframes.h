@@ -7,13 +7,16 @@ class Keyframe : public QWidget {
 public:
 	Keyframe(KeyframeHandler* keyframeHandler);
 	void setStatePath(QString statePath);
+	void setSnapshotPath(QString snapshotPath);
 private:
 	QString statePath;
 	QString snapshotPath;
+	bool toDelete = false;
 	KeyframeHandler* keyframeHandler;
 
 signals:
 	void clicked(QString);
+	void clickForRemove(QString, QString);
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void paintEvent(QPaintEvent* event);
