@@ -4,8 +4,6 @@
 
 LayerHandler::LayerHandler() : QWidget()
 {
-	setMaximumHeight(400);
-	setMinimumHeight(400);
 	QVBoxLayout* layout = new QVBoxLayout();
 	layout->setMargin(0);
 	layout->setAlignment(Qt::AlignTop);
@@ -15,16 +13,15 @@ LayerHandler::LayerHandler() : QWidget()
 	
 	// Stygg hardkoding.... fiks dette!!
 	minX = 20;
-	maxX = 358;
+	maxX = 508;
 	m_phaseFuncData.resize(256 * 4);
 }
 
 void LayerHandler::addLayer(QRect area)
 {
+	if (area.left() == area.right()) return;
 	Layer* newLayer = new Layer(this, area);
-	newLayer->setMaximumHeight(30);
-	newLayer->setMinimumHeight(30);
-	newLayer->setStyleSheet("background-color:#6D6D6D; height:30;");
+	newLayer->setStyleSheet("background-color:#6D6D6D; height:40; border-radius:10px;");
 	layout()->addWidget(newLayer);
 	
 	QObject::connect(newLayer, &Layer::clicked, this, &LayerHandler::layerSelected);
@@ -108,6 +105,6 @@ void LayerHandler::updatePhaseFuncData()
 	}
 
 	qDebug() << m_selectedLayer->red << m_selectedLayer->green << m_selectedLayer->blue << m_selectedLayer->alpha;
-	qDebug() << intervalStart << intervalEnd;
+	qDebug() << "Interval " << intervalStart << intervalEnd;
 	updatePhaseFunction(intervalStart, intervalEnd, textureData);
 }

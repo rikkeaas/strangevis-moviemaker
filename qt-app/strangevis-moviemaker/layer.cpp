@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QLineEdit>
 #include <QHBoxLayout>
+#include <QFontDatabase>
 
 Layer::Layer(QWidget* parent, QRect area) : QWidget(parent)
 {
@@ -11,7 +12,15 @@ Layer::Layer(QWidget* parent, QRect area) : QWidget(parent)
 	QLineEdit* label = new QLineEdit(this);
 	QHBoxLayout* layout = new QHBoxLayout();
 	label->setText("Layer name...");
+	int id = QFontDatabase::addApplicationFont("fonts/Roboto-Regular.ttf");
+	QString robotoHeader = QFontDatabase::applicationFontFamilies(id).at(0);
+	QFont f(robotoHeader, 10);
+	label->setFont(f);
 	layout->addWidget(label);
+	setLayout(layout);
+	layout->addStretch();
+	//layout->setMargin(5);
+	layout->setContentsMargins(10, 0, 0, 5);
 }
 
 void Layer::mouseDoubleClickEvent(QMouseEvent* event)

@@ -68,7 +68,7 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
 
     chart->legend()->setVisible(false);
     // chart->setBackgroundVisible(false);
-    chart->setBackgroundBrush(QColor(92,91,91));
+    chart->setBackgroundBrush(QColor(109,109,109));
     chart->setPlotAreaBackgroundVisible(false);
     chart->setBackgroundRoundness(15);
     chart->setMaximumHeight(QDesktopWidget().availableGeometry().height() * 0.20);
@@ -103,8 +103,8 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
     layout()->addWidget(m_layerHandler);
 
     CustomSlider* sliderR = new CustomSlider(1, QRect(30, 50, 300, 16), 0, 300, this);
-    CustomSlider* sliderG = new CustomSlider(2, QRect(30, 50, 300, 16), 0, 300, this);
-    CustomSlider* sliderB = new CustomSlider(3, QRect(30, 50, 300, 16), 0, 300, this);
+    CustomSlider* sliderG = new CustomSlider(3, QRect(30, 50, 300, 16), 0, 300, this);
+    CustomSlider* sliderB = new CustomSlider(2, QRect(30, 50, 300, 16), 0, 300, this);
     CustomSlider* sliderA = new CustomSlider(1, QRect(30, 50, 300, 16), 0, 300, this);
     layout()->addWidget(sliderR);
     layout()->addWidget(sliderG);
