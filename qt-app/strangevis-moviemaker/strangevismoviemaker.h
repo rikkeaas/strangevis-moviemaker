@@ -17,7 +17,7 @@ public slots:
     void fileOpen();
     void highresScreenshot();
     void clearStates();
-
+    void setBackgroundColor();
 private:
     Ui::strangevismoviemakerClass ui;
     Renderer* m_renderer;

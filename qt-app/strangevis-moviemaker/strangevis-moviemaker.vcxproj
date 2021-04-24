@@ -119,6 +119,12 @@
     <QtMoc Include="model.h" />
     <QtMoc Include="Renderer.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\fragmentShader.glsl" />
+    <None Include="Shaders\raycast-fs.glsl" />
+    <None Include="Shaders\raycast-vs.glsl" />
+    <None Include="Shaders\vertexShader.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
     <Import Project="$(QtMsBuild)\qt.targets" />

@@ -30,9 +30,15 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(highresScreenshot, SIGNAL(triggered()), this, SLOT(highresScreenshot()));
     ui.menuFile->addAction(highresScreenshot);
 
+    QAction* setBackgroundColor = new QAction("Choose Background Color", this);
+    connect(setBackgroundColor, SIGNAL(triggered()), this, SLOT(setBackgroundColor()));
+    ui.menuEdit->addAction(setBackgroundColor);
+
     QAction* clearStates = new QAction("Clear All States", this);
     connect(clearStates, SIGNAL(triggered()), this, SLOT(clearStates()));
     ui.menuEdit->addAction(clearStates);
+
+    
 
     this->setMinimumSize(1600, 1200);
 
@@ -75,6 +81,11 @@ void strangevismoviemaker::highresScreenshot()
     filename.append(".png");
     QString f = QString(filename);
     m_renderer->grab().save(f);
+}
+
+void strangevismoviemaker::setBackgroundColor()
+{
+    m_renderer->setBackgroundColor();
 }
 
 void strangevismoviemaker::appendDockWidgets()
