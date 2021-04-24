@@ -1,5 +1,4 @@
 #include "strangevismoviemaker.h"
-#include "customSlider.h"
 #include "histogram.h"
 #include "keyframeHandler.h"
 #include <QOpenGLWidget>
@@ -54,6 +53,11 @@ void strangevismoviemaker::fileOpen()
     {
         if (m_renderer->getVolume()->load(fileName))
         {
+            for (QDockWidget* dw : this->findChildren<QDockWidget *>())
+            {
+                this->removeDockWidget(dw);
+            }
+            appendDockWidgets();
             qDebug() << "Loaded volume " << fileName; 
         } else {
             qDebug() << "Failed to load volume " << fileName;
@@ -83,15 +87,15 @@ void strangevismoviemaker::appendDockWidgets()
     dockContentWrapper->setStyleSheet("background-color: #6D6D6D;");
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
-    Histogram* h = new Histogram(m_renderer->getVolume()->getDataset());
+    Histogram* h = new Histogram(m_renderer);
+    //h->m_renderer = m_renderer;
+   // QWidget* histoWrapper = new QWidget();
+    //QVBoxLayout* histoLayout = new QVBoxLayout();
+    //histoLayout->addWidget(h->getHistogram());
+    //histoWrapper->setLayout(histoLayout);
+    //histoLayout->setContentsMargins(0, 0, 0, 0);
 
-    QWidget* histoWrapper = new QWidget();
-    QVBoxLayout* histoLayout = new QVBoxLayout();
-    histoLayout->addWidget(h->getHistogram());
-    histoWrapper->setLayout(histoLayout);
-    histoLayout->setContentsMargins(0, 0, 0, 0);
-
-    dockLayout->addWidget(toolbarContent(histoWrapper, QString("Layers")));
+    dockLayout->addWidget(toolbarContent(h, QString("Layers")));
 
     dockContentWrapper->setLayout(dockLayout);
     toolbox->setWidget(dockContentWrapper);

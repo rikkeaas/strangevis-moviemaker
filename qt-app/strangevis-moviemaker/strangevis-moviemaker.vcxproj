@@ -53,7 +53,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>msvc2019_64</QtInstall>
-    <QtModules>core;gui;opengl;openglextensions;widgets</QtModules>
+    <QtModules>charts;core;gui;opengl;openglextensions;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
@@ -89,11 +89,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="histogramChartView.cpp" />
+    <ClCompile Include="layer.cpp" />
+    <ClCompile Include="layerHandler.cpp" />
+    <ClCompile Include="phasefunction.cpp" />
     <ClCompile Include="histogram.cpp" />
     <QtRcc Include="strangevismoviemaker.qrc" />
     <QtUic Include="strangevismoviemaker.ui" />
     <QtMoc Include="strangevismoviemaker.h" />
-    <ClCompile Include="cube.cpp" />
     <ClCompile Include="customSlider.cpp" />
     <ClCompile Include="interpolation.cpp" />
     <ClCompile Include="keyframeHandler.cpp" />
@@ -104,10 +107,13 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cube.h" />
-    <ClInclude Include="customSlider.h" />
+    <QtMoc Include="customSlider.h" />
+    <QtMoc Include="histogramChartView.h" />
+    <QtMoc Include="layerHandler.h" />
+    <QtMoc Include="layer.h" />
+    <ClInclude Include="phasefunction.h" />
+    <QtMoc Include="histogram.h" />
     <ClInclude Include="interpolation.h" />
-    <ClInclude Include="histogram.h" />
     <QtMoc Include="keyframeHandler.h" />
     <QtMoc Include="keyframes.h" />
     <QtMoc Include="model.h" />

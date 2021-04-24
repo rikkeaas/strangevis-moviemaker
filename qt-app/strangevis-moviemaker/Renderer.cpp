@@ -6,6 +6,9 @@
 #include <QPixmap>
 #include <QMessageBox>
 
+Renderer::Renderer() : QOpenGLWidget(nullptr, Qt::WindowFlags())
+{}
+
 Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
 	setFocusPolicy(Qt::StrongFocus);
@@ -19,6 +22,8 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 
 	interpolater = new LinearInterpolation();
 
+	m_phasefunction = new PhaseFunction();
+
 	alpha = 25;
 	beta = -25;
 	distance = 2.0;
@@ -28,11 +33,15 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_scaleMatrix.setToIdentity();
 	m_translateMatrix.setToIdentity();
 	m_translateMatrix.translate(0.0, 0.0, -2.0 * sqrt(3.0));
+
+
 }
 
 
 Renderer::~Renderer()
 {
+	m_volume->~Model();
+	m_phasefunction->~PhaseFunction();
 }
 
 
@@ -119,6 +128,7 @@ void Renderer::resizeGL(int width, int height)
 
 void Renderer::paintGL()
 {
+
 	// Clear
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -141,9 +151,12 @@ void Renderer::paintGL()
 
 	glActiveTexture(GL_TEXTURE0);
 	m_volume->bind();
+	glActiveTexture(GL_TEXTURE0+1);
+	m_phasefunction->bind();
 
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
 	shaderProgram.setUniformValue("volumeTexture", 0);
+	shaderProgram.setUniformValue("phaseFunction", 1);
 	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
 	//qDebug() << "mvp " << m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix;
 	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());
@@ -156,6 +169,8 @@ void Renderer::paintGL()
 	glDrawArrays(GL_QUADS, 0, vertices.size());
 	shaderProgram.disableAttributeArray("vertex");
 
+	glActiveTexture(GL_TEXTURE0+1);
+	m_phasefunction->release();
 	glActiveTexture(GL_TEXTURE0);
 	m_volume->release();
 	
@@ -180,6 +195,21 @@ void Renderer::mousePressEvent(QMouseEvent* event)
 
 	m_previousX = m_currentX;
 	m_previousY = m_currentY;
+
+	/*
+	QVector<float> data;
+	for (int i = 0; i < 256; i++)
+	{
+		if (clicks % 3 == 0)
+			data << 1.0 << 0.0 << 0.0 << 1.0;
+		else if (clicks % 3 == 1)
+			data << 0.0 << 1.0 << 0.0 << 1.0;
+		else 
+			data << 0.0 << 0.0 << 1.0 << 1.0;
+	}
+	m_phasefunction->updatePhaseFunction(0, 256, &data);
+	*/
+	clicks++;
 }
 
 void Renderer::mouseMoveEvent(QMouseEvent* event)
@@ -315,4 +345,10 @@ void Renderer::clearStates()
 	while (at.hasNext())
 		QFile(at.next()).remove();
 	setKeyframes(keyframeWrapper, square);
+}
+
+
+PhaseFunction* Renderer::getPhaseFunction()
+{
+	return m_phasefunction;
 }

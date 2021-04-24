@@ -10,9 +10,12 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QKeyEvent>
+#include <QElapsedTimer>
+
 #include "model.h"
-#include "histogram.h"
 #include "keyframeHandler.h"
+#include "phasefunction.h"
+
 #include "interpolation.h"
 
 class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
@@ -20,6 +23,7 @@ class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 	Q_OBJECT
 
 public:
+	Renderer();
 	Renderer(QWidget* parent, Qt::WindowFlags f = Qt::WindowFlags());
 	~Renderer();
 	void initializeGL();
@@ -28,6 +32,7 @@ public:
 	Model* getVolume();
 	QWidget* setKeyframes(QWidget*, QSize*);
 	void setKeyframeWrapper(QWidget* qw);
+	PhaseFunction* getPhaseFunction();
 	void clearStates();
 
 public slots:
@@ -64,6 +69,10 @@ private:
 	QVector3D arcballVector(qreal x, qreal y);
 
 	Model* m_volume;
+	PhaseFunction* m_phasefunction;
+
+	int clicks = 0;
+
 	KeyframeHandler* m_keyframeHandler;
 	QWidget* keyframeWrapper;
 	void setState();

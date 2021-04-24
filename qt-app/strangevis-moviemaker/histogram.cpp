@@ -1,18 +1,33 @@
 #include "histogram.h"
+#include "histogramChartView.h"
 #include "model.h"
+#include "customSlider.h"
 #include <cfloat>
 using namespace std;
 
 
-Histogram::Histogram(QVector<unsigned short> values) {
+Histogram::Histogram(Renderer* renderer) : QWidget() {
+    m_renderer = renderer;
+    auto values = renderer->getVolume()->getDataset();
     QBarSet* barChart = new QBarSet("Density");
     barChart->setBorderColor(Qt::white);
     barChart->setColor(Qt::white);
     QStringList categories;
+    //qDebug() << values->size();
+
+    hoverItem.setBrush(QBrush(Qt::red));
+    hoverItem.setPen(Qt::NoPen);
+
+    clickItem.setBrush(QBrush(Qt::black));
+    clickItem.setPen(Qt::NoPen);
 
     if (!values.isEmpty()) {
+        for (int i = 0; i < 100; i++)
+        {
+            qDebug() << values.at(i*4);
+        }
         int showValuesAbove = 100;
-        int skipStep = 50;
+        int skipStep = 10;
         int roundTo = 10;
 
         std::map<float, int> bin = binData(values, skipStep, roundTo);
@@ -39,7 +54,7 @@ Histogram::Histogram(QVector<unsigned short> values) {
             str.append(i);
             categories << str;
         }
-        qDebug() << "Vals: " << (s-skipped);
+        qDebug() << "Vals: " << (s-skipped) << "Skipped: " << skipped;
     }
 
     QBarSeries* series = new QBarSeries();
@@ -53,7 +68,7 @@ Histogram::Histogram(QVector<unsigned short> values) {
 
     chart->legend()->setVisible(false);
     // chart->setBackgroundVisible(false);
-    chart->setBackgroundBrush(QColor(92,91,91));
+    chart->setBackgroundBrush(QColor(109,109,109));
     chart->setPlotAreaBackgroundVisible(false);
     chart->setBackgroundRoundness(15);
     chart->setMaximumHeight(QDesktopWidget().availableGeometry().height() * 0.20);
@@ -61,17 +76,69 @@ Histogram::Histogram(QVector<unsigned short> values) {
     chart->setContentsMargins(0, 0, 0, 0);
     chart->layout()->setContentsMargins(0, 0, 0, 0);
 
-
-    chartView = new QChartView(chart);
+    HistogramChartView* chartView = new HistogramChartView(chart, this);
+    //chartView->setChart(chart);
+    
     chartView->setRenderHint(QPainter::Antialiasing);
+    chartView->chart()->setAcceptHoverEvents(true);
+    chartView->setContentsMargins(0, 0, 0, 0);
+  
+    QMargins margins = chart->margins();
+    
+    qDebug() << margins;
 
+    chartViewP = chartView;
+    //chartViewP->setRubberBand(QChartView::RectangleRubberBand);
+    //qDebug() << barChart-> << barChart->at(1) << barChart->at(2) << barChart->at(3);
+    QObject::connect(barChart, &QBarSet::hovered, this, &Histogram::showHovering);
+    QObject::connect(barChart, &QBarSet::clicked, this, &Histogram::registerClick);
+    //QObject::connect(barChart, &QBarSet::released, this, &Histogram::endClick);
 
+    QVBoxLayout* histoLayout = new QVBoxLayout();
+    setLayout(histoLayout);
+    layout()->setContentsMargins(0, 0, 0, 0);
+    layout()->addWidget(getHistogram());
+ 
+    m_layerHandler = new LayerHandler();
+    layout()->addWidget(m_layerHandler);
+
+    CustomSlider* sliderR = new CustomSlider(1, QRect(30, 50, 300, 16), 0, 300, this);
+    CustomSlider* sliderG = new CustomSlider(3, QRect(30, 50, 300, 16), 0, 300, this);
+    CustomSlider* sliderB = new CustomSlider(2, QRect(30, 50, 300, 16), 0, 300, this);
+    CustomSlider* sliderA = new CustomSlider(1, QRect(30, 50, 300, 16), 0, 300, this);
+    layout()->addWidget(sliderR);
+    layout()->addWidget(sliderG);
+    layout()->addWidget(sliderB);
+    layout()->addWidget(sliderA);
+
+    QObject::connect(sliderR, &CustomSlider::valueChanged, m_layerHandler, &LayerHandler::redChanged);
+    QObject::connect(m_layerHandler, &LayerHandler::updateRedSlider, sliderR, &CustomSlider::setValue);
+
+    QObject::connect(sliderG, &CustomSlider::valueChanged, m_layerHandler, &LayerHandler::greenChanged);
+    QObject::connect(m_layerHandler, &LayerHandler::updateGreenSlider, sliderG, &CustomSlider::setValue);
+
+    QObject::connect(sliderB, &CustomSlider::valueChanged, m_layerHandler, &LayerHandler::blueChanged);
+    QObject::connect(m_layerHandler, &LayerHandler::updateBlueSlider, sliderB, &CustomSlider::setValue);
+
+    QObject::connect(sliderA, &CustomSlider::valueChanged, m_layerHandler, &LayerHandler::alphaChanged);
+    QObject::connect(m_layerHandler, &LayerHandler::updateAlphaSlider, sliderA, &CustomSlider::setValue);
+
+    QObject::connect(m_layerHandler, &LayerHandler::displayLayer, chartViewP, &HistogramChartView::showLayerSelection);
+    QObject::connect(m_layerHandler, &LayerHandler::undisplayLayer, chartViewP, &HistogramChartView::unshowLayerSelection);
+
+    QObject::connect(chartViewP, &HistogramChartView::addLayer, m_layerHandler, &LayerHandler::addLayer);
+
+    QObject::connect(m_layerHandler, &LayerHandler::updatePhaseFunction, this, &Histogram::updatePhaseFunction);
 }
 
 std::map<float, int> Histogram::binData(QVector<unsigned short> values, int skipStep, int roundTo) {
     std::map<float, int> occurences;
-    for (int i = 0; i < values.size(); i += skipStep) {
-        float val = roundNearest(roundTo, values[i]);
+    for (int i = 0; i*4 < values.size(); i += skipStep) {
+        float val = roundNearest(roundTo, values.at(i*4));
+        if (occurences[val] > 1500)
+        {
+            continue;
+        }
         if (occurences.count(val) > 0) {
             occurences[val] += 1;
         }
@@ -84,7 +151,7 @@ std::map<float, int> Histogram::binData(QVector<unsigned short> values, int skip
 
 QChartView* Histogram::getHistogram()
 {
-	return chartView;
+	return chartViewP;
 }
 
 float Histogram::roundNearest(int roundTo, float d)
@@ -94,3 +161,82 @@ float Histogram::roundNearest(int roundTo, float d)
     return ((d_i % r) < (r/2)) ? d_i - (d_i % r) : d_i + (r - (d_i % r));
 }
 
+void Histogram::showHovering(bool status, int index) 
+{
+
+    QPoint p = chartViewP->mapFromGlobal(QCursor::pos());// chartView->mapFromGlobal(QCursor::pos());
+    QGraphicsItem* bar = chartViewP->itemAt(p);
+   // qDebug() << bar;
+  
+    QGraphicsRectItem* rect = qgraphicsitem_cast<QGraphicsRectItem*>(chartViewP->itemAt(p));
+    if (rect == NULL) {
+        //qDebug() << "no rect";
+        return;
+    }
+
+    if (status) {
+        //qDebug() << "hovering " << index;
+        hoverItem.setParentItem(bar);
+        hoverItem.setRect(bar->boundingRect());
+        hoverItem.show();
+    }
+    else {
+        //qDebug() << "not hovering " << index;
+        hoverItem.setParentItem(nullptr);
+        hoverItem.hide();
+    }
+}
+
+void Histogram::registerClick(int index)
+{
+    qDebug() << "Histogram click";
+    QPoint p = chartViewP->mapFromGlobal(QCursor::pos());// chartView->mapFromGlobal(QCursor::pos());
+    QGraphicsItem* bar = chartViewP->itemAt(p);
+    //qDebug() << bar;
+    QGraphicsRectItem* rect = qgraphicsitem_cast<QGraphicsRectItem*>(chartViewP->itemAt(p));
+    if (rect == NULL) {
+        //qDebug() << "no rect";
+        return;
+    }
+
+    if (endClick)
+    {
+        endClick = false;
+        interval.append(index);
+        qDebug() << interval.at(interval.size() - 2) << " - " << interval.at(interval.size() - 1);
+        int size = chartViewP->items().size();
+        int start = 256.0 * float(interval.at(interval.size() - 2)) / float(size);
+        int end = 256.0 * float(interval.at(interval.size() - 1)) / float(size);
+        if (end < start)
+        {
+            auto temp = start;
+            start = end;
+            end = temp;
+        }
+        QVector<float> textureData;
+        textureData.resize((end-start) * 4);
+
+        for (int i = 0; i < (end - start) * 4; i++) 
+        {
+            textureData[i] = 0.0;
+        }
+
+        m_renderer->getPhaseFunction()->updatePhaseFunction(start, end, &textureData);
+    }
+    else
+    {
+        endClick = true;
+    }
+
+    clickItem.setParentItem(bar);
+    clickItem.setRect(bar->boundingRect());
+    clickItem.show();
+    
+    interval.append(index);
+
+}
+
+void Histogram::updatePhaseFunction(int start, int end, QVector<float> textureData)
+{
+    m_renderer->getPhaseFunction()->updatePhaseFunction(start, end, &textureData);
+}

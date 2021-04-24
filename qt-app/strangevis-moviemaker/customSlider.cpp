@@ -3,8 +3,8 @@
 #include <QFile>
 #include <iostream>
 
-/*
-customSlider::customSlider(int color, QRect sliderPos, int minValue, int maxValue, QWidget* parent)
+
+CustomSlider::CustomSlider(int color, QRect sliderPos, int minValue, int maxValue, QWidget* parent)
 {
 	m_horizontalSlider = new QSlider(Qt::Horizontal, this);
 	m_spinbox = new QSpinBox(this);
@@ -48,10 +48,16 @@ customSlider::customSlider(int color, QRect sliderPos, int minValue, int maxValu
 
 	connect(m_horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setPosition(int)));
 
-
+	connect(m_horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(sendValueSignal(int)));
+	
 }
 
-void customSlider::setPosition(int newVal)
+void CustomSlider::sendValueSignal(int val)
+{
+	valueChanged(val);
+}
+
+void CustomSlider::setPosition(int newVal)
 {
 	QRect sliderGeo = m_horizontalSlider->geometry();
 	QRect spinboxGeo = m_spinbox->geometry();
@@ -62,10 +68,13 @@ void customSlider::setPosition(int newVal)
 	m_spinbox->setGeometry(QRect(xpos, spinboxGeo.y(), spinboxGeo.width(), spinboxGeo.height()));
 }
 
+void CustomSlider::setValue(int val)
+{
+	m_horizontalSlider->setValue(val);
+}
 
-customSlider::~customSlider()
+CustomSlider::~CustomSlider()
 {
 
 }
 
-*/

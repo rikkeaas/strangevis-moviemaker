@@ -2,6 +2,7 @@
 #include <QOpenGLTexture>
 #include <QOpenGLExtraFunctions>
 #include <QVector3d>
+#include <vector>
 
 class Model : public QObject, protected QOpenGLExtraFunctions
 {
