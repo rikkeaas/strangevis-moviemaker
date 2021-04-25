@@ -18,11 +18,11 @@ public slots:
     void highresScreenshot();
     void clearStates();
     void setBackgroundColor();
+    void adjustAnimationDuration();
 private:
     Ui::strangevismoviemakerClass ui;
     Renderer* m_renderer;
     void appendDockWidgets();
-    void updateKeyframes();
     void formatDockWidgets(QDockWidget* dw);
     QWidget* toolbarContent(QWidget*, QString);
     void closeEvent(QCloseEvent* event);

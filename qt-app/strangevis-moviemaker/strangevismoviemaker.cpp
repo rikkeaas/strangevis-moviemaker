@@ -26,19 +26,21 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(fileOpenAction, SIGNAL(triggered()), this, SLOT(fileOpen()));
     ui.menuFile->addAction(fileOpenAction);
 
-    QAction* highresScreenshot = new QAction("Screenshot", this);
-    connect(highresScreenshot, SIGNAL(triggered()), this, SLOT(highresScreenshot()));
-    ui.menuFile->addAction(highresScreenshot);
+    QAction* highresScreenshotAction = new QAction("Screenshot", this);
+    connect(highresScreenshotAction, SIGNAL(triggered()), this, SLOT(highresScreenshot()));
+    ui.menuFile->addAction(highresScreenshotAction);
 
-    QAction* setBackgroundColor = new QAction("Choose Background Color", this);
-    connect(setBackgroundColor, SIGNAL(triggered()), this, SLOT(setBackgroundColor()));
-    ui.menuEdit->addAction(setBackgroundColor);
+    QAction* setBackgroundColorAction = new QAction("Choose Background Color", this);
+    connect(setBackgroundColorAction, SIGNAL(triggered()), this, SLOT(setBackgroundColor()));
+    ui.menuEdit->addAction(setBackgroundColorAction);
 
-    QAction* clearStates = new QAction("Clear All States", this);
-    connect(clearStates, SIGNAL(triggered()), this, SLOT(clearStates()));
-    ui.menuEdit->addAction(clearStates);
+    QAction* animationTimerAction = new QAction("Adjust Animation Duration", this);
+    connect(animationTimerAction, SIGNAL(triggered()), this, SLOT(adjustAnimationDuration()));
+    ui.menuEdit->addAction(animationTimerAction);
 
-    
+    QAction* clearStatesAction = new QAction("Clear All States", this);
+    connect(clearStatesAction, SIGNAL(triggered()), this, SLOT(clearStates()));
+    ui.menuEdit->addAction(clearStatesAction);
 
     this->setMinimumSize(1600, 1200);
 
@@ -53,8 +55,6 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 void strangevismoviemaker::fileOpen()
 {
     QString fileName = QFileDialog::getOpenFileName(this, "Open Volume File", QString(), "*.dat");
-
-
     if (!fileName.isEmpty())
     {
         if (m_renderer->getVolume()->load(fileName))
@@ -73,6 +73,9 @@ void strangevismoviemaker::fileOpen()
 
 void strangevismoviemaker::highresScreenshot()
 {
+    if (!QDir("screenshots").exists()) {
+        QDir().mkdir("screenshots");
+    }
     QTimeEdit* timeEdit = new QTimeEdit();
     QTime currentTime = timeEdit->time().currentTime();
     currentTime.toString().replace(":", "");
@@ -88,10 +91,15 @@ void strangevismoviemaker::setBackgroundColor()
     m_renderer->setBackgroundColor();
 }
 
+void strangevismoviemaker::adjustAnimationDuration()
+{
+    auto duration = QInputDialog::getDouble(0, "Animation Speed",
+        "Set Animation Speed in Seconds:", m_renderer->getAnimationDuration(), 0.3, 5.0);
+    m_renderer->setAnimationDuration(duration);
+}
+
 void strangevismoviemaker::appendDockWidgets()
 {
-    qDebug() << "Volume contains values: " << !m_renderer->getVolume()->getDataset().isEmpty();
-
     auto dockLayout = new QVBoxLayout();
     auto dockContentWrapper = new QWidget();
     dockContentWrapper->setLayout(dockLayout);
@@ -99,13 +107,6 @@ void strangevismoviemaker::appendDockWidgets()
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
     Histogram* h = new Histogram(m_renderer);
-    //h->m_renderer = m_renderer;
-   // QWidget* histoWrapper = new QWidget();
-    //QVBoxLayout* histoLayout = new QVBoxLayout();
-    //histoLayout->addWidget(h->getHistogram());
-    //histoWrapper->setLayout(histoLayout);
-    //histoLayout->setContentsMargins(0, 0, 0, 0);
-
     dockLayout->addWidget(toolbarContent(h, QString("Layers")));
 
     dockContentWrapper->setLayout(dockLayout);
@@ -113,6 +114,9 @@ void strangevismoviemaker::appendDockWidgets()
     formatDockWidgets(toolbox);
     this->addDockWidget(Qt::LeftDockWidgetArea, toolbox);
 
+    if (!QDir("states").exists()) {
+        QDir().mkdir("states");
+    }
     QDockWidget* keyframes = new QDockWidget(tr("Keyframe Handler"), this);
     formatDockWidgets(keyframes);
     square = new QSize(QDesktopWidget().availableGeometry().width() * 0.2, QDesktopWidget().availableGeometry().width() * 0.2);
@@ -122,8 +126,6 @@ void strangevismoviemaker::appendDockWidgets()
     keyframes->setMaximumWidth(QDesktopWidget().availableGeometry().width() * 0.2);
     this->addDockWidget(Qt::LeftDockWidgetArea, keyframes);
 }
-
-
 
 void strangevismoviemaker::formatDockWidgets(QDockWidget* dw) {
     QDockWidget* dockWidget = dw;

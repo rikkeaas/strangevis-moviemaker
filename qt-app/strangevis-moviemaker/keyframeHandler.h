@@ -11,6 +11,7 @@ public:
 	QWidget* updateKeyframes(QWidget* keyframeWrapper, QSize*, QString filename);
 	void takeQtScreenShot(QWidget* widget, QString);
 	bool toDelete = false;
+	QList<QStringList> getFiles();
 public slots:
 	void readStates(QString statePath);
 	void deleteKeyframe(QString statePath, QString snapshotPath);
@@ -24,6 +25,5 @@ private:
 	int numberofStates;
 	int filenameNumber;
 	void setFilenameNumber();
-	QList<QStringList> getFiles();
 	QString filename;
 };

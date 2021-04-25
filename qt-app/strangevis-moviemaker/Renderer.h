@@ -35,7 +35,9 @@ public:
 	PhaseFunction* getPhaseFunction();
 	void clearStates();
 	void setBackgroundColor();
-
+	void playAnimation();
+	int getAnimationDuration();
+	void setAnimationDuration(double);
 public slots:
 	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor);
 	void addNewKeyframe();
@@ -88,6 +90,7 @@ private:
 	float t = 1;
 	QElapsedTimer timer;
 	LinearInterpolation* interpolater;
+	float animationDuration = 1000.f;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);

@@ -178,7 +178,7 @@ void Renderer::paintGL()
 	
 	
 	shaderProgram.release();
-	float elapsedTime = timer.restart()/1000.f;
+	float elapsedTime = timer.restart()/animationDuration;
 	t += elapsedTime;
 	if (t < 1) {
 		QList<QMatrix4x4> newMatrices = interpolater->interpolate(fromKeyframe, toKeyframe, t);
@@ -303,18 +303,12 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 	else if (event->key() == Qt::Key_B) {
 		setBackgroundColor();
 	}
+	else if (event->key() == Qt::Key_A) {
+		playAnimation();
+	}
 }
 
-void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor) {
-	t = 0;
-	timer.restart();
-	fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
-	toKeyframe = matrices;
-	fromBackgroundColor = m_backgroundColor;
-	toBackgroundColor = backgroundColor;
 
-	update();
-}
 
 
 void Renderer::keyPressEvent(QKeyEvent* event)
@@ -355,6 +349,16 @@ void Renderer::clearStates()
 	setKeyframes(keyframeWrapper, square);
 }
 
+void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor) {
+	t = 0;
+	timer.restart();
+	fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
+	toKeyframe = matrices;
+	fromBackgroundColor = m_backgroundColor;
+	toBackgroundColor = backgroundColor;
+	update();
+}
+
 void Renderer::setBackgroundColor()
 {
 	auto colorpicker = QColorDialog::getColor();
@@ -364,8 +368,34 @@ void Renderer::setBackgroundColor()
 	update();
 }
 
+void Renderer::playAnimation()
+{
+	auto states = m_keyframeHandler->getFiles();
+	int index = 0;
+	while (true) {
+		if (index >= states.at(1).length()) {
+			break;
+		}
+		m_keyframeHandler->readStates("states/" + states.at(1).at(index));
+		index++;
+		QEventLoop loop;
+		QTimer::singleShot(animationDuration, &loop, SLOT(quit()));
+		loop.exec();
+	}
+}
+
 
 PhaseFunction* Renderer::getPhaseFunction()
 {
 	return m_phasefunction;
+}
+
+int Renderer::getAnimationDuration()
+{
+	return animationDuration / 1000;
+}
+
+void Renderer::setAnimationDuration(double newDur)
+{
+	animationDuration = newDur * 1000.f;
 }

@@ -22,10 +22,6 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
     clickItem.setPen(Qt::NoPen);
 
     if (!values.isEmpty()) {
-        for (int i = 0; i < 100; i++)
-        {
-            qDebug() << values.at(i*4);
-        }
         int showValuesAbove = 100;
         int skipStep = 10;
         int roundTo = 10;
@@ -54,7 +50,6 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
             str.append(i);
             categories << str;
         }
-        qDebug() << "Vals: " << (s-skipped) << "Skipped: " << skipped;
     }
 
     QBarSeries* series = new QBarSeries();
