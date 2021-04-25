@@ -4,7 +4,7 @@
 #include <iostream>
 
 
-CustomSlider::CustomSlider(int color, QRect sliderPos, int minValue, int maxValue, QWidget* parent)
+CustomSlider::CustomSlider(int color, QRect sliderPos, int minValue, int maxValue, int currValue, QWidget* parent)
 {
 	m_horizontalSlider = new QSlider(Qt::Horizontal, this);
 	m_spinbox = new QSpinBox(this);
@@ -49,6 +49,8 @@ CustomSlider::CustomSlider(int color, QRect sliderPos, int minValue, int maxValu
 	connect(m_horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(setPosition(int)));
 
 	connect(m_horizontalSlider, SIGNAL(valueChanged(int)), this, SLOT(sendValueSignal(int)));
+
+	m_horizontalSlider->setValue(currValue);
 	
 }
 

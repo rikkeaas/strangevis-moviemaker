@@ -13,22 +13,13 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
     barChart->setBorderColor(Qt::white);
     barChart->setColor(Qt::white);
     QStringList categories;
-    //qDebug() << values->size();
-
-    hoverItem.setBrush(QBrush(Qt::red));
-    hoverItem.setPen(Qt::NoPen);
-
-    clickItem.setBrush(QBrush(Qt::black));
-    clickItem.setPen(Qt::NoPen);
+   
 
     if (!values.isEmpty()) {
-        for (int i = 0; i < 100; i++)
-        {
-            qDebug() << values.at(i*4);
-        }
-        int showValuesAbove = 100;
+       
+        int showValuesAbove = 0;
         int skipStep = 10;
-        int roundTo = 10;
+        int roundTo = 40;
 
         std::map<float, int> bin = binData(values, skipStep, roundTo);
         int s = bin.size();
@@ -86,12 +77,13 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
     QMargins margins = chart->margins();
     
     qDebug() << margins;
+    //qDebug() << "Width of chart " << chart-> << " bars at " << series->barWidth() << " times nb of bars: " << barChart->count();
 
     chartViewP = chartView;
     //chartViewP->setRubberBand(QChartView::RectangleRubberBand);
     //qDebug() << barChart-> << barChart->at(1) << barChart->at(2) << barChart->at(3);
-    QObject::connect(barChart, &QBarSet::hovered, this, &Histogram::showHovering);
-    QObject::connect(barChart, &QBarSet::clicked, this, &Histogram::registerClick);
+    //QObject::connect(barChart, &QBarSet::hovered, this, &Histogram::showHovering);
+    //QObject::connect(barChart, &QBarSet::clicked, this, &Histogram::registerClick);
     //QObject::connect(barChart, &QBarSet::released, this, &Histogram::endClick);
 
     QVBoxLayout* histoLayout = new QVBoxLayout();
@@ -102,10 +94,10 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
     m_layerHandler = new LayerHandler();
     layout()->addWidget(m_layerHandler);
 
-    CustomSlider* sliderR = new CustomSlider(1, QRect(30, 50, 300, 16), 0, 300, this);
-    CustomSlider* sliderG = new CustomSlider(3, QRect(30, 50, 300, 16), 0, 300, this);
-    CustomSlider* sliderB = new CustomSlider(2, QRect(30, 50, 300, 16), 0, 300, this);
-    CustomSlider* sliderA = new CustomSlider(1, QRect(30, 50, 300, 16), 0, 300, this);
+    CustomSlider* sliderR = new CustomSlider(1, QRect(30, 50, 300, 16), 0, 300, 300, this);
+    CustomSlider* sliderG = new CustomSlider(3, QRect(30, 50, 300, 16), 0, 300, 0, this);
+    CustomSlider* sliderB = new CustomSlider(2, QRect(30, 50, 300, 16), 0, 300, 0, this);
+    CustomSlider* sliderA = new CustomSlider(1, QRect(30, 50, 300, 16), 0, 300, 300, this);
     layout()->addWidget(sliderR);
     layout()->addWidget(sliderG);
     layout()->addWidget(sliderB);
@@ -149,16 +141,16 @@ std::map<float, int> Histogram::binData(QVector<unsigned short> values, int skip
     return occurences;
 }
 
-QChartView* Histogram::getHistogram()
-{
-	return chartViewP;
-}
-
 float Histogram::roundNearest(int roundTo, float d)
 {
     int r = roundTo;
     int d_i = d;
     return ((d_i % r) < (r/2)) ? d_i - (d_i % r) : d_i + (r - (d_i % r));
+}
+
+QChartView* Histogram::getHistogram()
+{
+    return chartViewP;
 }
 
 void Histogram::showHovering(bool status, int index) 
