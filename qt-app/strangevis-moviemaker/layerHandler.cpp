@@ -23,6 +23,7 @@ void LayerHandler::addLayer(QRect area)
 	layout()->addWidget(newLayer);
 	
 	QObject::connect(newLayer, &Layer::clicked, this, &LayerHandler::layerSelected);
+	QObject::connect(newLayer, &Layer::updatePhaseFunc, this, &LayerHandler::updatePhaseFuncData);
 
 	m_layers.append(newLayer);
 	layerSelected(newLayer, false);

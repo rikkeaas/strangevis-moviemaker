@@ -7,6 +7,7 @@
 #include <QFontDatabase>
 #include <QColorDialog>
 #include <QPushButton>
+#include "colorSlot.h"
 
 Layer::Layer(QWidget* parent, QRect area) : QWidget(parent)
 {
@@ -26,15 +27,9 @@ Layer::Layer(QWidget* parent, QRect area) : QWidget(parent)
 	//layout->setMargin(5);
 	layout->setContentsMargins(10, 10, 10, 10);
 
-	QColor color = QColorDialog::getColor(Qt::white, nullptr, "Layer color", { QColorDialog::DontUseNativeDialog, QColorDialog::ShowAlphaChannel });
-	m_layerRGBA = color;
-
-	QWidget* colorSample = new QWidget();
-	colorSample->setStyleSheet("QWidget {background-color: " + color.name() + "; } QWidget:hover {border: 1px solid black;}");
-	colorSample->setAutoFillBackground(true);
-	colorSample->setFixedWidth(height());
-	colorSample->setFixedHeight(height());
-	colorSample->update();
+	ColorSlot* colorSample = new ColorSlot(height());
+	QObject::connect(colorSample, &ColorSlot::colorChange, this, &Layer::colorChange);
+	colorSample->publicMousePress();
 	layout->addWidget(colorSample);
 	
 	setLayout(layout);
@@ -50,6 +45,12 @@ void Layer::mousePressEvent(QMouseEvent* event)
 	clicked(this, false);
 }
 
+void Layer::colorChange(QColor color)
+{
+	m_layerRGBA = color;
+	clicked(this, false);
+	updatePhaseFunc();
+}
 
 // some hacky code from Stack Overflow
 // https://stackoverflow.com/questions/7276330/qt-stylesheet-for-custom-widget
@@ -60,3 +61,4 @@ void Layer::paintEvent(QPaintEvent* event)
 	QPainter p(this);
 	style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
+

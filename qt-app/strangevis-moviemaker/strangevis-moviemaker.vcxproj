@@ -89,8 +89,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="colorSlot.cpp" />
     <ClCompile Include="histogramChartView.cpp" />
-    <ClCompile Include="layer.cpp" />
+    <ClCompile Include="layer.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="layerHandler.cpp" />
     <ClCompile Include="phasefunction.cpp" />
     <ClCompile Include="histogram.cpp" />
@@ -111,6 +117,7 @@
     <QtMoc Include="histogramChartView.h" />
     <QtMoc Include="layerHandler.h" />
     <QtMoc Include="layer.h" />
+    <QtMoc Include="colorSlot.h" />
     <ClInclude Include="phasefunction.h" />
     <QtMoc Include="histogram.h" />
     <ClInclude Include="interpolation.h" />
