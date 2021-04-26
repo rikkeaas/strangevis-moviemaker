@@ -79,6 +79,8 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
     qDebug() << margins;
     //qDebug() << "Width of chart " << chart-> << " bars at " << series->barWidth() << " times nb of bars: " << barChart->count();
 
+    qDebug() << chartView->width();
+
     chartViewP = chartView;
     //chartViewP->setRubberBand(QChartView::RectangleRubberBand);
     //qDebug() << barChart-> << barChart->at(1) << barChart->at(2) << barChart->at(3);
@@ -91,36 +93,17 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
     layout()->setContentsMargins(0, 0, 0, 0);
     layout()->addWidget(getHistogram());
  
-    m_layerHandler = new LayerHandler();
+    m_layerHandler = new LayerHandler(chartViewP);
     layout()->addWidget(m_layerHandler);
 
-    CustomSlider* sliderR = new CustomSlider(1, QRect(30, 50, 300, 16), 0, 300, 300, this);
-    CustomSlider* sliderG = new CustomSlider(3, QRect(30, 50, 300, 16), 0, 300, 0, this);
-    CustomSlider* sliderB = new CustomSlider(2, QRect(30, 50, 300, 16), 0, 300, 0, this);
-    CustomSlider* sliderA = new CustomSlider(1, QRect(30, 50, 300, 16), 0, 300, 300, this);
-    layout()->addWidget(sliderR);
-    layout()->addWidget(sliderG);
-    layout()->addWidget(sliderB);
-    layout()->addWidget(sliderA);
-
-    QObject::connect(sliderR, &CustomSlider::valueChanged, m_layerHandler, &LayerHandler::redChanged);
-    QObject::connect(m_layerHandler, &LayerHandler::updateRedSlider, sliderR, &CustomSlider::setValue);
-
-    QObject::connect(sliderG, &CustomSlider::valueChanged, m_layerHandler, &LayerHandler::greenChanged);
-    QObject::connect(m_layerHandler, &LayerHandler::updateGreenSlider, sliderG, &CustomSlider::setValue);
-
-    QObject::connect(sliderB, &CustomSlider::valueChanged, m_layerHandler, &LayerHandler::blueChanged);
-    QObject::connect(m_layerHandler, &LayerHandler::updateBlueSlider, sliderB, &CustomSlider::setValue);
-
-    QObject::connect(sliderA, &CustomSlider::valueChanged, m_layerHandler, &LayerHandler::alphaChanged);
-    QObject::connect(m_layerHandler, &LayerHandler::updateAlphaSlider, sliderA, &CustomSlider::setValue);
-
+    
     QObject::connect(m_layerHandler, &LayerHandler::displayLayer, chartViewP, &HistogramChartView::showLayerSelection);
     QObject::connect(m_layerHandler, &LayerHandler::undisplayLayer, chartViewP, &HistogramChartView::unshowLayerSelection);
 
     QObject::connect(chartViewP, &HistogramChartView::addLayer, m_layerHandler, &LayerHandler::addLayer);
 
     QObject::connect(m_layerHandler, &LayerHandler::updatePhaseFunction, this, &Histogram::updatePhaseFunction);
+
 }
 
 std::map<float, int> Histogram::binData(QVector<unsigned short> values, int skipStep, int roundTo) {
