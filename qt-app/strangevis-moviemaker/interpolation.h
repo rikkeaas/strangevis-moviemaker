@@ -5,4 +5,5 @@
 class LinearInterpolation {
 public:
 	QList<QMatrix4x4> interpolate(QList<QMatrix4x4>, QList<QMatrix4x4>, float);
+	QVector3D backgroundInterpolation(QVector3D, QVector3D, float);
 };

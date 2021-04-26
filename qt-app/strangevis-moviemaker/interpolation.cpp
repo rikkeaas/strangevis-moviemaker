@@ -43,3 +43,12 @@ QList<QMatrix4x4> LinearInterpolation::interpolate(QList<QMatrix4x4> old_matrice
 
 	return m_out;
 }
+
+QVector3D LinearInterpolation::backgroundInterpolation(QVector3D fromColor, QVector3D toColor, float f)
+{
+	// ((r2 - r1) * fraction + r1)
+	float r = (toColor.x() - fromColor.x()) * f + fromColor.x();
+	float g = (toColor.y() - fromColor.y()) * f + fromColor.y();
+	float b = (toColor.z() - fromColor.z()) * f + fromColor.z();
+	return QVector3D(r, g, b);
+}

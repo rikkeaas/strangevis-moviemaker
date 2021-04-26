@@ -34,9 +34,12 @@ public:
 	void setKeyframeWrapper(QWidget* qw);
 	PhaseFunction* getPhaseFunction();
 	void clearStates();
-
+	void setBackgroundColor();
+	void playAnimation();
+	int getAnimationDuration();
+	void setAnimationDuration(double);
 public slots:
-	void setMatrices(QList<QMatrix4x4> matrices);
+	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor);
 	void addNewKeyframe();
 	void updateKeyframes();
 private:
@@ -45,8 +48,14 @@ private:
 	QMatrix4x4 m_scaleMatrix;
 	QMatrix4x4 m_translateMatrix;
 
+	QVector3D m_backgroundColor;
+
 	QList<QMatrix4x4> fromKeyframe;
 	QList<QMatrix4x4> toKeyframe;
+
+	QVector3D fromBackgroundColor;
+	QVector3D toBackgroundColor;
+
 
 	QOpenGLShaderProgram shaderProgram;
 	QVector<QVector3D> vertices;
@@ -81,6 +90,7 @@ private:
 	float t = 1;
 	QElapsedTimer timer;
 	LinearInterpolation* interpolater;
+	float animationDuration = 1000.f;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);

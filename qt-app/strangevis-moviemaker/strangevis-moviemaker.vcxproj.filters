@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="cube.cpp" />
     <ClCompile Include="customSlider.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -11,12 +10,14 @@
     <ClCompile Include="keyframeHandler.cpp" />
     <ClCompile Include="keyframes.cpp" />
     <ClCompile Include="interpolation.cpp" />
+    <ClCompile Include="histogramChartView.cpp" />
+    <ClCompile Include="layer.cpp" />
+    <ClCompile Include="layerHandler.cpp" />
+    <ClCompile Include="phasefunction.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cube.h" />
-    <ClInclude Include="customSlider.h" />
-    <ClInclude Include="histogram.h" />
     <ClInclude Include="interpolation.h" />
+    <ClInclude Include="phasefunction.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="strangevismoviemaker.cpp">
@@ -44,6 +45,11 @@
     <QtMoc Include="Renderer.h" />
     <QtMoc Include="keyframeHandler.h" />
     <QtMoc Include="keyframes.h" />
+    <QtMoc Include="customSlider.h" />
+    <QtMoc Include="histogramChartView.h" />
+    <QtMoc Include="layerHandler.h" />
+    <QtMoc Include="layer.h" />
+    <QtMoc Include="histogram.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="customSlider.h">
@@ -58,5 +64,11 @@
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="strangevismoviemaker.ui" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\fragmentShader.glsl" />
+    <None Include="Shaders\raycast-fs.glsl" />
+    <None Include="Shaders\raycast-vs.glsl" />
+    <None Include="Shaders\vertexShader.glsl" />
   </ItemGroup>
 </Project>

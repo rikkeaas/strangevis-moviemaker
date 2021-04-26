@@ -10,6 +10,8 @@ uniform vec3 voxelDimsInTexCoord;
 uniform sampler3D volumeTexture;
 uniform sampler2D phaseFunction;
 
+uniform vec3 backgroundColorVector;
+
 in vec2 fragCoord;
 out vec4 fragColor;
 
@@ -75,7 +77,7 @@ void main() {
 
 	vec2 t_hit = intersect_box(rayOrigin, rayDir);
 	if (t_hit.x > t_hit.y) {
-		fragColor = vec4(0.0,0.0,0.0,1.0);
+		fragColor = vec4(backgroundColorVector,1.0);
 		gl_FragDepth = 1.0;
 	}
 
@@ -146,14 +148,14 @@ void main() {
 
 	if (notFound)
 	{
-		fragColor = vec4(0.0,0.0,0.0,1.0);
-		gl_FragDepth = 1.0;
+		fragColor = vec4(backgroundColorVector, 1.0);
+		gl_FragDepth = 0.99;
 	}
 	else
 	{
 		if (color.a != 1.0)
 		{
-			color.a = 1.0;
+			color += vec4(backgroundColorVector * (1.0 - color.a), 1.0);
 		}
 		//vec3 lightpos = vec3(0.0);//(modelViewProjectionMatrix * vec4(vec3(0.0),1.0)).xyz;
 		//vec3 t = sampligPoint;//(modelViewProjectionMatrix * vec4(sampligPoint, 1.0)).xyz;//(inverseModelViewProjectionMatrix * vec4(normalize(sampligPoint),1.0)).xyz;//
