@@ -160,6 +160,7 @@ void Renderer::paintGL()
 	shaderProgram.setUniformValue("phaseFunction", 1);
 	shaderProgram.setUniformValue("lightPosition", QVector3D((m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted() * QVector4D(5.0, 0.0, 0.0, 1.0)));
 	shaderProgram.setUniformValue("modelViewMatrix", m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
+	shaderProgram.setUniformValue("inverseModelViewMatrix", (m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());
 	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
 	//qDebug() << "mvp " << m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix;
 	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());

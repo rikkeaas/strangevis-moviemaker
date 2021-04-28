@@ -3,6 +3,9 @@
 uniform mat4 modelViewProjectionMatrix;
 uniform mat4 inverseModelViewProjectionMatrix;
 
+uniform mat4 modelViewMatrix;
+uniform mat4 inverseModelViewMatrix;
+
 uniform vec3 voxelSpacing;
 uniform vec3 dimensionScaling;
 uniform vec3 voxelDimsInTexCoord;
@@ -84,12 +87,20 @@ Intersection calcSphereIntersection(float r, vec3 center, vec3 origin, vec3 line
 		{
 			vec3 near = origin + min(da,ds) * l;
 			vec3 far = origin + max(da,ds) * l;
+			//vec4 near = inverseModelViewProjectionMatrix * vec4(origin + min(da,ds) * l, 1.0);
+			//vec4 far = inverseModelViewProjectionMatrix * vec4(origin + max(da,ds) * l, 1.0);
+			//near /= near.w;
+			//far /= far.w;
 			return Intersection(true, near, far);
 		}
 		if (max(da,ds) > 0)
 		{
-			vec3 behindCam = origin + min(da,ds) * l;
-			vec3 intersect = origin + max(da,ds) * l;
+			vec3 behindCam = origin + min(da,ds) * l;//inverseModelViewProjectionMatrix * vec4(origin + min(da,ds) * l, 1.0);
+			vec3 intersect = origin + max(da,ds) * l;//inverseModelViewProjectionMatrix * vec4(origin + max(da,ds) * l, 1.0);
+			//vec4 behindCam = inverseModelViewMatrix * vec4(origin + min(da,ds) * l, 1.0);
+			//vec4 intersect = inverseModelViewMatrix * vec4(origin + max(da,ds) * l, 1.0);
+			//behindCam /= behindCam.w;
+			//intersect /= intersect.w;
 			return Intersection(true, behindCam, intersect);
 		}
 	}
@@ -114,11 +125,7 @@ void main() {
     vec3 rayDir = normalize(far.xyz - near.xyz);
 
 	vec2 t_hit = intersect_box(rayOrigin, rayDir);
-	if (t_hit.x > t_hit.y) {
-		fragColor = vec4(backgroundColorVector,1.0);
-		gl_FragDepth = 1.0;
-	}
-
+	
 	t_hit.x = max(t_hit.x, 0.0);
 
 
@@ -135,19 +142,53 @@ void main() {
 	vec4 color = vec4(0.0);
 
 	vec3 scalingFactor = voxelSpacing * dimensionScaling;
+	vec4 spherePos = (inverseModelViewProjectionMatrix) * vec4(0.1,0.3,0.7, 1.0);
+	spherePos /= spherePos.w;
 	
-	Intersection cutSphere = calcSphereIntersection(2.0, vec3(0), sampligPoint, rayDir);
+
+	vec4 sphereCurve = inverseModelViewProjectionMatrix * vec4(0.60, 0.0,0.0,0.0);
+	float sphereRad = length(sphereCurve.xyz);
 
 
-	for (float i = 0; i <= renderDistance; i += samplingDistance) 
+	Intersection cutSphere = calcSphereIntersection(sphereRad, (spherePos).xyz, rayOrigin, rayDir);
+
+	float ii = 0;
+	if (cutSphere.hit)// && distance(cutSphere.enterPoint,rayOrigin) <= (distance(sampligPoint, rayOrigin)) && distance(cutSphere.exitPoint,rayOrigin) >= distance(rayOrigin, sampligPoint));
 	{
-		if (cutSphere.hit)
+		if (length(cutSphere.enterPoint - rayOrigin) <= length(sampligPoint - rayOrigin))
 		{
-			if (length(cutSphere.enterPoint) <= length(sampligPoint) && length(cutSphere.exitPoint) > length(sampligPoint))
+			if (length(cutSphere.exitPoint - rayOrigin) <= length(t_hit.y * rayDir) && t_hit.x <= t_hit.y ) 
 			{
-				sampligPoint = cutSphere.exitPoint;
+				if (length(cutSphere.exitPoint - rayOrigin) >= length(sampligPoint - rayOrigin)) 
+				{
+					ii = length(cutSphere.exitPoint - sampligPoint);
+				//fragColor = vec4(0.0,1.0,0.0,1.0);
+				//gl_FragDepth = 0.99;
+				//return;
+					sampligPoint = cutSphere.exitPoint;
+				}
+			}
+			else if (t_hit.x <= t_hit.y) 
+			{
+				fragColor = vec4(backgroundColorVector,1.0);
+				gl_FragDepth = 0.99;
+				return;
 			}
 		}
+		
+	}
+	
+
+	if (t_hit.x > t_hit.y) {
+		fragColor = vec4(backgroundColorVector,1.0);
+		gl_FragDepth = 1.0;
+		return;
+	}
+
+
+	for (float i = ii; i <= renderDistance; i += samplingDistance) 
+	{
+		
 
 		// With no special scaling, we would just do 0.5 + sampligPoint/2 to map from [-1,1] to [0,1] (ie voxelSpacing and dimensionScaling are equal to 1)
 		// With different dimension scales and voxel spacing we need to scale by these factors also. Note both are in interval [0,1].
