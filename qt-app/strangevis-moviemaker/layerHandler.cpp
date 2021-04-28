@@ -2,7 +2,7 @@
 #include <QDebug>
 #include <QVBoxLayout>
 
-LayerHandler::LayerHandler() : QWidget()
+LayerHandler::LayerHandler(HistogramChartView* chartView) : QWidget()
 {
 	QVBoxLayout* layout = new QVBoxLayout();
 	layout->setMargin(0);
@@ -11,9 +11,7 @@ LayerHandler::LayerHandler() : QWidget()
 	setLayout(layout);
 	m_selectedLayer = NULL;
 	
-	// Stygg hardkoding.... fiks dette!!
-	minX = 20;
-	maxX = 508;
+	m_chartView = chartView;
 	m_phaseFuncData.resize(256 * 4);
 }
 
@@ -21,50 +19,16 @@ void LayerHandler::addLayer(QRect area)
 {
 	if (area.left() == area.right()) return;
 	Layer* newLayer = new Layer(this, area);
-	newLayer->setStyleSheet("background-color:#6D6D6D; height:40; border-radius:10px;");
+	newLayer->setStyleSheet("background-color:#6D6D6D; height:45; border-radius:10px;");
 	layout()->addWidget(newLayer);
 	
 	QObject::connect(newLayer, &Layer::clicked, this, &LayerHandler::layerSelected);
+	QObject::connect(newLayer, &Layer::updatePhaseFunc, this, &LayerHandler::updatePhaseFuncData);
 
 	m_layers.append(newLayer);
+	layerSelected(newLayer, false);
+	updatePhaseFuncData();
 }
-
-void LayerHandler::redChanged(int newRed)
-{
-	if (m_selectedLayer != NULL)
-	{
-		m_selectedLayer->red = newRed;
-		updatePhaseFuncData();
-	}
-}
-
-void LayerHandler::greenChanged(int newGreen)
-{
-	if (m_selectedLayer != NULL)
-	{
-		m_selectedLayer->green = newGreen;
-		updatePhaseFuncData();
-	}
-}
-
-void LayerHandler::blueChanged(int newBlue)
-{
-	if (m_selectedLayer != NULL)
-	{
-		m_selectedLayer->blue = newBlue;
-		updatePhaseFuncData();
-	}
-}
-
-void LayerHandler::alphaChanged(int newAlpha)
-{
-	if (m_selectedLayer != NULL)
-	{
-		m_selectedLayer->alpha = newAlpha;
-		updatePhaseFuncData();
-	}
-}
-
 
 void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 {
@@ -81,30 +45,31 @@ void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 		qDebug() << selectedLayer->m_selectedArea.left() << selectedLayer->m_selectedArea.right();
 		m_selectedLayer = selectedLayer;
 		displayLayer(selectedLayer->m_selectedArea);
-		updateRedSlider(selectedLayer->red);
-		updateGreenSlider(selectedLayer->green);
-		updateBlueSlider(selectedLayer->blue);
-		updateAlphaSlider(selectedLayer->alpha);
+		
 	}
 }
 
 void LayerHandler::updatePhaseFuncData()
 {
+	qDebug() << m_chartView->width();
+	auto maxX = m_chartView->width() - 20;
+	auto minX = 20;
 	int intervalStart = 256.0 * (float(m_selectedLayer->m_selectedArea.left()-minX) / float(maxX-minX));
 	int intervalEnd = 256.0 * (float(m_selectedLayer->m_selectedArea.right()-minX) / float(maxX - minX)) - 1;
 	
 	QVector<float> textureData;
 	textureData.resize((intervalEnd - intervalStart) * 4);
 
+	QColor color = m_selectedLayer->m_layerRGBA;
 	for (int i = 0; i < (intervalEnd - intervalStart); i++)
 	{
-		textureData[i * 4] = float(m_selectedLayer->red) / 300.0;
-		textureData[1 + i * 4] = float(m_selectedLayer->green) /300.0;
-		textureData[2 + i * 4] = float(m_selectedLayer->blue) / 300.0;
-		textureData[3 + i * 4] = float(m_selectedLayer->alpha) / 300.0;
+		textureData[i * 4] = float(color.red()) / 255.0;
+		textureData[1 + i * 4] = float(color.green()) /255.0;
+		textureData[2 + i * 4] = float(color.blue()) / 255.0;
+		textureData[3 + i * 4] = float(color.alpha()) / 255.0;
 	}
 
-	qDebug() << m_selectedLayer->red << m_selectedLayer->green << m_selectedLayer->blue << m_selectedLayer->alpha;
+	qDebug() << float(color.red()) / 255.0 << " " << float(color.green()) / 255.0 << " " << float(color.blue()) / 255.0 << " " << float(color.alpha()) / 255.0;
 	qDebug() << "Interval " << intervalStart << intervalEnd;
 	updatePhaseFunction(intervalStart, intervalEnd, textureData);
 }
