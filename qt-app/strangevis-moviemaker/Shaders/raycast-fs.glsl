@@ -58,6 +58,42 @@ vec2 intersect_box(vec3 orig, vec3 dir) {
 	return vec2(t0, t1);
 }
 
+struct Intersection
+{
+	bool hit;
+	vec3 enterPoint;
+	vec3 exitPoint;
+};
+
+// Sphere-ray intersection test from my 251 project, sligthly modified
+Intersection calcSphereIntersection(float r, vec3 center, vec3 origin, vec3 line)
+{
+	vec3 oc = origin - center;
+	vec3 l = normalize(line);
+	float ocProj = dot(oc, l); // projection of center of sphere onto ray
+	float under_square_root = ocProj * ocProj - dot(oc,oc) + r*r;
+	
+	if (under_square_root > 0.0)
+	{
+		float da = -ocProj + sqrt(under_square_root);
+		float ds = -ocProj - sqrt(under_square_root);
+
+		if (da > 0 && ds > 0)
+		{
+			vec3 near = origin + min(da,ds) * l;
+			vec3 far = origin + max(da,ds) * l;
+			return Intersection(true, near, far);
+		}
+		if (max(da,ds) > 0)
+		{
+			vec3 behindCam = origin + min(da,ds) * l;
+			vec3 intersect = origin + max(da,ds) * l;
+			return Intersection(true, behindCam, intersect);
+		}
+	}
+	return Intersection(false, vec3(0), vec3(0));
+}
+
 
 vec3 scalePoint(vec3 point)
 {
@@ -98,8 +134,19 @@ void main() {
 
 	vec3 scalingFactor = voxelSpacing * dimensionScaling;
 	
+	Intersection cutSphere = calcSphereIntersection(2.0, vec3(0), sampligPoint, rayDir);
+
+
 	for (float i = 0; i <= renderDistance; i += samplingDistance) 
 	{
+		if (cutSphere.hit)
+		{
+			if (length(cutSphere.enterPoint) <= length(sampligPoint) && length(cutSphere.exitPoint) > length(sampligPoint))
+			{
+				sampligPoint = cutSphere.exitPoint;
+			}
+		}
+
 		// With no special scaling, we would just do 0.5 + sampligPoint/2 to map from [-1,1] to [0,1] (ie voxelSpacing and dimensionScaling are equal to 1)
 		// With different dimension scales and voxel spacing we need to scale by these factors also. Note both are in interval [0,1].
 		vec3 scaledSamplePoint = 0.5 + sampligPoint / (scalingFactor * 2.0);
