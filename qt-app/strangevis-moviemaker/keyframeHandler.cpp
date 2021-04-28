@@ -9,7 +9,7 @@
 #include <QDesktopWidget>
 
 
-void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*> matrices)
+void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*> matrices, QVector3D backgroundColor)
 {
     setFilenameNumber();
     numberofStates++;
@@ -27,6 +27,11 @@ void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*>
             out << QString::number(x[i]) << "\n";
         }
     }
+
+    out << QString::number(backgroundColor.x()) << "\n";
+    out << QString::number(backgroundColor.y()) << "\n";
+    out << QString::number(backgroundColor.z()) << "\n";
+    
     qDebug() << "Saved state to file: " << f;
 }
 
@@ -144,7 +149,8 @@ void KeyframeHandler::readStates(QString statePath) {
         m_out.append(QMatrix4x4(matrices[16], matrices[17], matrices[18], matrices[19], matrices[20], matrices[21], matrices[22], matrices[23], matrices[24], matrices[25], matrices[26], matrices[27], matrices[28], matrices[29], matrices[30], matrices[31]).transposed());
         m_out.append(QMatrix4x4(matrices[32], matrices[33], matrices[34], matrices[35], matrices[36], matrices[37], matrices[38], matrices[39], matrices[40], matrices[41], matrices[42], matrices[43], matrices[44], matrices[45], matrices[46], matrices[47]).transposed());
         m_out.append(QMatrix4x4(matrices[48], matrices[49], matrices[50], matrices[51], matrices[52], matrices[53], matrices[54], matrices[55], matrices[56], matrices[57], matrices[58], matrices[59], matrices[60], matrices[61], matrices[62], matrices[63]).transposed());
-        matricesUpdated(m_out);
+        QVector3D backgroundColor = QVector3D(matrices[64], matrices[65], matrices[66]);
+        matricesUpdated(m_out, backgroundColor);
     }
 }
 

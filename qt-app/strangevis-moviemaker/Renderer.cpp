@@ -34,7 +34,7 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_translateMatrix.setToIdentity();
 	m_translateMatrix.translate(0.0, 0.0, -2.0 * sqrt(3.0));
 
-
+	m_backgroundColor = QVector3D(0.0, 0.0, 0.0);
 }
 
 
@@ -57,7 +57,8 @@ void Renderer::setState()
 	mx.append(m_rotateMatrix.data());
 	mx.append(m_scaleMatrix.data());
 	mx.append(m_translateMatrix.data());
-	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx);
+	qDebug() << "Background color in renderer: " << m_backgroundColor;
+	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx, m_backgroundColor);
 	m_keyframeHandler->takeQtScreenShot(this, m_volume->getFilename());
 }
 
@@ -165,6 +166,7 @@ void Renderer::paintGL()
 	shaderProgram.setUniformValue("voxelSpacing", m_volume->getVoxelSpacing());
 	shaderProgram.setUniformValue("dimensionScaling", m_volume->getDimensionScale());
 	shaderProgram.setUniformValue("voxelDimsInTexCoord", QVector3D(QVector3D(1.0,1.0,1.0) / m_volume->getDimensions()));
+	shaderProgram.setUniformValue("backgroundColorVector", m_backgroundColor);
 
 	shaderProgram.setAttributeArray("vertex", vertices.constData());
 	shaderProgram.enableAttributeArray("vertex");
@@ -178,7 +180,7 @@ void Renderer::paintGL()
 	
 	
 	shaderProgram.release();
-	float elapsedTime = timer.restart()/1000.f;
+	float elapsedTime = timer.restart()/animationDuration;
 	t += elapsedTime;
 	if (t < 1) {
 		QList<QMatrix4x4> newMatrices = interpolater->interpolate(fromKeyframe, toKeyframe, t);
@@ -186,6 +188,7 @@ void Renderer::paintGL()
 		m_rotateMatrix = newMatrices[1];
 		m_scaleMatrix = newMatrices[2];
 		m_translateMatrix = newMatrices[3];
+		m_backgroundColor = interpolater->backgroundInterpolation(fromBackgroundColor, toBackgroundColor, t);
 		update();
 	}
 }
@@ -299,16 +302,15 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 			clearStates();
 		}
 	}
+	else if (event->key() == Qt::Key_B) {
+		setBackgroundColor();
+	}
+	else if (event->key() == Qt::Key_A) {
+		playAnimation();
+	}
 }
 
-void Renderer::setMatrices(QList<QMatrix4x4> matrices) {
-	t = 0;
-	timer.restart();
-	fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
-	toKeyframe = matrices;
 
-	update();
-}
 
 
 void Renderer::keyPressEvent(QKeyEvent* event)
@@ -349,8 +351,53 @@ void Renderer::clearStates()
 	setKeyframes(keyframeWrapper, square);
 }
 
+void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor) {
+	t = 0;
+	timer.restart();
+	fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
+	toKeyframe = matrices;
+	fromBackgroundColor = m_backgroundColor;
+	toBackgroundColor = backgroundColor;
+	update();
+}
+
+void Renderer::setBackgroundColor()
+{
+	auto colorpicker = QColorDialog::getColor();
+	m_backgroundColor.setX(colorpicker.red() / 255.f);
+	m_backgroundColor.setY(colorpicker.green() / 255.f);
+	m_backgroundColor.setZ(colorpicker.blue() / 255.f);
+	update();
+}
+
+void Renderer::playAnimation()
+{
+	auto states = m_keyframeHandler->getFiles();
+	int index = 0;
+	while (true) {
+		if (index >= states.at(1).length()) {
+			break;
+		}
+		m_keyframeHandler->readStates("states/" + states.at(1).at(index));
+		index++;
+		QEventLoop loop;
+		QTimer::singleShot(animationDuration, &loop, SLOT(quit()));
+		loop.exec();
+	}
+}
+
 
 PhaseFunction* Renderer::getPhaseFunction()
 {
 	return m_phasefunction;
+}
+
+int Renderer::getAnimationDuration()
+{
+	return animationDuration / 1000;
+}
+
+void Renderer::setAnimationDuration(double newDur)
+{
+	animationDuration = newDur * 1000.f;
 }
