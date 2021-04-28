@@ -68,3 +68,8 @@ void PhaseFunction::updatePhaseFunction(int startIdx, int endIdx, QVector<float>
 		m_data[i] = data->at((i - startIdx*4));
 	}
 }
+
+QVector<float> PhaseFunction::getPhaseFunctionData()
+{
+	return m_data;
+}

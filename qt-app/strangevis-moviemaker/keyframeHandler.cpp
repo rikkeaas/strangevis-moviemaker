@@ -9,7 +9,7 @@
 #include <QDesktopWidget>
 
 
-void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*> matrices, QVector3D backgroundColor)
+void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*> matrices, QVector3D backgroundColor, QVector<float> phaseFunctionData)
 {
     setFilenameNumber();
     numberofStates++;
@@ -31,6 +31,11 @@ void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*>
     out << QString::number(backgroundColor.x()) << "\n";
     out << QString::number(backgroundColor.y()) << "\n";
     out << QString::number(backgroundColor.z()) << "\n";
+
+    for (int i = 0; i < 256 * 4; i++) {
+        float f = phaseFunctionData.at(i);
+        out << QString::number(f) << "\n";
+    }
     
     qDebug() << "Saved state to file: " << f;
 }
@@ -141,7 +146,7 @@ void KeyframeHandler::removeKeyframeHighlighting(QWidget* keyframeWrapper, int i
 
 void KeyframeHandler::readStates(QString statePath) {
     QFile inputFile(statePath);
-    QList<float> matrices;
+    QList<float> textFileLine;
     if (inputFile.open(QIODevice::ReadOnly))
     {
         QTextStream in(&inputFile);
@@ -149,20 +154,24 @@ void KeyframeHandler::readStates(QString statePath) {
         {
             QString line = in.readLine();
             double dd = line.toFloat();
-            matrices.append(dd);
+            textFileLine.append(dd);
         }
         inputFile.close();
     }
     
-    if (matrices.length() > 0) {
+    if (textFileLine.length() > 0) {
         int point = 0;
         QList<QMatrix4x4> m_out;
-        m_out.append(QMatrix4x4(matrices[0], matrices[1], matrices[2], matrices[3], matrices[4], matrices[5], matrices[6], matrices[7], matrices[8], matrices[9], matrices[10], matrices[11], matrices[12], matrices[13], matrices[14], matrices[15]).transposed());
-        m_out.append(QMatrix4x4(matrices[16], matrices[17], matrices[18], matrices[19], matrices[20], matrices[21], matrices[22], matrices[23], matrices[24], matrices[25], matrices[26], matrices[27], matrices[28], matrices[29], matrices[30], matrices[31]).transposed());
-        m_out.append(QMatrix4x4(matrices[32], matrices[33], matrices[34], matrices[35], matrices[36], matrices[37], matrices[38], matrices[39], matrices[40], matrices[41], matrices[42], matrices[43], matrices[44], matrices[45], matrices[46], matrices[47]).transposed());
-        m_out.append(QMatrix4x4(matrices[48], matrices[49], matrices[50], matrices[51], matrices[52], matrices[53], matrices[54], matrices[55], matrices[56], matrices[57], matrices[58], matrices[59], matrices[60], matrices[61], matrices[62], matrices[63]).transposed());
-        QVector3D backgroundColor = QVector3D(matrices[64], matrices[65], matrices[66]);
-        matricesUpdated(m_out, backgroundColor);
+        m_out.append(QMatrix4x4(textFileLine[0], textFileLine[1], textFileLine[2], textFileLine[3], textFileLine[4], textFileLine[5], textFileLine[6], textFileLine[7], textFileLine[8], textFileLine[9], textFileLine[10], textFileLine[11], textFileLine[12], textFileLine[13], textFileLine[14], textFileLine[15]).transposed());
+        m_out.append(QMatrix4x4(textFileLine[16], textFileLine[17], textFileLine[18], textFileLine[19], textFileLine[20], textFileLine[21], textFileLine[22], textFileLine[23], textFileLine[24], textFileLine[25], textFileLine[26], textFileLine[27], textFileLine[28], textFileLine[29], textFileLine[30], textFileLine[31]).transposed());
+        m_out.append(QMatrix4x4(textFileLine[32], textFileLine[33], textFileLine[34], textFileLine[35], textFileLine[36], textFileLine[37], textFileLine[38], textFileLine[39], textFileLine[40], textFileLine[41], textFileLine[42], textFileLine[43], textFileLine[44], textFileLine[45], textFileLine[46], textFileLine[47]).transposed());
+        m_out.append(QMatrix4x4(textFileLine[48], textFileLine[49], textFileLine[50], textFileLine[51], textFileLine[52], textFileLine[53], textFileLine[54], textFileLine[55], textFileLine[56], textFileLine[57], textFileLine[58], textFileLine[59], textFileLine[60], textFileLine[61], textFileLine[62], textFileLine[63]).transposed());
+        QVector3D backgroundColor = QVector3D(textFileLine[64], textFileLine[65], textFileLine[66]);
+        QVector<float> phaseFunction;
+        for (int i = 0; i < 1024; i++) {
+            phaseFunction << textFileLine[i + 67];
+        }
+        matricesUpdated(m_out, backgroundColor, phaseFunction);
     }
 }
 

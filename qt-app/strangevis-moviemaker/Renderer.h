@@ -39,7 +39,7 @@ public:
 	int getAnimationDuration();
 	void setAnimationDuration(double);
 public slots:
-	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor);
+	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> phaseFunction);
 	void addNewKeyframe();
 	void updateKeyframes();
 private:
@@ -49,6 +49,7 @@ private:
 	QMatrix4x4 m_translateMatrix;
 
 	QVector3D m_backgroundColor;
+	QVector<float> m_phaseFunctionData;
 
 	QList<QMatrix4x4> fromKeyframe;
 	QList<QMatrix4x4> toKeyframe;
@@ -56,6 +57,8 @@ private:
 	QVector3D fromBackgroundColor;
 	QVector3D toBackgroundColor;
 
+	QVector<float> fromPhaseFunction;
+	QVector<float> toPhaseFunction;
 
 	QOpenGLShaderProgram shaderProgram;
 	QVector<QVector3D> vertices;
