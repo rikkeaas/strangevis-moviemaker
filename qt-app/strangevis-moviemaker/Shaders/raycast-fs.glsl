@@ -7,6 +7,8 @@ uniform vec3 voxelSpacing;
 uniform vec3 dimensionScaling;
 uniform vec3 voxelDimsInTexCoord;
 
+uniform vec3 lightPosition;
+
 uniform sampler3D volumeTexture;
 uniform sampler2D phaseFunction;
 
@@ -31,7 +33,7 @@ float calcDepth(vec3 pos)
 vec3 diffuseComponent(vec3 lightPos, vec3 pos, vec3 normal, vec3 color)
 {
 	vec3 pointToLight = normalize(lightPos - pos);
-	vec3 diffuse = color * max(dot(pointToLight, normal),0.0f);
+	vec3 diffuse = color * max(dot(normal,pointToLight),0.0f);
 	return diffuse;
 }
 
@@ -174,12 +176,13 @@ void main() {
 		//float z = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z+voxelDimsInTexCoord.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z-voxelDimsInTexCoord.z)).r));
 		//vec3 phong = (normalize(densityAndGradient.yzw) + 1) * 0.5;
 		//vec3 phong = (normalize(vec3(x,y,z)) + 1) * 0.5;
-		//vec4 light = inverseModelViewProjectionMatrix * vec4(vec3(0.0, 0.0, -10.0), 1.0);
-		//light /= light.w;
+		
+		
 		//vec3 phong = diffuseComponent(light.xyz, sampligPoint, normalize(densityAndGradient.yzw), pfColor.rgb);
 
+
 		//vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(densityAndGradient.yzw), pfColor.rgb);
-		vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(vec3(x,y,z)), pfColor.rgb);
+		vec3 phong = diffuseComponent(lightPosition, sampligPoint, normalize(vec3(x,y,z)), pfColor.rgb);
 		phong += pfColor.rgb * 0.2;
 		color.rgb += (1.0 - color.a) * pfColor.a * phong;
 		color.a += (1.0 - color.a) * pfColor.a;

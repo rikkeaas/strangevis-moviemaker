@@ -11,9 +11,9 @@ class CustomSlider : public QWidget
     Q_OBJECT
 
 public:
-    CustomSlider(int color, QRect sliderPos, int minValue, int maxValue, QWidget* parent);
+    CustomSlider(int color, QRect sliderPos, int minValue, int maxValue, int currValue, QWidget* parent);
     ~CustomSlider();
-
+    
 signals:
     void valueChanged(int newVal);
 public slots:

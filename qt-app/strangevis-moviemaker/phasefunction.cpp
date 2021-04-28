@@ -31,30 +31,6 @@ void PhaseFunction::bind()
 		m_phasefunction.setSize(256);
 		m_phasefunction.allocateStorage();
 
-
-
-		/*
-		QVector<float> data;
-		data << 1.0 << 0.0 << 0.0 << 0.0
-			<< 1.0 << 0.3 << 0.3 << 0.0
-			<< 1.0 << 1.0 << 0.0 << 0.2
-			<< 0.0 << 0.0 << 1.0 << 0.2
-			<< 1.0 << 1.0 << 1.0 << 0.5;
-		*/
-		/*
-		data.append(QVector4D(0.0, 0.0, 0.0, 0.0));
-		data.append(QVector4D(0.0, 1.0, 0.0, 0.05));
-		data.append(QVector4D(1.0, 0.0, 0.0, 0.05));
-		data.append(QVector4D(1.0, 0.0, 0.0, 0.05));
-		data.append(QVector4D(1.0, 0.0, 0.0, 0.05));
-		
-		data.append(QVector4D(0, 0.0, 0.0, 0.02));
-		data.append(QVector4D(0.2, 0.0, 0.0, 0.03));
-		data.append(QVector4D(0.2, 0.0, 0.0, 0.04));
-		data.append(QVector4D(1.0, 0.0, 0.0, 0.05));
-		*/
-
-		//void* data = reinterpret_cast<void*>(m_Data.data());
 		m_phasefunction.setData(QOpenGLTexture::RGBA, QOpenGLTexture::Float32, m_data.data());
 	}
 

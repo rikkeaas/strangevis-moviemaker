@@ -8,6 +8,8 @@ HistogramChartView::HistogramChartView(QChart* chart, QWidget* parent) : QChartV
 
     //hoverItem.setBrush(QBrush(Qt::red));
     //hoverItem.setPen(Qt::NoPen);
+
+    qDebug() << "Width " << width();
 }
 
 void HistogramChartView::mousePressEvent(QMouseEvent* event)
@@ -43,7 +45,7 @@ void HistogramChartView::mouseReleaseEvent(QMouseEvent* event)
     rect.setRight(qMin(width() - 20, rect.right()));
     rect.setBottom(height()-1-20);
     rect.setTop(0+20);
-
+    
     m_area = rect;
 
     addLayer(m_area);
