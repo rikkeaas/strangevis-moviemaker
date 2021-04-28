@@ -127,6 +127,18 @@ QWidget* KeyframeHandler::updateKeyframes(QWidget* keyframeWrapper, QSize* squar
     return keyframeWrapper;
 }
 
+void KeyframeHandler::highlightKeyframe(QWidget* keyframeWrapper, int index)
+{
+    QString yellowBorder = "border: 7px solid yellow;";
+    backupStyleSheet = keyframeWrapper->layout()->itemAt(index)->widget()->styleSheet();
+    keyframeWrapper->layout()->itemAt(index)->widget()->setStyleSheet(backupStyleSheet + yellowBorder);
+}
+
+void KeyframeHandler::removeKeyframeHighlighting(QWidget* keyframeWrapper, int index)
+{
+    keyframeWrapper->layout()->itemAt(index)->widget()->setStyleSheet(backupStyleSheet);
+}
+
 void KeyframeHandler::readStates(QString statePath) {
     QFile inputFile(statePath);
     QList<float> matrices;

@@ -371,17 +371,35 @@ void Renderer::setBackgroundColor()
 void Renderer::playAnimation()
 {
 	auto states = m_keyframeHandler->getFiles();
-	int index = 0;
-	while (true) {
-		if (index >= states.at(1).length()) {
-			break;
+	if (states.at(1).length() > 0) {
+		auto backupMatrices = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
+		auto backupBackgroundColor = m_backgroundColor;
+		int index = 0;
+		int numberOfStates = states.at(1).length();
+		int keyframeHighlightIndex = numberOfStates - 1;
+		while (true) {
+			if (index >= numberOfStates) {
+				break;
+			}
+			m_keyframeHandler->readStates("states/" + states.at(1).at(index));
+			if (keyframeHighlightIndex < 9) {
+				m_keyframeHandler->highlightKeyframe(keyframeWrapper, keyframeHighlightIndex);
+			}
+			QEventLoop loop;
+			QTimer::singleShot(animationDuration, &loop, SLOT(quit()));
+			loop.exec();
+			if (keyframeHighlightIndex < 9) {
+				m_keyframeHandler->removeKeyframeHighlighting(keyframeWrapper, keyframeHighlightIndex);
+			}
+			index++;
+			keyframeHighlightIndex--;
 		}
-		m_keyframeHandler->readStates("states/" + states.at(1).at(index));
-		index++;
-		QEventLoop loop;
-		QTimer::singleShot(animationDuration, &loop, SLOT(quit()));
-		loop.exec();
+		setMatrices(backupMatrices, backupBackgroundColor);
 	}
+	else {
+		qDebug() << "Can't play animation with no saved states.";
+	}
+	
 }
 
 
