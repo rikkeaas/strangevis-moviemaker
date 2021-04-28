@@ -9,6 +9,8 @@ class KeyframeHandler : public QWidget {
 public:
 	void saveState(QWidget* widget, QString filename, QList<float*> matrices, QVector3D backgroundColor);
 	QWidget* updateKeyframes(QWidget* keyframeWrapper, QSize*, QString filename);
+	void highlightKeyframe(QWidget* keyframeWrapper, int index);
+	void removeKeyframeHighlighting(QWidget* keyframeWrapper, int index);
 	void takeQtScreenShot(QWidget* widget, QString);
 	bool toDelete = false;
 	QList<QStringList> getFiles();
@@ -26,4 +28,5 @@ private:
 	int filenameNumber;
 	void setFilenameNumber();
 	QString filename;
+	QString backupStyleSheet;
 };
