@@ -59,6 +59,7 @@ void Renderer::setState()
 	mx.append(m_scaleMatrix.data());
 	mx.append(m_translateMatrix.data());
 	qDebug() << "Background color in renderer: " << m_backgroundColor;
+	m_phaseFunctionData = m_phasefunction->getPhaseFunctionData();
 	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx, m_backgroundColor, m_phasefunction->getPhaseFunctionData());
 	m_keyframeHandler->takeQtScreenShot(this, m_volume->getFilename());
 }
@@ -183,7 +184,7 @@ void Renderer::paintGL()
 	shaderProgram.release();
 	float elapsedTime = timer.restart()/animationDuration;
 	t += elapsedTime;
-	if (t < 1) {
+	if (t <= 1) {
 		QList<QMatrix4x4> newMatrices = interpolater->interpolate(fromKeyframe, toKeyframe, t);
 		m_projectionMatrix = newMatrices[0];
 		m_rotateMatrix = newMatrices[1];
@@ -191,7 +192,7 @@ void Renderer::paintGL()
 		m_translateMatrix = newMatrices[3];
 		m_backgroundColor = interpolater->backgroundInterpolation(fromBackgroundColor, toBackgroundColor, t);
 		m_phaseFunctionData = interpolater->phaseFunctionInterpolation(fromPhaseFunction, toPhaseFunction, t);
-		m_phasefunction->updatePhaseFunction(0, 255, &m_phaseFunctionData);
+		m_phasefunction->updatePhaseFunction(0, 256, &m_phaseFunctionData);
 		update();
 	}
 }

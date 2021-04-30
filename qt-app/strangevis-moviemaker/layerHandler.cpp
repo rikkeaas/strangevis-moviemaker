@@ -45,7 +45,6 @@ void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 		qDebug() << selectedLayer->m_selectedArea.left() << selectedLayer->m_selectedArea.right();
 		m_selectedLayer = selectedLayer;
 		displayLayer(selectedLayer->m_selectedArea);
-		
 	}
 }
 

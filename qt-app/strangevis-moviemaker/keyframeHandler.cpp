@@ -32,7 +32,7 @@ void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*>
     out << QString::number(backgroundColor.y()) << "\n";
     out << QString::number(backgroundColor.z()) << "\n";
 
-    for (int i = 0; i < 256 * 4; i++) {
+    for (int i = 0; i < phaseFunctionData.length(); i++) {
         float f = phaseFunctionData.at(i);
         out << QString::number(f) << "\n";
     }
@@ -146,32 +146,51 @@ void KeyframeHandler::removeKeyframeHighlighting(QWidget* keyframeWrapper, int i
 
 void KeyframeHandler::readStates(QString statePath) {
     QFile inputFile(statePath);
-    QList<float> textFileLine;
     if (inputFile.open(QIODevice::ReadOnly))
     {
+        float m_projectionMatrix[16];
+        float m_rotateMatrix[16];
+        float m_scaleMatrix[16];
+        float m_translateMatrix[16];
+        QVector3D m_backgroundColorVector;
+        QVector<float> m_phasefunctionVector;
+
         QTextStream in(&inputFile);
-        while (!in.atEnd())
+        int index = 0;
+        for (int i = 0; i < 1024+67; i++)
         {
             QString line = in.readLine();
-            double dd = line.toFloat();
-            textFileLine.append(dd);
+            float dd = line.toFloat();
+            if (i > 66) {
+                m_phasefunctionVector << dd;
+            } else if (i == 64) {
+                m_backgroundColorVector.setX(dd);
+            } else if (i == 65) {
+                m_backgroundColorVector.setY(dd);
+            } else if (i == 66) {
+                m_backgroundColorVector.setZ(dd);
+            } else if (i > 47) {
+                m_translateMatrix[index] = dd;
+            } else if (i > 31) {
+                m_scaleMatrix[index] = dd;
+            } else if (i > 15) {
+                m_rotateMatrix[index] = dd;
+            } else {
+                m_projectionMatrix[index] = dd;
+            }
+            index++;
+            if (index == 16) {
+                index = 0;
+            }
         }
         inputFile.close();
-    }
-    
-    if (textFileLine.length() > 0) {
-        int point = 0;
+
         QList<QMatrix4x4> m_out;
-        m_out.append(QMatrix4x4(textFileLine[0], textFileLine[1], textFileLine[2], textFileLine[3], textFileLine[4], textFileLine[5], textFileLine[6], textFileLine[7], textFileLine[8], textFileLine[9], textFileLine[10], textFileLine[11], textFileLine[12], textFileLine[13], textFileLine[14], textFileLine[15]).transposed());
-        m_out.append(QMatrix4x4(textFileLine[16], textFileLine[17], textFileLine[18], textFileLine[19], textFileLine[20], textFileLine[21], textFileLine[22], textFileLine[23], textFileLine[24], textFileLine[25], textFileLine[26], textFileLine[27], textFileLine[28], textFileLine[29], textFileLine[30], textFileLine[31]).transposed());
-        m_out.append(QMatrix4x4(textFileLine[32], textFileLine[33], textFileLine[34], textFileLine[35], textFileLine[36], textFileLine[37], textFileLine[38], textFileLine[39], textFileLine[40], textFileLine[41], textFileLine[42], textFileLine[43], textFileLine[44], textFileLine[45], textFileLine[46], textFileLine[47]).transposed());
-        m_out.append(QMatrix4x4(textFileLine[48], textFileLine[49], textFileLine[50], textFileLine[51], textFileLine[52], textFileLine[53], textFileLine[54], textFileLine[55], textFileLine[56], textFileLine[57], textFileLine[58], textFileLine[59], textFileLine[60], textFileLine[61], textFileLine[62], textFileLine[63]).transposed());
-        QVector3D backgroundColor = QVector3D(textFileLine[64], textFileLine[65], textFileLine[66]);
-        QVector<float> phaseFunction;
-        for (int i = 0; i < 1024; i++) {
-            phaseFunction << textFileLine[i + 67];
-        }
-        matricesUpdated(m_out, backgroundColor, phaseFunction);
+        m_out.append(QMatrix4x4(m_projectionMatrix).transposed());
+        m_out.append(QMatrix4x4(m_rotateMatrix).transposed());
+        m_out.append(QMatrix4x4(m_scaleMatrix).transposed());
+        m_out.append(QMatrix4x4(m_translateMatrix).transposed());
+        matricesUpdated(m_out, QVector3D(m_backgroundColorVector), m_phasefunctionVector);
     }
 }
 
