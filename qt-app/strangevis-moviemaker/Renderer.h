@@ -49,9 +49,9 @@ public slots:
 	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> phaseFunction, QList<Layer*> layers);
 	void addNewKeyframe();
 	void updateKeyframes();
+	void toggleLightVolumeTransformation();
 signals:
 	void updateLayers(QList<Layer*> layers);
-	void toggleLightVolumeTransformation();
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;

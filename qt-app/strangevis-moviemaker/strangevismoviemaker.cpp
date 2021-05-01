@@ -45,9 +45,9 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(clearStatesAction, SIGNAL(triggered()), this, SLOT(clearStates()));
     ui.menuEdit->addAction(clearStatesAction);
 
-    QAction* toggleLightVolumeTransformation = new QAction("Toggle light/volume transformation", this);
-    connect(toggleLightVolumeTransformation, SIGNAL(triggered()), m_renderer, SLOT(toggleLightVolumeTransformation()));
-    ui.menuEdit->addAction(toggleLightVolumeTransformation);
+    QAction* toggleLightVolumeTransformationAction = new QAction("Toggle light/volume transformation", this);
+    connect(toggleLightVolumeTransformationAction, SIGNAL(triggered()), m_renderer, SLOT(toggleLightVolumeTransformation()));
+    ui.menuEdit->addAction(toggleLightVolumeTransformationAction);
 
     QAction* cutAction = new QAction("Cut type", this);
     connect(cutAction, SIGNAL(triggered()), this, SLOT(cut()));
