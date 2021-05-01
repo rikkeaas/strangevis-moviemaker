@@ -38,15 +38,25 @@ public:
 	void playAnimation();
 	int getAnimationDuration();
 	void setAnimationDuration(double);
+	void setSphereCut(bool);
+	void setCubeCut(bool);
+	void setSphereRadius(double);
+	void setCubeSize(double);
+	void setShowCut(bool, bool);
 public slots:
 	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor);
 	void addNewKeyframe();
 	void updateKeyframes();
+	void toggleLightVolumeTransformation();
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
 	QMatrix4x4 m_scaleMatrix;
 	QMatrix4x4 m_translateMatrix;
+
+	QMatrix4x4 m_lightRotateMatrix;
+	QMatrix4x4 m_lightTranslateMatrix;
+	bool m_transformLight = false;
 
 	QVector3D m_backgroundColor;
 
@@ -91,6 +101,13 @@ private:
 	QElapsedTimer timer;
 	LinearInterpolation* interpolater;
 	float animationDuration = 1000.f;
+
+	bool m_sphereCut = false;
+	bool m_cubeCut = false;
+	double m_sphereCutRadius;
+	double m_cubeCutSize;
+	bool m_showCut = false;
+	bool m_showInFront = false;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);
