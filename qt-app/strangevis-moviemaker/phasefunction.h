@@ -12,6 +12,7 @@ public:
 	void release();
 
 	void updatePhaseFunction(int startIdx, int endIdx, QVector<float>* data);
+	QVector<float> getPhaseFunctionData();
 private:
 	QOpenGLTexture m_phasefunction;
 

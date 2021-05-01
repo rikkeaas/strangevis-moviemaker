@@ -114,11 +114,6 @@ void main() {
 		//}
 
 		vec4 pfColor = texture(phaseFunction, vec2(densityAndGradient.r,0.5));
-		if (pfColor.a <= 0.015)
-		{
-			sampligPoint += rayDir * samplingDistance;
-			continue;
-		}
 
 		float x = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.x + voxelDimsInTexCoord.x, sampligPoint.yz))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.x - voxelDimsInTexCoord.x, sampligPoint.yz))).r));
 		float y = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.x, sampligPoint.y + voxelDimsInTexCoord.y, sampligPoint.z))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.x, sampligPoint.y - voxelDimsInTexCoord.y, sampligPoint.z))).r));

@@ -51,3 +51,13 @@ QVector3D LinearInterpolation::backgroundInterpolation(QVector3D fromColor, QVec
 	float b = (toColor.z() - fromColor.z()) * f + fromColor.z();
 	return QVector3D(r, g, b);
 }
+
+QVector<float> LinearInterpolation::phaseFunctionInterpolation(QVector<float> fromColor, QVector<float> toColor, float f)
+{
+	QVector<float> newColor;
+	for (int i = 0; i < fromColor.length(); i++) {
+		float r = (toColor.at(i) - fromColor.at(i)) * f + fromColor.at(i);
+		newColor << r;
+	}
+	return newColor;
+}
