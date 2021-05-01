@@ -40,17 +40,27 @@ public:
 	int getAnimationDuration();
 	void setAnimationDuration(double);
 	void setLayers(QList<Layer*>);
+	void setSphereCut(bool);
+	void setCubeCut(bool);
+	void setSphereRadius(double);
+	void setCubeSize(double);
+	void setShowCut(bool, bool);
 public slots:
 	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> phaseFunction, QList<Layer*> layers);
 	void addNewKeyframe();
 	void updateKeyframes();
 signals:
 	void updateLayers(QList<Layer*> layers);
+	void toggleLightVolumeTransformation();
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
 	QMatrix4x4 m_scaleMatrix;
 	QMatrix4x4 m_translateMatrix;
+
+	QMatrix4x4 m_lightRotateMatrix;
+	QMatrix4x4 m_lightTranslateMatrix;
+	bool m_transformLight = false;
 
 	QVector3D m_backgroundColor;
 	QVector<float> m_phaseFunctionData;
@@ -98,6 +108,13 @@ private:
 	QElapsedTimer timer;
 	LinearInterpolation* interpolater;
 	float animationDuration = 1000.f;
+
+	bool m_sphereCut = false;
+	bool m_cubeCut = false;
+	double m_sphereCutRadius;
+	double m_cubeCutSize;
+	bool m_showCut = false;
+	bool m_showInFront = false;
 
 	bool isInterpolating = false;
 	QList<Layer*> m_layers;

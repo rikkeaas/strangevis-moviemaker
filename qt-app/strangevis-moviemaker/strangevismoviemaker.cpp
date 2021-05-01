@@ -17,11 +17,14 @@
 strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     : QMainWindow(parent)
 {
+
     renderer->setParent(this);
     m_renderer = renderer;
 
     ui.setupUi(this);
-       
+    
+    cutMenu = ui.menuBar->addMenu("Cut");
+
     QAction* fileOpenAction = new QAction("Open", this);
     connect(fileOpenAction, SIGNAL(triggered()), this, SLOT(fileOpen()));
     ui.menuFile->addAction(fileOpenAction);
@@ -41,6 +44,29 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     QAction* clearStatesAction = new QAction("Clear All States", this);
     connect(clearStatesAction, SIGNAL(triggered()), this, SLOT(clearStates()));
     ui.menuEdit->addAction(clearStatesAction);
+
+    QAction* toggleLightVolumeTransformation = new QAction("Toggle light/volume transformation", this);
+    connect(toggleLightVolumeTransformation, SIGNAL(triggered()), m_renderer, SLOT(toggleLightVolumeTransformation()));
+    ui.menuEdit->addAction(toggleLightVolumeTransformation);
+
+    QAction* cutAction = new QAction("Cut type", this);
+    connect(cutAction, SIGNAL(triggered()), this, SLOT(cut()));
+    cutMenu->addAction(cutAction);
+
+    QAction* setRadius = new QAction("Set cut radius (spherical cut)", this);
+    connect(setRadius, SIGNAL(triggered()), this, SLOT(setRadius()));
+    cutMenu->addAction(setRadius);
+    cutMenu->actions().at(1)->setEnabled(false);
+
+    QAction* setSize = new QAction("Set cut size (cubical cut)", this);
+    connect(setSize, SIGNAL(triggered()), this, SLOT(setCutSize()));
+    cutMenu->addAction(setSize);
+    cutMenu->actions().at(2)->setEnabled(false);
+
+    QAction* showCut = new QAction("Visualize cut geometry", this);
+    connect(showCut, SIGNAL(triggered()), this, SLOT(setShowCut()));
+    cutMenu->addAction(showCut);
+    cutMenu->actions().at(3)->setEnabled(false);
 
     this->setMinimumSize(1600, 1200);
 
@@ -91,10 +117,97 @@ void strangevismoviemaker::setBackgroundColor()
     m_renderer->setBackgroundColor();
 }
 
+void strangevismoviemaker::cut()
+{
+    QStringList items;
+    items << "None" << "Spherical" << "Cubical";
+    QString item = QInputDialog::getItem(0, "Type of cut", "Type of cut: ", items, m_cutType, false, nullptr, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+    if (!item.isEmpty())
+    {
+        m_cutType = items.indexOf(item);
+        if (m_cutType == 0)
+        {
+            m_renderer->setCubeCut(false);
+            m_renderer->setSphereCut(false);
+            cutMenu->actions().at(1)->setEnabled(false);
+            cutMenu->actions().at(2)->setEnabled(false);
+            cutMenu->actions().at(3)->setEnabled(false);
+
+        }
+        if (m_cutType == 1)
+        {
+            m_renderer->setCubeCut(false);
+            m_renderer->setSphereCut(true);
+            cutMenu->actions().at(1)->setEnabled(true);
+            cutMenu->actions().at(2)->setEnabled(false);
+            cutMenu->actions().at(3)->setEnabled(true);
+            m_renderer->setSphereRadius(m_cutRadius);
+        }
+        if (m_cutType == 2)
+        {
+            m_renderer->setCubeCut(true);
+            m_renderer->setSphereCut(false);
+            cutMenu->actions().at(1)->setEnabled(false);
+            cutMenu->actions().at(2)->setEnabled(true);
+            cutMenu->actions().at(3)->setEnabled(true);
+            m_renderer->setCubeSize(m_cutSize);
+        }
+    }
+}
+
+void strangevismoviemaker::setShowCut()
+{
+    QStringList items;
+    items << "Don't show cut" << "Show cut in volume" << "Show cut in front";
+    QString item = QInputDialog::getItem(0, "Visualize Cut Geometry", "Select cut visualization", items, m_showCut, false, nullptr, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+
+    if (!item.isEmpty())
+    {
+        m_showCut = items.indexOf(item);
+        
+        if (m_showCut == 0)
+        {
+            m_renderer->setShowCut(false, false);
+        }
+        if (m_showCut == 1)
+        {
+            m_renderer->setShowCut(true, false);
+        }
+        if (m_showCut == 2)
+        {
+            m_renderer->setShowCut(true, true);
+        }
+
+    }
+
+}
+
+void strangevismoviemaker::setRadius()
+{
+    bool ok;
+    double radius = QInputDialog::getDouble(0, "Cut Sphere Radius", "Set radius of cut: ", m_cutRadius, 0.0, 2.0, 2, &ok, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+    if (ok)
+    {
+        m_cutRadius = radius;
+        m_renderer->setSphereRadius(radius);
+    }
+}
+
+void strangevismoviemaker::setCutSize()
+{
+    bool ok;
+    double size = QInputDialog::getDouble(0, "Cut Cube Size", "Set size of cut: ", m_cutSize, 0.0, 2.0, 2, &ok, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+    if (ok)
+    {
+        m_cutSize = size;
+        m_renderer->setCubeSize(size);
+    }
+}
+
 void strangevismoviemaker::adjustAnimationDuration()
 {
     auto duration = QInputDialog::getDouble(0, "Animation Speed",
-        "Set Animation Speed in Seconds:", m_renderer->getAnimationDuration(), 0.3, 5.0);
+        "Set Animation Speed in Seconds:", m_renderer->getAnimationDuration(), 0.3, 5.0, 1, nullptr, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
     m_renderer->setAnimationDuration(duration);
 }
 
