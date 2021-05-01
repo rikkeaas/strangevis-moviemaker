@@ -15,6 +15,7 @@
 #include "model.h"
 #include "keyframeHandler.h"
 #include "phasefunction.h"
+#include "layer.h";
 
 #include "interpolation.h"
 
@@ -38,10 +39,13 @@ public:
 	void playAnimation();
 	int getAnimationDuration();
 	void setAnimationDuration(double);
+	void setLayers(QList<Layer*>);
 public slots:
-	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> phaseFunction);
+	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> phaseFunction, QList<Layer*> layers);
 	void addNewKeyframe();
 	void updateKeyframes();
+signals:
+	void updateLayers(QList<Layer*> layers);
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
@@ -96,6 +100,7 @@ private:
 	float animationDuration = 1000.f;
 
 	bool isInterpolating = false;
+	QList<Layer*> m_layers;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);

@@ -10,6 +10,7 @@ class LayerHandler : public QWidget
 	Q_OBJECT
 public:
 	LayerHandler(HistogramChartView* chartView);
+	QList<Layer*> getLayers();
 private:
 	Layer* m_selectedLayer;
 	QList<Layer*>  m_layers;
@@ -19,7 +20,7 @@ private:
 public slots:
 	void addLayer(QRect area);
 	void layerSelected(Layer* selectedLayer, bool remove);
-
+	void setLayers(QList<Layer*> layers);
 signals:
 	void displayLayer(QRect area);
 	void undisplayLayer(QRect area);

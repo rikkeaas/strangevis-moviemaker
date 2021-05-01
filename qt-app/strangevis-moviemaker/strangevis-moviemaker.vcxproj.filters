@@ -14,6 +14,7 @@
     <ClCompile Include="layer.cpp" />
     <ClCompile Include="layerHandler.cpp" />
     <ClCompile Include="phasefunction.cpp" />
+    <ClCompile Include="colorSlot.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="interpolation.h" />
@@ -35,9 +36,6 @@
     <ClCompile Include="Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cube.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="strangevismoviemaker.h" />
@@ -50,14 +48,7 @@
     <QtMoc Include="layerHandler.h" />
     <QtMoc Include="layer.h" />
     <QtMoc Include="histogram.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="customSlider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cube.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <QtMoc Include="colorSlot.h" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="strangevismoviemaker.qrc" />
@@ -70,5 +61,6 @@
     <None Include="Shaders\raycast-fs.glsl" />
     <None Include="Shaders\raycast-vs.glsl" />
     <None Include="Shaders\vertexShader.glsl" />
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>
