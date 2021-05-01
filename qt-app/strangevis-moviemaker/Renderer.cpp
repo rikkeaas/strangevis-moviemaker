@@ -184,7 +184,8 @@ void Renderer::paintGL()
 	shaderProgram.release();
 	float elapsedTime = timer.restart()/animationDuration;
 	t += elapsedTime;
-	if (t <= 1) {
+	if (t < 1) {
+		isInterpolating = true;
 		QList<QMatrix4x4> newMatrices = interpolater->interpolate(fromKeyframe, toKeyframe, t);
 		m_projectionMatrix = newMatrices[0];
 		m_rotateMatrix = newMatrices[1];
@@ -193,6 +194,16 @@ void Renderer::paintGL()
 		m_backgroundColor = interpolater->backgroundInterpolation(fromBackgroundColor, toBackgroundColor, t);
 		m_phaseFunctionData = interpolater->phaseFunctionInterpolation(fromPhaseFunction, toPhaseFunction, t);
 		m_phasefunction->updatePhaseFunction(0, 256, &m_phaseFunctionData);
+		update();
+	}
+	if (t >= 1 && isInterpolating) {
+		m_projectionMatrix = toKeyframe[0];
+		m_rotateMatrix = toKeyframe[1];
+		m_scaleMatrix = toKeyframe[2];
+		m_translateMatrix = toKeyframe[3];
+		m_backgroundColor = toBackgroundColor;
+		m_phasefunction->updatePhaseFunction(0, 256, &toPhaseFunction);
+		isInterpolating = false;
 		update();
 	}
 }

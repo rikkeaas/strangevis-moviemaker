@@ -95,6 +95,8 @@ private:
 	LinearInterpolation* interpolater;
 	float animationDuration = 1000.f;
 
+	bool isInterpolating = false;
+
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
