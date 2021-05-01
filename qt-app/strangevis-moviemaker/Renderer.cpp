@@ -34,6 +34,9 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_translateMatrix.setToIdentity();
 	m_translateMatrix.translate(0.0, 0.0, -2.0 * sqrt(3.0));
 
+	m_lightRotateMatrix.setToIdentity();
+	m_lightTranslateMatrix.setToIdentity();
+
 	m_backgroundColor = QVector3D(0.0, 0.0, 0.0);
 	m_phaseFunctionData = m_phasefunction->getPhaseFunctionData();
 }
@@ -160,8 +163,18 @@ void Renderer::paintGL()
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
 	shaderProgram.setUniformValue("volumeTexture", 0);
 	shaderProgram.setUniformValue("phaseFunction", 1);
-	shaderProgram.setUniformValue("lightPosition", QVector3D((m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted() * QVector4D(5.0, 0.0, 0.0, 1.0)));
+	shaderProgram.setUniformValue("lightPosition", QVector3D((m_lightTranslateMatrix * m_lightRotateMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted() * QVector4D(5.0, 0.0, 0.0, 1.0)));
 	shaderProgram.setUniformValue("modelViewMatrix", m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
+	shaderProgram.setUniformValue("rotate", m_rotateMatrix);
+	shaderProgram.setUniformValue("invRotate", m_rotateMatrix.inverted());
+	shaderProgram.setUniformValue("sphereCut", m_sphereCut);
+	shaderProgram.setUniformValue("cubeCut", m_cubeCut);
+	shaderProgram.setUniformValue("sphereCutRadius", float(m_sphereCutRadius));
+	shaderProgram.setUniformValue("cubeCutSize", float(m_cubeCutSize));
+	shaderProgram.setUniformValue("showCut", m_showCut);
+	shaderProgram.setUniformValue("showInFront", m_showInFront);
+
+	shaderProgram.setUniformValue("inverseModelViewMatrix", (m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());
 	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
 	//qDebug() << "mvp " << m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix;
 	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());
@@ -251,15 +264,32 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 					qreal angle = acos(qMax(-1.0f, qMin(1.0f, QVector3D::dotProduct(va, vb))));
 					QVector3D axis = QVector3D::crossProduct(va, vb);
 
-					QMatrix4x4 inverseModelViewMatrix = m_rotateMatrix.inverted();
-					QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
+					if (m_transformLight)
+					{
+						QMatrix4x4 inverseModelViewMatrix = m_lightRotateMatrix.inverted();
+						QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
 
-					m_rotateMatrix.rotate(qRadiansToDegrees(angle), transformedAxis.toVector3D());
+						m_lightRotateMatrix.rotate(qRadiansToDegrees(angle), transformedAxis.toVector3D());
+					}
+					else
+					{
+						QMatrix4x4 inverseModelViewMatrix = m_rotateMatrix.inverted();
+						QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
+
+						m_rotateMatrix.rotate(qRadiansToDegrees(angle), transformedAxis.toVector3D());
+					}
 				}
 			}
 			else
 			{
-				m_translateMatrix.setColumn(3, m_translateMatrix.column(3) + QVector3D((m_previousX - m_currentX) * -0.001, (m_previousY - m_currentY) * 0.001, 0.0));
+				if (m_transformLight)
+				{
+					m_lightTranslateMatrix.setColumn(3, m_lightTranslateMatrix.column(3) + QVector3D((m_previousX - m_currentX) * -0.001, (m_previousY - m_currentY) * 0.001, 0.0));
+				}
+				else
+				{
+					m_translateMatrix.setColumn(3, m_translateMatrix.column(3) + QVector3D((m_previousX - m_currentX) * -0.001, (m_previousY - m_currentY) * 0.001, 0.0));
+				}
 			}
 		}
 	}
@@ -272,6 +302,14 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 
 void Renderer::wheelEvent(QWheelEvent* event)
 {
+	if (m_transformLight)
+	{
+		float translateZ = 1 + (float(event->delta()) / 1200.0);
+		m_lightTranslateMatrix.translate(0.0, 0.0, translateZ);
+		event->accept();
+		return;
+	}
+
 	float* values = new float[16];
 	m_scaleMatrix.copyDataTo(values);
 	QMatrix4x4 scaledMat = QMatrix4x4(values);
@@ -285,7 +323,7 @@ void Renderer::wheelEvent(QWheelEvent* event)
 
 	if (currScale > 2.0 || currScale < 0.5)
 	{
-		qDebug() << "Out of scale";
+		//qDebug() << "Out of scale";
 		event->accept();
 		return;
 	}
@@ -439,4 +477,35 @@ int Renderer::getAnimationDuration()
 void Renderer::setAnimationDuration(double newDur)
 {
 	animationDuration = newDur * 1000.f;
+}
+
+
+void Renderer::setSphereCut(bool cut)
+{
+	m_sphereCut = cut;
+}
+void Renderer::setCubeCut(bool cut)
+{
+	m_cubeCut = cut;
+}
+
+void Renderer::setSphereRadius(double rad)
+{
+	m_sphereCutRadius = rad;
+}
+
+void Renderer::setCubeSize(double size)
+{
+	m_cubeCutSize = size;
+}
+
+void Renderer::setShowCut(bool show, bool inFront)
+{
+	m_showCut = show;
+	m_showInFront = inFront;
+}
+
+void Renderer::toggleLightVolumeTransformation()
+{
+	m_transformLight = !m_transformLight;
 }

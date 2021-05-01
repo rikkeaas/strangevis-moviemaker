@@ -19,6 +19,10 @@ public slots:
     void clearStates();
     void setBackgroundColor();
     void adjustAnimationDuration();
+    void cut();
+    void setRadius();
+    void setCutSize();
+    void setShowCut();
 private:
     Ui::strangevismoviemakerClass ui;
     Renderer* m_renderer;
@@ -29,5 +33,10 @@ private:
     QWidget* keyframeWrapper;
     QSize* square;
     int screenshotCount = 0;
+    int m_cutType = 0;
+    double m_cutRadius = 0.5;
+    double m_cutSize = 0.5;
+    QMenu* cutMenu;
+    int m_showCut = 0;
     // class Histogram* m_histogram_widget{};
 };
