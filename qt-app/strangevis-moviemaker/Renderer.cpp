@@ -38,6 +38,7 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_lightTranslateMatrix.setToIdentity();
 
 	m_backgroundColor = QVector3D(0.0, 0.0, 0.0);
+	m_phaseFunctionData = m_phasefunction->getPhaseFunctionData();
 }
 
 
@@ -61,7 +62,8 @@ void Renderer::setState()
 	mx.append(m_scaleMatrix.data());
 	mx.append(m_translateMatrix.data());
 	qDebug() << "Background color in renderer: " << m_backgroundColor;
-	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx, m_backgroundColor);
+	m_phaseFunctionData = m_phasefunction->getPhaseFunctionData();
+	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx, m_backgroundColor, m_phasefunction->getPhaseFunctionData());
 	m_keyframeHandler->takeQtScreenShot(this, m_volume->getFilename());
 }
 
@@ -196,12 +198,25 @@ void Renderer::paintGL()
 	float elapsedTime = timer.restart()/animationDuration;
 	t += elapsedTime;
 	if (t < 1) {
+		isInterpolating = true;
 		QList<QMatrix4x4> newMatrices = interpolater->interpolate(fromKeyframe, toKeyframe, t);
 		m_projectionMatrix = newMatrices[0];
 		m_rotateMatrix = newMatrices[1];
 		m_scaleMatrix = newMatrices[2];
 		m_translateMatrix = newMatrices[3];
 		m_backgroundColor = interpolater->backgroundInterpolation(fromBackgroundColor, toBackgroundColor, t);
+		m_phaseFunctionData = interpolater->phaseFunctionInterpolation(fromPhaseFunction, toPhaseFunction, t);
+		m_phasefunction->updatePhaseFunction(0, 256, &m_phaseFunctionData);
+		update();
+	}
+	if (t >= 1 && isInterpolating) {
+		m_projectionMatrix = toKeyframe[0];
+		m_rotateMatrix = toKeyframe[1];
+		m_scaleMatrix = toKeyframe[2];
+		m_translateMatrix = toKeyframe[3];
+		m_backgroundColor = toBackgroundColor;
+		m_phasefunction->updatePhaseFunction(0, 256, &toPhaseFunction);
+		isInterpolating = false;
 		update();
 	}
 }
@@ -346,6 +361,9 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 	else if (event->key() == Qt::Key_A) {
 		playAnimation();
 	}
+	else if (event->key() == Qt::Key_P) {
+		qDebug() << m_phaseFunctionData;
+	}
 }
 
 
@@ -389,13 +407,15 @@ void Renderer::clearStates()
 	setKeyframes(keyframeWrapper, square);
 }
 
-void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor) {
+void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> phaseFunction) {
 	t = 0;
 	timer.restart();
 	fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
 	toKeyframe = matrices;
 	fromBackgroundColor = m_backgroundColor;
 	toBackgroundColor = backgroundColor;
+	fromPhaseFunction = m_phaseFunctionData;
+	toPhaseFunction = phaseFunction;
 	update();
 }
 
@@ -411,17 +431,36 @@ void Renderer::setBackgroundColor()
 void Renderer::playAnimation()
 {
 	auto states = m_keyframeHandler->getFiles();
-	int index = 0;
-	while (true) {
-		if (index >= states.at(1).length()) {
-			break;
+	if (states.at(1).length() > 0) {
+		auto backupMatrices = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
+		auto backupBackgroundColor = m_backgroundColor;
+		auto backupPhaseFunction = m_phaseFunctionData;
+		int index = 0;
+		int numberOfStates = states.at(1).length();
+		int keyframeHighlightIndex = numberOfStates - 1;
+		while (true) {
+			if (index >= numberOfStates) {
+				break;
+			}
+			m_keyframeHandler->readStates("states/" + states.at(1).at(index));
+			if (keyframeHighlightIndex < 9) {
+				m_keyframeHandler->highlightKeyframe(keyframeWrapper, keyframeHighlightIndex);
+			}
+			QEventLoop loop;
+			QTimer::singleShot(animationDuration, &loop, SLOT(quit()));
+			loop.exec();
+			if (keyframeHighlightIndex < 9) {
+				m_keyframeHandler->removeKeyframeHighlighting(keyframeWrapper, keyframeHighlightIndex);
+			}
+			index++;
+			keyframeHighlightIndex--;
 		}
-		m_keyframeHandler->readStates("states/" + states.at(1).at(index));
-		index++;
-		QEventLoop loop;
-		QTimer::singleShot(animationDuration, &loop, SLOT(quit()));
-		loop.exec();
+		setMatrices(backupMatrices, backupBackgroundColor, backupPhaseFunction);
 	}
+	else {
+		qDebug() << "Can't play animation with no saved states.";
+	}
+	
 }
 
 

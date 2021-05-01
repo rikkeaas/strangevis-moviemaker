@@ -44,7 +44,7 @@ public:
 	void setCubeSize(double);
 	void setShowCut(bool, bool);
 public slots:
-	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor);
+	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> phaseFunction);
 	void addNewKeyframe();
 	void updateKeyframes();
 	void toggleLightVolumeTransformation();
@@ -59,6 +59,7 @@ private:
 	bool m_transformLight = false;
 
 	QVector3D m_backgroundColor;
+	QVector<float> m_phaseFunctionData;
 
 	QList<QMatrix4x4> fromKeyframe;
 	QList<QMatrix4x4> toKeyframe;
@@ -66,6 +67,8 @@ private:
 	QVector3D fromBackgroundColor;
 	QVector3D toBackgroundColor;
 
+	QVector<float> fromPhaseFunction;
+	QVector<float> toPhaseFunction;
 
 	QOpenGLShaderProgram shaderProgram;
 	QVector<QVector3D> vertices;
@@ -108,6 +111,8 @@ private:
 	double m_cubeCutSize;
 	bool m_showCut = false;
 	bool m_showInFront = false;
+
+	bool isInterpolating = false;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);
