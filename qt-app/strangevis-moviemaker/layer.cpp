@@ -2,17 +2,16 @@
 #include <QStyleOption>
 #include <QPainter>
 #include <QDebug>
-#include <QLineEdit>
 #include <QHBoxLayout>
 #include <QFontDatabase>
 #include <QColorDialog>
 #include <QPushButton>
 #include "colorSlot.h"
 
-Layer::Layer(QWidget* parent, QRect area) : QWidget(parent)
+Layer::Layer(QWidget* parent, QRect area, bool isExisting, QColor color) : QWidget(parent)
 {
 	m_selectedArea = area;
-	QLineEdit* label = new QLineEdit();
+	label = new QLineEdit();
 	QHBoxLayout* layout = new QHBoxLayout();
 	label->setText("Layer name...");
 	int id = QFontDatabase::addApplicationFont("fonts/Roboto-Regular.ttf");
@@ -23,13 +22,14 @@ Layer::Layer(QWidget* parent, QRect area) : QWidget(parent)
 	label->setStyleSheet("QLineEdit {background-color: #4C4C4C;}");
 	layout->addWidget(label);
 	
-
 	//layout->setMargin(5);
 	layout->setContentsMargins(10, 10, 10, 10);
 
-	ColorSlot* colorSample = new ColorSlot(height());
+	ColorSlot* colorSample = new ColorSlot(40, color);
 	QObject::connect(colorSample, &ColorSlot::colorChange, this, &Layer::colorChange);
-	colorSample->publicMousePress();
+	if (!isExisting) {
+		colorSample->publicMousePress();
+	}
 	layout->addWidget(colorSample);
 	
 	setLayout(layout);

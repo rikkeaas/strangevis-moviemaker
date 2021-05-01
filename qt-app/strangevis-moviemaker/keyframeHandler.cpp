@@ -9,7 +9,7 @@
 #include <QDesktopWidget>
 
 
-void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*> matrices, QVector3D backgroundColor, QVector<float> phaseFunctionData)
+void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*> matrices, QVector3D backgroundColor, QVector<float> phaseFunctionData, QList<Layer*> layers)
 {
     setFilenameNumber();
     numberofStates++;
@@ -35,6 +35,23 @@ void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*>
     for (int i = 0; i < phaseFunctionData.length(); i++) {
         float f = phaseFunctionData.at(i);
         out << QString::number(f) << "\n";
+    }
+
+    if (layers.length() > 0) {
+        foreach(Layer* x, layers) {
+            QString layer = "";
+            layer.append(x->label->text() + ",");
+            qDebug() << "Writing rect: " << x->m_selectedArea;
+            layer.append(QString::number(x->m_selectedArea.topLeft().x()) + ",");
+            layer.append(QString::number(x->m_selectedArea.topLeft().y()) + ",");
+            layer.append(QString::number(x->m_selectedArea.width()) + ",");
+            layer.append(QString::number(x->m_selectedArea.height()) + ",");
+            layer.append(QString::number(x->m_layerRGBA.alpha()) + ",");
+            layer.append(QString::number(x->m_layerRGBA.red()) + ",");
+            layer.append(QString::number(x->m_layerRGBA.green()) + ",");
+            layer.append(QString::number(x->m_layerRGBA.blue()) + "\n");
+            out << layer;
+        }
     }
     
     qDebug() << "Saved state to file: " << f;
@@ -154,30 +171,49 @@ void KeyframeHandler::readStates(QString statePath) {
         float m_translateMatrix[16];
         QVector3D m_backgroundColorVector;
         QVector<float> m_phasefunctionVector;
+        QList<Layer*> m_layers;
 
         QTextStream in(&inputFile);
         int index = 0;
-        for (int i = 0; i < 1024+67; i++)
+        int i = 0;
+        while (!in.atEnd())
         {
             QString line = in.readLine();
-            float dd = line.toFloat();
-            if (i > 66) {
-                m_phasefunctionVector << dd;
-            } else if (i == 64) {
-                m_backgroundColorVector.setX(dd);
-            } else if (i == 65) {
-                m_backgroundColorVector.setY(dd);
-            } else if (i == 66) {
-                m_backgroundColorVector.setZ(dd);
-            } else if (i > 47) {
-                m_translateMatrix[index] = dd;
-            } else if (i > 31) {
-                m_scaleMatrix[index] = dd;
-            } else if (i > 15) {
-                m_rotateMatrix[index] = dd;
-            } else {
-                m_projectionMatrix[index] = dd;
+            if (i > 1024 + 66) {
+                QList<QString> layerString = line.split(",");
+                QString label = layerString[0];
+                QRect rect = QRect(layerString[1].toInt(), layerString[2].toInt(), layerString[3].toInt(), layerString[4].toInt());
+                qDebug() << "Reading rect: " << rect;
+                QColor color = QColor();
+                color.setAlpha(layerString[5].toInt());
+                color.setRed(layerString[6].toInt());
+                color.setGreen(layerString[7].toInt());
+                color.setBlue(layerString[8].toInt());
+                Layer* layer = new Layer(nullptr, rect, true, color);
+                layer->label->setText(label);
+                layer->m_selectedArea = rect;
+                layer->m_layerRGBA = color;
+                layer->setStyleSheet("background-color:#6D6D6D; height:45; border-radius:10px;");
+                m_layers.append(layer);
             }
+            else if (i > 66) {
+                m_phasefunctionVector << line.toFloat();
+            } else if (i == 64) {
+                m_backgroundColorVector.setX(line.toFloat());
+            } else if (i == 65) {
+                m_backgroundColorVector.setY(line.toFloat());
+            } else if (i == 66) {
+                m_backgroundColorVector.setZ(line.toFloat());
+            } else if (i > 47) {
+                m_translateMatrix[index] = line.toFloat();
+            } else if (i > 31) {
+                m_scaleMatrix[index] = line.toFloat();
+            } else if (i > 15) {
+                m_rotateMatrix[index] = line.toFloat();
+            } else {
+                m_projectionMatrix[index] = line.toFloat();
+            }
+            i++;
             index++;
             if (index == 16) {
                 index = 0;
@@ -190,7 +226,7 @@ void KeyframeHandler::readStates(QString statePath) {
         m_out.append(QMatrix4x4(m_rotateMatrix).transposed());
         m_out.append(QMatrix4x4(m_scaleMatrix).transposed());
         m_out.append(QMatrix4x4(m_translateMatrix).transposed());
-        matricesUpdated(m_out, QVector3D(m_backgroundColorVector), m_phasefunctionVector);
+        matricesUpdated(m_out, QVector3D(m_backgroundColorVector), m_phasefunctionVector, m_layers);
     }
 }
 

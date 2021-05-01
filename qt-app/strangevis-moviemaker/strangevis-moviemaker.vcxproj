@@ -127,6 +127,7 @@
     <QtMoc Include="Renderer.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="Shaders\fragmentShader.glsl" />
     <None Include="Shaders\raycast-fs.glsl" />
     <None Include="Shaders\raycast-vs.glsl" />

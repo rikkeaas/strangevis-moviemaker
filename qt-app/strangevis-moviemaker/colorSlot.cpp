@@ -3,12 +3,12 @@
 #include <QStyleOption>
 #include <QPainter>
 
-ColorSlot::ColorSlot(int size) : QWidget()
+ColorSlot::ColorSlot(int size, QColor inColor) : QWidget()
 {
 	setAutoFillBackground(true);
 	setFixedWidth(size);
 	setFixedHeight(size);
-	color = Qt::white;
+	color = inColor;
 	setStyleSheet("QWidget {background-color: " + color.name() + "; } QWidget:hover {border: 1px solid black;}");
 }
 

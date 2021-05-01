@@ -2,12 +2,13 @@
 #include <QFile>
 #include <QOpenGLWidget>
 #include <QMatrix4x4>
+#include "layer.h";
 
 
 class KeyframeHandler : public QWidget {
 	Q_OBJECT
 public:
-	void saveState(QWidget* widget, QString filename, QList<float*> matrices, QVector3D backgroundColor, QVector<float> phaseFunctionData);
+	void saveState(QWidget* widget, QString filename, QList<float*> matrices, QVector3D backgroundColor, QVector<float> phaseFunctionData, QList<Layer*> layers);
 	QWidget* updateKeyframes(QWidget* keyframeWrapper, QSize*, QString filename);
 	void highlightKeyframe(QWidget* keyframeWrapper, int index);
 	void removeKeyframeHighlighting(QWidget* keyframeWrapper, int index);
@@ -20,7 +21,7 @@ public slots:
 	void addButton();
 
 signals:
-	void matricesUpdated(QList<QMatrix4x4>, QVector3D, QVector<float>);
+	void matricesUpdated(QList<QMatrix4x4>, QVector3D, QVector<float>, QList<Layer*>);
 	void addedKeyframe();
 	void deletedKeyframe();
 private:

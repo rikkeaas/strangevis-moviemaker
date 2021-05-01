@@ -18,7 +18,7 @@ LayerHandler::LayerHandler(HistogramChartView* chartView) : QWidget()
 void LayerHandler::addLayer(QRect area)
 {
 	if (area.left() == area.right()) return;
-	Layer* newLayer = new Layer(this, area);
+	Layer* newLayer = new Layer(this, area, false, Qt::white);
 	newLayer->setStyleSheet("background-color:#6D6D6D; height:45; border-radius:10px;");
 	layout()->addWidget(newLayer);
 	
@@ -37,6 +37,7 @@ void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 		undisplayLayer(selectedLayer->m_selectedArea);
 		layout()->removeWidget(selectedLayer);
 		if (m_selectedLayer == selectedLayer) m_selectedLayer = NULL;
+		m_layers.removeAt(m_layers.indexOf(selectedLayer));
 		delete selectedLayer;
 
 	}
@@ -45,6 +46,28 @@ void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 		qDebug() << selectedLayer->m_selectedArea.left() << selectedLayer->m_selectedArea.right();
 		m_selectedLayer = selectedLayer;
 		displayLayer(selectedLayer->m_selectedArea);
+	}
+}
+
+QList<Layer*> LayerHandler::getLayers()
+{
+	return m_layers;
+}
+
+void LayerHandler::setLayers(QList<Layer*> layers)
+{
+	while (!layout()->isEmpty()) {
+		m_selectedLayer = NULL;
+		QLayoutItem* l = layout()->takeAt(0);
+		layout()->removeWidget(l->widget());
+		delete l->widget();
+	}
+	m_layers = layers;
+	foreach(auto * x, m_layers) {
+		x->setParent(this);
+		QObject::connect(x, &Layer::clicked, this, &LayerHandler::layerSelected);
+		QObject::connect(x, &Layer::updatePhaseFunc, this, &LayerHandler::updatePhaseFuncData);
+		layout()->addWidget(x);
 	}
 }
 

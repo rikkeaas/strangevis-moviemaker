@@ -12,7 +12,7 @@ class Histogram : public QWidget {
 public:
 	QChartView* getHistogram();
 	Histogram(Renderer* renderer);
-
+	LayerHandler* m_layerHandler;
 private:
 	std::map<float, int> binData(QVector<unsigned short>, int, int);
 	HistogramChartView* chartViewP;
@@ -29,7 +29,6 @@ private:
 
 	Renderer* m_renderer;
 
-	LayerHandler* m_layerHandler;
 
 public slots:
 	void updatePhaseFunction(int start, int end, QVector<float>);

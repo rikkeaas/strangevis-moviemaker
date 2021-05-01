@@ -208,10 +208,11 @@ void Histogram::registerClick(int index)
     clickItem.show();
     
     interval.append(index);
-
 }
 
 void Histogram::updatePhaseFunction(int start, int end, QVector<float> textureData)
 {
+    m_renderer->setLayers(m_layerHandler->getLayers());
+    qDebug() << m_layerHandler->getLayers().at(0)->m_selectedArea;
     m_renderer->getPhaseFunction()->updatePhaseFunction(start, end, &textureData);
 }
