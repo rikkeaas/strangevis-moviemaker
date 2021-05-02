@@ -23,6 +23,7 @@ public slots:
     void setRadius();
     void setCutSize();
     void setShowCut();
+    void setTypeOfAnimation();
 private:
     Ui::strangevismoviemakerClass ui;
     Renderer* m_renderer;
@@ -38,5 +39,6 @@ private:
     double m_cutSize = 0.5;
     QMenu* cutMenu;
     int m_showCut = 0;
+    int m_animationType = 0;
     // class Histogram* m_histogram_widget{};
 };

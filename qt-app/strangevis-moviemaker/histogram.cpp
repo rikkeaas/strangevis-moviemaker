@@ -196,7 +196,7 @@ void Histogram::registerClick(int index)
             textureData[i] = 0.0;
         }
 
-        m_renderer->getPhaseFunction()->updatePhaseFunction(start, end, &textureData);
+        m_renderer->getTransferFunction()->updateTransferFunction(start, end, &textureData);
     }
     else
     {
@@ -213,5 +213,5 @@ void Histogram::registerClick(int index)
 
 void Histogram::updatePhaseFunction(int start, int end, QVector<float> textureData)
 {
-    m_renderer->getPhaseFunction()->updatePhaseFunction(start, end, &textureData);
+    m_renderer->getTransferFunction()->updateTransferFunction(start, end, &textureData);
 }

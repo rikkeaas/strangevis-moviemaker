@@ -37,6 +37,10 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(setBackgroundColorAction, SIGNAL(triggered()), this, SLOT(setBackgroundColor()));
     ui.menuEdit->addAction(setBackgroundColorAction);
 
+    QAction* typeOfAnimation = new QAction("Set type of interpolation", this);
+    connect(typeOfAnimation, SIGNAL(triggered()), this, SLOT(setTypeOfAnimation()));
+    ui.menuEdit->addAction(typeOfAnimation);
+
     QAction* animationTimerAction = new QAction("Adjust Animation Duration", this);
     connect(animationTimerAction, SIGNAL(triggered()), this, SLOT(adjustAnimationDuration()));
     ui.menuEdit->addAction(animationTimerAction);
@@ -177,9 +181,28 @@ void strangevismoviemaker::setShowCut()
         {
             m_renderer->setShowCut(true, true);
         }
-
     }
+}
 
+void strangevismoviemaker::setTypeOfAnimation()
+{
+    QStringList items;
+    items << "Linear" << "Catmull Rom";
+    QString item = QInputDialog::getItem(0, "Set type of interpolation", "Select type of interpolation", items, m_animationType, false, nullptr, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+
+    if (!item.isEmpty())
+    {
+        m_animationType = items.indexOf(item);
+
+        if (m_animationType == 0)
+        {
+            m_renderer->setInterpolationType(false);
+        }
+        else
+        {
+            m_renderer->setInterpolationType(true);
+        }
+    }
 }
 
 void strangevismoviemaker::setRadius()

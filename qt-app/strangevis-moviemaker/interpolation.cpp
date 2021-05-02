@@ -52,7 +52,7 @@ QVector3D LinearInterpolation::backgroundInterpolation(QVector3D fromColor, QVec
 	return QVector3D(r, g, b);
 }
 
-QVector<float> LinearInterpolation::phaseFunctionInterpolation(QVector<float> fromColor, QVector<float> toColor, float f)
+QVector<float> LinearInterpolation::transferFunctionInterpolation(QVector<float> fromColor, QVector<float> toColor, float f)
 {
 	QVector<float> newColor;
 	for (int i = 0; i < fromColor.length(); i++) {
@@ -65,39 +65,51 @@ QVector<float> LinearInterpolation::phaseFunctionInterpolation(QVector<float> fr
 
 QMatrix4x4 CatmullRomInterpolation::catmullRomMat()
 {
-	QMatrix4x4 catmullRomMat = QMatrix4x4(-1.0, 3.0, -3.0, 1.0, 2.0, -5.0, 4.0, -1.0, -1.0, 0.0, 1.0, 0.0, 0.0, 2.0, 0.0, 0.0);
-	catmullRomMat = 0.5 * catmullRomMat;
-	return catmullRomMat;
+	QMatrix4x4 catmullRomMat = QMatrix4x4(-1.0, 3.0, -3.0, 1.0, 2.0, -5.0, 4.0, -1.0,-1.0, 0.0, 1.0, 0.0, 0.0, 2.0, 0.0, 0.0);
+	return 0.5 * catmullRomMat;
 }
 
 float CatmullRomInterpolation::scalarInterpolation(float p0, float p1, float p2, float p3, float samplePoint)
 {
-	//vec4 samplePointPow = vec4(pow(samplePoint, 3), pow(samplePoint, 2), samplePoint, 1);
-	//vec4 points = vec4(p0, p1, p2, p3);
+	QVector4D samplePointPow = QVector4D(pow(samplePoint, 3), pow(samplePoint, 2), samplePoint, 1);
+	QVector4D points = QVector4D(p0, p1, p2, p3);
 
-	return 0;//dot((samplePointPow * bezierMat()), points);
+	return QVector4D::dotProduct(samplePointPow * catmullRomMat(), points);
 }
 
 
 QVector3D CatmullRomInterpolation::vectorInterpolation(QVector3D p0, QVector3D p1, QVector3D p2, QVector3D p3, float samplePoint)
 {
-	//vec4 samplePointPow = vec4(pow(samplePoint, 3), pow(samplePoint, 2), samplePoint, 1);
-	//mat4x3 points = mat4x3(p0, p1, p2, p3);
+	QVector4D samplePointPow = QVector4D(pow(samplePoint, 3), pow(samplePoint, 2), samplePoint, 1);
+	QMatrix4x4 points;
+	points.setRow(0, QVector4D(p0, 0.0));
+	points.setRow(1, QVector4D(p1, 0.0));
+	points.setRow(2, QVector4D(p2, 0.0));
+	points.setRow(3, QVector4D(p3, 0.0));
 
-	return QVector3D();//points * (samplePointPow * bezierMat());
+	return ((samplePointPow * catmullRomMat()) * points).toVector3D();
 }
 
+QVector3D CatmullRomInterpolation::quaternionComponents(QQuaternion q)
+{
+	QVector3D quatComp;
+	quatComp.setX(q.x());
+	quatComp.setY(q.y());
+	quatComp.setZ(q.z());
+	return quatComp;
+}
 
 QQuaternion CatmullRomInterpolation::interpolateRotation(QQuaternion r0, QQuaternion r1, QQuaternion r2, QQuaternion r3, float samplePoint)
 {
-	//quat temp1 = slerp(r0, r1, samplePoint);
-	//quat temp2 = slerp(r1, r2, samplePoint);
-	//quat temp3 = slerp(r2, r3, samplePoint);
+	QVector3D qr0 = quaternionComponents(r0);
+	QVector3D qr1 = quaternionComponents(r1);
+	QVector3D qr2 = quaternionComponents(r2);
+	QVector3D qr3 = quaternionComponents(r3);
+	
+	QVector3D interQ = vectorInterpolation(qr0, qr1, qr2, qr3, samplePoint);
 
-	//quat temp4 = slerp(temp1, temp2, samplePoint);
-	//quat temp5 = slerp(temp2, temp3, samplePoint);
-
-	return QQuaternion();//slerp(temp4, temp5, samplePoint);
+	float interAng = scalarInterpolation(r0.scalar(), r1.scalar(), r2.scalar(), r3.scalar(), samplePoint);
+	return QQuaternion(interAng, interQ).normalized();
 }
 
 
@@ -112,7 +124,7 @@ QList<QMatrix4x4> CatmullRomInterpolation::matrixInterpolation(QList<QMatrix4x4>
 	QVector3D interpolatedTranslationVec = CatmullRomInterpolation::vectorInterpolation(t0, t1, t2, t3, samplePoint);
 	QMatrix4x4 interpolatedTranslation;
 	interpolatedTranslation.setToIdentity();
-	interpolatedTranslation.translate(interpolatedTranslationVec);
+	interpolatedTranslation.setColumn(3, QVector4D(interpolatedTranslationVec, 1.0));
 
 	// Exctracting scale from keyframe transform matrices, interpolating, then getting the scale matrix with the interpolated scale
 	QVector3D s0 = extractScale(p0[2]);
@@ -122,7 +134,10 @@ QList<QMatrix4x4> CatmullRomInterpolation::matrixInterpolation(QList<QMatrix4x4>
 	QVector3D interpolatedScaleVec = CatmullRomInterpolation::vectorInterpolation(s0, s1, s2, s3, samplePoint);
 	QMatrix4x4 interpolatedScale;
 	interpolatedScale.setToIdentity();
-	interpolatedScale.scale(interpolatedScaleVec);
+	interpolatedScale(0, 0) = interpolatedScaleVec[0];
+	interpolatedScale(1, 1) = interpolatedScaleVec[1];
+	interpolatedScale(2, 2) = interpolatedScaleVec[2];
+	//interpolatedScale.scale(interpolatedScaleVec);
 
 	// Extracting rotation from keyframe transform matrices, interpolating with slerp, then getting the interpolated rotation
 	QMatrix3x3 rot0 = extractRotation(p0[1]);
@@ -153,44 +168,34 @@ QList<QMatrix4x4> CatmullRomInterpolation::matrixInterpolation(QList<QMatrix4x4>
 	return m_out;
 }
 
-
+QVector<float> CatmullRomInterpolation::transferFunctionInterpolation(QVector<float> prevColor, QVector<float> fromColor, QVector<float> toColor, QVector<float> nextColor, float f)
+{
+	QVector<float> outTF;
+	for (int i = 0; i < fromColor.length(); i++) {
+		float r = scalarInterpolation(prevColor[i], fromColor[i], toColor[i], nextColor[i], f);
+		outTF << r;
+	}
+	return outTF;
+}
 
 
 
 QVector3D CatmullRomInterpolation::extractScale(QMatrix4x4 matrix)
 {
-	/*
-	vec3 scale;
+	QVector3D scale;
 	for (int i = 0; i < 3; i++)
 	{
-		scale[i] = length(vec3(matrix[i]));
+		scale[i] = matrix(i,i);
 	}
 	return scale;
-	*/
-	return QVector3D();
 }
 
 
 QVector3D CatmullRomInterpolation::extractTranslation(QMatrix4x4 matrix)
 {
-	//return vec3(matrix[3]);
-	return QVector3D();
+	return matrix.column(3).toVector3D();
 }
 
-
-QMatrix4x4 CatmullRomInterpolation::removeTranslation(QMatrix4x4 matrix)
-{
-	/*
-	mat4 newMat = matrix;
-	for (int i = 0; i < 3; i++)
-	{
-		newMat[3][i] = 0;
-	}
-	newMat[3][3] = 1;
-	return newMat;
-	*/
-	return QMatrix4x4();
-}
 
 QMatrix3x3 CatmullRomInterpolation::extractRotation(QMatrix4x4 matrix)
 {

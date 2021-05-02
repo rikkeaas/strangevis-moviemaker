@@ -14,6 +14,7 @@ public:
 	void takeQtScreenShot(QWidget* widget, QString);
 	bool toDelete = false;
 	QList<QStringList> getFiles();
+	void getStates(QString statePath, QList<QMatrix4x4> &matrices, QVector3D &background, QVector<float> &transferFunc);
 public slots:
 	void readStates(QString statePath);
 	void deleteKeyframe(QString statePath, QString snapshotPath);
