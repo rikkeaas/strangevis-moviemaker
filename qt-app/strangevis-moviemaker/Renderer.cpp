@@ -457,7 +457,18 @@ void Renderer::playAnimation()
 	if (states.at(1).length() > 0) {
 		auto backupMatrices = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
 		auto backupBackgroundColor = m_backgroundColor;
-		auto backuptransferFunction = m_transferFunctionData;
+		auto backuptransferFunction = m_transferfunction->getTransferFunctionData();
+		QList<Layer*> backupLayers;
+		for (Layer* l : m_layers)
+		{
+			Layer* nl = new Layer(nullptr, l->m_selectedArea, true, l->m_layerRGBA);
+			nl->label->setText(l->label->text());
+			nl->m_selectedArea = l->m_selectedArea;
+			nl->m_layerRGBA = l->m_layerRGBA;
+			nl->setStyleSheet("background-color:#6D6D6D; height:45; border-radius:10px;");
+			backupLayers.append(nl);
+		}
+
 		int index = 0;
 		int numberOfStates = states.at(1).length();
 		int keyframeHighlightIndex = numberOfStates - 1;
@@ -465,6 +476,7 @@ void Renderer::playAnimation()
 		QList<QList<QMatrix4x4>> matrices;
 		QList<QVector3D> backgrounds;
 		QList<QVector<float>> transferFunctions;
+		QList<QList<Layer*>> layers;
 
 		if (interpolationTypeIsCM)
 		{
@@ -473,12 +485,14 @@ void Renderer::playAnimation()
 				QList<QMatrix4x4> mats = QList<QMatrix4x4>();
 				QVector3D background = QVector3D();
 				QVector<float> tf = QVector<float>();
+				QList<Layer*> ls = QList<Layer*>();
 
-				m_keyframeHandler->getStates("states/" + states.at(1).at(i), mats, background, tf);
+				m_keyframeHandler->getStates("states/" + states.at(1).at(i), mats, background, tf, ls);
 
 				matrices.append(mats);
 				backgrounds.append(background);
 				transferFunctions.append(tf);
+				layers.append(ls);
 			}
 		}
 
@@ -496,6 +510,8 @@ void Renderer::playAnimation()
 				fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
 				fromBackgroundColor = m_backgroundColor;
 				fromTransferFunction = m_transferFunctionData;
+				m_layers = layers[index];
+				updateLayers(m_layers);
 				if (index == 0)
 				{
 					previousKeyframe = fromKeyframe;
@@ -542,7 +558,7 @@ void Renderer::playAnimation()
 			index++;
 			keyframeHighlightIndex--;
 		}
-		setMatrices(backupMatrices, backupBackgroundColor, backuptransferFunction, QList<Layer*>());
+		setMatrices(backupMatrices, backupBackgroundColor, backuptransferFunction, backupLayers);
 		catmullRom = false;
 	}
 	else {

@@ -161,7 +161,7 @@ void KeyframeHandler::removeKeyframeHighlighting(QWidget* keyframeWrapper, int i
     keyframeWrapper->layout()->itemAt(index)->widget()->setStyleSheet(backupStyleSheet);
 }
 
-void KeyframeHandler::getStates(QString statePath, QList<QMatrix4x4>& matrices, QVector3D& background, QVector<float>& transferFunc)
+void KeyframeHandler::getStates(QString statePath, QList<QMatrix4x4>& matrices, QVector3D& background, QVector<float>& transferFunc, QList<Layer*>& layers)
 {
     QFile inputFile(statePath);
     if (inputFile.open(QIODevice::ReadOnly))
@@ -172,44 +172,62 @@ void KeyframeHandler::getStates(QString statePath, QList<QMatrix4x4>& matrices, 
         float translateMatrix[16];
         QVector3D backgroundColorVector;
         QVector<float> transferfunctionVector;
+        QList<Layer*> tempLayers;
 
         QTextStream in(&inputFile);
         int index = 0;
-        for (int i = 0; i < 1024 + 67; i++)
+        int i = 0;
+        while (!in.atEnd())
         {
             QString line = in.readLine();
-            float dd = line.toFloat();
-            if (i > 66) {
-                transferfunctionVector << dd;
+            if (i > 1024 + 66) {
+                QList<QString> layerString = line.split(",");
+                QString label = layerString[0];
+                QRect rect = QRect(layerString[1].toInt(), layerString[2].toInt(), layerString[3].toInt(), layerString[4].toInt());
+                qDebug() << "Reading rect: " << rect;
+                QColor color = QColor();
+                color.setAlpha(layerString[5].toInt());
+                color.setRed(layerString[6].toInt());
+                color.setGreen(layerString[7].toInt());
+                color.setBlue(layerString[8].toInt());
+                Layer* layer = new Layer(nullptr, rect, true, color);
+                layer->label->setText(label);
+                layer->m_selectedArea = rect;
+                layer->m_layerRGBA = color;
+                layer->setStyleSheet("background-color:#6D6D6D; height:45; border-radius:10px;");
+                tempLayers.append(layer);
+            }
+            else if (i > 66) {
+                transferfunctionVector << line.toFloat();
             }
             else if (i == 64) {
-                backgroundColorVector.setX(dd);
+                backgroundColorVector.setX(line.toFloat());
             }
             else if (i == 65) {
-                backgroundColorVector.setY(dd);
+                backgroundColorVector.setY(line.toFloat());
             }
             else if (i == 66) {
-                backgroundColorVector.setZ(dd);
+                backgroundColorVector.setZ(line.toFloat());
             }
             else if (i > 47) {
-                translateMatrix[index] = dd;
+                translateMatrix[index] = line.toFloat();
             }
             else if (i > 31) {
-                scaleMatrix[index] = dd;
+                scaleMatrix[index] = line.toFloat();
             }
             else if (i > 15) {
-                rotateMatrix[index] = dd;
+                rotateMatrix[index] = line.toFloat();
             }
             else {
-                projectionMatrix[index] = dd;
+                projectionMatrix[index] = line.toFloat();
             }
+            i++;
             index++;
             if (index == 16) {
                 index = 0;
             }
         }
         inputFile.close();
-
        
         matrices.append(QMatrix4x4(projectionMatrix).transposed());
         matrices.append(QMatrix4x4(rotateMatrix).transposed());
@@ -217,6 +235,7 @@ void KeyframeHandler::getStates(QString statePath, QList<QMatrix4x4>& matrices, 
         matrices.append(QMatrix4x4(translateMatrix).transposed());
         background = QVector3D(backgroundColorVector);
         transferFunc = transferfunctionVector;
+        layers = tempLayers;
     }
 }
 
