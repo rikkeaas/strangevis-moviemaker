@@ -24,6 +24,7 @@ public slots:
     void setCutSize();
     void setShowCut();
     void setTypeOfAnimation();
+    void raySamplingDistance();
 private:
     Ui::strangevismoviemakerClass ui;
     Renderer* m_renderer;
@@ -37,6 +38,7 @@ private:
     int m_cutType = 0;
     double m_cutRadius = 0.5;
     double m_cutSize = 0.5;
+    QMenu* animationMenu;
     QMenu* cutMenu;
     int m_showCut = 0;
     int m_animationType = 0;

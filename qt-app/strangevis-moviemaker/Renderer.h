@@ -44,6 +44,8 @@ public:
 	void setCubeSize(double);
 	void setShowCut(bool, bool);
 	void setInterpolationType(bool);
+	void setRaySamplingDistance(float);
+	float getRaySamplingDistance();
 public slots:
 	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> transferFunction);
 	void addNewKeyframe();
@@ -123,6 +125,8 @@ private:
 	bool m_showInFront = false;
 
 	bool isInterpolating = false;
+
+	float m_raySamplingDistanceMultiplier = 1.0;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);

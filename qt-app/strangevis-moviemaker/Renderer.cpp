@@ -182,6 +182,7 @@ void Renderer::paintGL()
 	shaderProgram.setUniformValue("dimensionScaling", m_volume->getDimensionScale());
 	shaderProgram.setUniformValue("voxelDimsInTexCoord", QVector3D(QVector3D(1.0,1.0,1.0) / m_volume->getDimensions()));
 	shaderProgram.setUniformValue("backgroundColorVector", m_backgroundColor);
+	shaderProgram.setUniformValue("samplingDistanceMultiplier", m_raySamplingDistanceMultiplier);
 
 	shaderProgram.setAttributeArray("vertex", vertices.constData());
 	shaderProgram.enableAttributeArray("vertex");
@@ -592,4 +593,14 @@ void Renderer::setShowCut(bool show, bool inFront)
 void Renderer::toggleLightVolumeTransformation()
 {
 	m_transformLight = !m_transformLight;
+}
+
+void Renderer::setRaySamplingDistance(float newSamplingDistance)
+{
+	m_raySamplingDistanceMultiplier = newSamplingDistance;
+}
+
+float Renderer::getRaySamplingDistance()
+{
+	return m_raySamplingDistanceMultiplier;
 }

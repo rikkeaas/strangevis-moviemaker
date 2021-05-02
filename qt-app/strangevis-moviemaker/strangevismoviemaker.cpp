@@ -23,6 +23,7 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 
     ui.setupUi(this);
     
+    animationMenu = ui.menuBar->addMenu("Animation");
     cutMenu = ui.menuBar->addMenu("Cut");
 
     QAction* fileOpenAction = new QAction("Open", this);
@@ -37,21 +38,25 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(setBackgroundColorAction, SIGNAL(triggered()), this, SLOT(setBackgroundColor()));
     ui.menuEdit->addAction(setBackgroundColorAction);
 
-    QAction* typeOfAnimation = new QAction("Set type of interpolation", this);
-    connect(typeOfAnimation, SIGNAL(triggered()), this, SLOT(setTypeOfAnimation()));
-    ui.menuEdit->addAction(typeOfAnimation);
-
-    QAction* animationTimerAction = new QAction("Adjust Animation Duration", this);
-    connect(animationTimerAction, SIGNAL(triggered()), this, SLOT(adjustAnimationDuration()));
-    ui.menuEdit->addAction(animationTimerAction);
-
-    QAction* clearStatesAction = new QAction("Clear All States", this);
-    connect(clearStatesAction, SIGNAL(triggered()), this, SLOT(clearStates()));
-    ui.menuEdit->addAction(clearStatesAction);
+    QAction* raySamplingDistance = new QAction("Set ray sampling distance multiplier", this);
+    connect(raySamplingDistance, SIGNAL(triggered()), this, SLOT(raySamplingDistance()));
+    ui.menuEdit->addAction(raySamplingDistance);
 
     QAction* toggleLightVolumeTransformation = new QAction("Toggle light/volume transformation", this);
     connect(toggleLightVolumeTransformation, SIGNAL(triggered()), m_renderer, SLOT(toggleLightVolumeTransformation()));
     ui.menuEdit->addAction(toggleLightVolumeTransformation);
+
+    QAction* typeOfAnimation = new QAction("Set type of interpolation", this);
+    connect(typeOfAnimation, SIGNAL(triggered()), this, SLOT(setTypeOfAnimation()));
+    animationMenu->addAction(typeOfAnimation);
+
+    QAction* animationTimerAction = new QAction("Adjust Animation Duration", this);
+    connect(animationTimerAction, SIGNAL(triggered()), this, SLOT(adjustAnimationDuration()));
+    animationMenu->addAction(animationTimerAction);
+
+    QAction* clearStatesAction = new QAction("Clear All States", this);
+    connect(clearStatesAction, SIGNAL(triggered()), this, SLOT(clearStates()));
+    animationMenu->addAction(clearStatesAction);
 
     QAction* cutAction = new QAction("Cut type", this);
     connect(cutAction, SIGNAL(triggered()), this, SLOT(cut()));
@@ -307,6 +312,14 @@ void strangevismoviemaker::closeEvent(QCloseEvent* event)
         while (at.hasNext())
             QFile(at.next()).remove();
     }
+}
+
+void strangevismoviemaker::raySamplingDistance()
+{
+    bool ok;
+    auto rsdm = QInputDialog::getDouble(0, "Ray sampling distance multiplier",
+        "Set ray sampling distance multiplier:", m_renderer->getRaySamplingDistance(), 0.5, 100.0, 1, &ok, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+    m_renderer->setRaySamplingDistance(rsdm);
 }
 
 void strangevismoviemaker::clearStates()

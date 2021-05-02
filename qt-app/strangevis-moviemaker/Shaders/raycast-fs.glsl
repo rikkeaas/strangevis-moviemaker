@@ -27,6 +27,8 @@ uniform sampler2D transferFunction;
 
 uniform vec3 backgroundColorVector;
 
+uniform float samplingDistanceMultiplier = 1.0;
+
 in vec2 fragCoord;
 out vec4 fragColor;
 
@@ -169,13 +171,10 @@ void main() {
     vec3 rayDir = normalize(far.xyz - near.xyz);
 
 	vec2 t_hit = intersect_box(rayOrigin, rayDir);
-	
 	t_hit.x = max(t_hit.x, 0.0);
 
-
-	float samplingDistance = 0.002;
-	float gd = 0.001;
 	float renderDistance = t_hit.y - t_hit.x;
+	float samplingDistance = 0.001 * samplingDistanceMultiplier;
 
 	vec3 firstValues = vec3(0.0);
 	bool notFound = true;

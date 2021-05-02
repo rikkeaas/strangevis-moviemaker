@@ -21,7 +21,6 @@ private:
 	static float scalarInterpolation(float p0, float p1, float p2, float p3, float samplePoint);
 	static QVector3D extractScale(QMatrix4x4 matrix);
 	static QVector3D extractTranslation(QMatrix4x4 matrix);
-	static QMatrix4x4 removeTranslation(QMatrix4x4 matrix);
 	static QMatrix3x3 extractRotation(QMatrix4x4 matrix);
 	static QQuaternion interpolateRotation(QQuaternion r0, QQuaternion r1, QQuaternion r2, QQuaternion r3, float samplePoint);
 	static QMatrix4x4 catmullRomMat();
