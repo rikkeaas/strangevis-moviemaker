@@ -50,6 +50,7 @@ public slots:
 	void addNewKeyframe();
 	void updateKeyframes();
 	void toggleLightVolumeTransformation();
+	void updateWidget();
 signals:
 	void updateLayers(QList<Layer*> layers);
 private:

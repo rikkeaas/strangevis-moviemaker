@@ -13,7 +13,9 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
 	setFocusPolicy(Qt::StrongFocus);
 	m_volume = new Model(this);
-	m_volume->load("./data/hand/hand.dat");
+	m_volume->threadedLoading("./data/hand/hand.dat");
+	connect(m_volume, &Model::loadedModel, this, &Renderer::updateWidget);
+
 
 	m_keyframeHandler = new KeyframeHandler();
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
@@ -519,4 +521,9 @@ void Renderer::setShowCut(bool show, bool inFront)
 void Renderer::toggleLightVolumeTransformation()
 {
 	m_transformLight = !m_transformLight;
+}
+
+void Renderer::updateWidget()
+{
+	update();
 }

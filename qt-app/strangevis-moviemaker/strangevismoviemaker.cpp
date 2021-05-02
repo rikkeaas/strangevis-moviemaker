@@ -12,6 +12,7 @@
 #include <QDesktopWidget>
 #include <QtCharts>
 #include <QDateTime>
+#include <QtConcurrent>
 
 
 strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
@@ -83,7 +84,8 @@ void strangevismoviemaker::fileOpen()
     QString fileName = QFileDialog::getOpenFileName(this, "Open Volume File", QString(), "*.dat");
     if (!fileName.isEmpty())
     {
-        if (m_renderer->getVolume()->load(fileName))
+        m_renderer->getVolume()->threadedLoading(fileName);
+        if (true)
         {
             for (QDockWidget* dw : this->findChildren<QDockWidget *>())
             {
@@ -262,10 +264,11 @@ QWidget* strangevismoviemaker::toolbarContent(QWidget* content, QString header) 
     label->setFont(f);
 
     auto dockContent = new QWidget();
-    dockContent->setStyleSheet("background-color: #3C3C3C;border-radius:18px;");
+    dockContent->setStyleSheet("background-color: #3C3C3C; border-radius:18px;");
     dockContent->setLayout(dockLayout);
     dockLayout->addWidget(label);
     dockLayout->addWidget(content);
+    
 
     return dockContent;
 }
