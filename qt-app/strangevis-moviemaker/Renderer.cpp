@@ -22,7 +22,7 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 
 	interpolater = new LinearInterpolation();
 
-	m_phasefunction = new PhaseFunction();
+	m_transferfunction = new TransferFunction();
 
 	alpha = 25;
 	beta = -25;
@@ -38,14 +38,14 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_lightTranslateMatrix.setToIdentity();
 
 	m_backgroundColor = QVector3D(0.0, 0.0, 0.0);
-	m_phaseFunctionData = m_phasefunction->getPhaseFunctionData();
+	m_transferFunctionData = m_transferfunction->getTransferFunctionData();
 }
 
 
 Renderer::~Renderer()
 {
 	m_volume->~Model();
-	m_phasefunction->~PhaseFunction();
+	m_transferfunction->~TransferFunction();
 }
 
 
@@ -62,8 +62,8 @@ void Renderer::setState()
 	mx.append(m_scaleMatrix.data());
 	mx.append(m_translateMatrix.data());
 	qDebug() << "Background color in renderer: " << m_backgroundColor;
-	m_phaseFunctionData = m_phasefunction->getPhaseFunctionData();
-	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx, m_backgroundColor, m_phasefunction->getPhaseFunctionData(), m_layers);
+	m_transferFunctionData = m_transferfunction->getTransferFunctionData();
+	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx, m_backgroundColor, m_transferfunction->getTransferFunctionData(), m_layers);
 	m_keyframeHandler->takeQtScreenShot(this, m_volume->getFilename());
 }
 
@@ -158,11 +158,11 @@ void Renderer::paintGL()
 	glActiveTexture(GL_TEXTURE0);
 	m_volume->bind();
 	glActiveTexture(GL_TEXTURE0+1);
-	m_phasefunction->bind();
+	m_transferfunction->bind();
 
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
 	shaderProgram.setUniformValue("volumeTexture", 0);
-	shaderProgram.setUniformValue("phaseFunction", 1);
+	shaderProgram.setUniformValue("transferFunction", 1);
 	shaderProgram.setUniformValue("lightPosition", QVector3D((m_lightTranslateMatrix * m_lightRotateMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted() * QVector4D(5.0, 0.0, 0.0, 1.0)));
 	shaderProgram.setUniformValue("modelViewMatrix", m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
 	shaderProgram.setUniformValue("rotate", m_rotateMatrix);
@@ -182,6 +182,7 @@ void Renderer::paintGL()
 	shaderProgram.setUniformValue("dimensionScaling", m_volume->getDimensionScale());
 	shaderProgram.setUniformValue("voxelDimsInTexCoord", QVector3D(QVector3D(1.0,1.0,1.0) / m_volume->getDimensions()));
 	shaderProgram.setUniformValue("backgroundColorVector", m_backgroundColor);
+	shaderProgram.setUniformValue("samplingDistanceMultiplier", m_raySamplingDistanceMultiplier);
 
 	shaderProgram.setAttributeArray("vertex", vertices.constData());
 	shaderProgram.enableAttributeArray("vertex");
@@ -189,7 +190,7 @@ void Renderer::paintGL()
 	shaderProgram.disableAttributeArray("vertex");
 
 	glActiveTexture(GL_TEXTURE0+1);
-	m_phasefunction->release();
+	m_transferfunction->release();
 	glActiveTexture(GL_TEXTURE0);
 	m_volume->release();
 	
@@ -199,14 +200,29 @@ void Renderer::paintGL()
 	t += elapsedTime;
 	if (t < 1) {
 		isInterpolating = true;
-		QList<QMatrix4x4> newMatrices = interpolater->interpolate(fromKeyframe, toKeyframe, t);
-		m_projectionMatrix = newMatrices[0];
-		m_rotateMatrix = newMatrices[1];
-		m_scaleMatrix = newMatrices[2];
-		m_translateMatrix = newMatrices[3];
-		m_backgroundColor = interpolater->backgroundInterpolation(fromBackgroundColor, toBackgroundColor, t);
-		m_phaseFunctionData = interpolater->phaseFunctionInterpolation(fromPhaseFunction, toPhaseFunction, t);
-		m_phasefunction->updatePhaseFunction(0, 256, &m_phaseFunctionData);
+
+		if (catmullRom)
+		{
+			QList<QMatrix4x4> newMatrices = CatmullRomInterpolation::matrixInterpolation(previousKeyframe, fromKeyframe, toKeyframe, nextKeyframe, t);
+			m_projectionMatrix = newMatrices[0];
+			m_rotateMatrix = newMatrices[1];
+			m_scaleMatrix = newMatrices[2];
+			m_translateMatrix = newMatrices[3];
+			m_backgroundColor = CatmullRomInterpolation::vectorInterpolation(previousBackgroundColor, fromBackgroundColor, toBackgroundColor, nextBackgroundColor, t);
+			m_transferFunctionData = CatmullRomInterpolation::transferFunctionInterpolation(previousTransferFunction, fromTransferFunction, toTransferFunction, nextTransferFunction, t);
+			m_transferfunction->updateTransferFunction(0, 256, &m_transferFunctionData);
+		}
+		else
+		{
+			QList<QMatrix4x4> newMatrices = interpolater->interpolate(fromKeyframe, toKeyframe, t);
+			m_projectionMatrix = newMatrices[0];
+			m_rotateMatrix = newMatrices[1];
+			m_scaleMatrix = newMatrices[2];
+			m_translateMatrix = newMatrices[3];
+			m_backgroundColor = interpolater->backgroundInterpolation(fromBackgroundColor, toBackgroundColor, t);
+			m_transferFunctionData = interpolater->transferFunctionInterpolation(fromTransferFunction, toTransferFunction, t);
+			m_transferfunction->updateTransferFunction(0, 256, &m_transferFunctionData);
+		}
 		update();
 	}
 	if (t >= 1 && isInterpolating) {
@@ -215,7 +231,7 @@ void Renderer::paintGL()
 		m_scaleMatrix = toKeyframe[2];
 		m_translateMatrix = toKeyframe[3];
 		m_backgroundColor = toBackgroundColor;
-		m_phasefunction->updatePhaseFunction(0, 256, &toPhaseFunction);
+		m_transferfunction->updateTransferFunction(0, 256, &toTransferFunction);
 		isInterpolating = false;
 		update();
 	}
@@ -240,7 +256,7 @@ void Renderer::mousePressEvent(QMouseEvent* event)
 		else 
 			data << 0.0 << 0.0 << 1.0 << 1.0;
 	}
-	m_phasefunction->updatePhaseFunction(0, 256, &data);
+	m_transferfunction->updatetransferFunction(0, 256, &data);
 	*/
 	clicks++;
 }
@@ -362,7 +378,7 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		playAnimation();
 	}
 	else if (event->key() == Qt::Key_P) {
-		qDebug() << m_phaseFunctionData;
+		qDebug() << m_transferFunctionData;
 	}
 }
 
@@ -407,15 +423,15 @@ void Renderer::clearStates()
 	setKeyframes(keyframeWrapper, square);
 }
 
-void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> phaseFunction, QList<Layer*> layers) {
+void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> transferFunction, QList<Layer*> layers) {
 	t = 0;
 	timer.restart();
 	fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
 	toKeyframe = matrices;
 	fromBackgroundColor = m_backgroundColor;
 	toBackgroundColor = backgroundColor;
-	fromPhaseFunction = m_phaseFunctionData;
-	toPhaseFunction = phaseFunction;
+	fromTransferFunction = m_transferFunctionData;
+	toTransferFunction = transferFunction;
 	m_layers = layers;
 	updateLayers(m_layers);
 	update();
@@ -441,15 +457,79 @@ void Renderer::playAnimation()
 	if (states.at(1).length() > 0) {
 		auto backupMatrices = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
 		auto backupBackgroundColor = m_backgroundColor;
-		auto backupPhaseFunction = m_phaseFunctionData;
+		auto backuptransferFunction = m_transferFunctionData;
 		int index = 0;
 		int numberOfStates = states.at(1).length();
 		int keyframeHighlightIndex = numberOfStates - 1;
+
+		QList<QList<QMatrix4x4>> matrices;
+		QList<QVector3D> backgrounds;
+		QList<QVector<float>> transferFunctions;
+
+		if (interpolationTypeIsCM)
+		{
+			for (int i = 0; i < numberOfStates; i++)
+			{
+				QList<QMatrix4x4> mats = QList<QMatrix4x4>();
+				QVector3D background = QVector3D();
+				QVector<float> tf = QVector<float>();
+
+				m_keyframeHandler->getStates("states/" + states.at(1).at(i), mats, background, tf);
+
+				matrices.append(mats);
+				backgrounds.append(background);
+				transferFunctions.append(tf);
+			}
+		}
+
+
 		while (true) {
 			if (index >= numberOfStates) {
 				break;
 			}
-			m_keyframeHandler->readStates("states/" + states.at(1).at(index));
+			if (!interpolationTypeIsCM)
+			{
+				m_keyframeHandler->readStates("states/" + states.at(1).at(index));
+			}
+			else
+			{
+				fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
+				fromBackgroundColor = m_backgroundColor;
+				fromTransferFunction = m_transferFunctionData;
+				if (index == 0)
+				{
+					previousKeyframe = fromKeyframe;
+					previousBackgroundColor = fromBackgroundColor;
+					previousTransferFunction = fromTransferFunction;
+				}
+				else
+				{
+					previousKeyframe = matrices[index - 1];
+					previousBackgroundColor = backgrounds[index - 1];
+					previousTransferFunction = transferFunctions[index - 1];
+				}
+				toKeyframe = matrices[index];
+				toBackgroundColor = backgrounds[index];
+				toTransferFunction = transferFunctions[index];
+				if (index == numberOfStates - 1)
+				{
+					nextKeyframe = backupMatrices;
+					nextBackgroundColor = backupBackgroundColor;
+					nextTransferFunction = backuptransferFunction;
+				}
+				else
+				{
+					nextKeyframe = matrices[index + 1];
+					nextBackgroundColor = backgrounds[index + 1];
+					nextTransferFunction = transferFunctions[index + 1];
+				}
+
+				t = 0.0;
+				catmullRom = true;
+				timer.restart();
+				update();
+			}
+
 			if (keyframeHighlightIndex < 9) {
 				m_keyframeHandler->highlightKeyframe(keyframeWrapper, keyframeHighlightIndex);
 			}
@@ -462,7 +542,8 @@ void Renderer::playAnimation()
 			index++;
 			keyframeHighlightIndex--;
 		}
-		setMatrices(backupMatrices, backupBackgroundColor, backupPhaseFunction, QList<Layer*>());
+		setMatrices(backupMatrices, backupBackgroundColor, backuptransferFunction, QList<Layer*>());
+		catmullRom = false;
 	}
 	else {
 		qDebug() << "Can't play animation with no saved states.";
@@ -470,10 +551,14 @@ void Renderer::playAnimation()
 	
 }
 
-
-PhaseFunction* Renderer::getPhaseFunction()
+void Renderer::setInterpolationType(bool b)
 {
-	return m_phasefunction;
+	interpolationTypeIsCM = b;
+}
+
+TransferFunction* Renderer::getTransferFunction()
+{
+	return m_transferfunction;
 }
 
 int Renderer::getAnimationDuration()
@@ -519,4 +604,14 @@ void Renderer::setShowCut(bool show, bool inFront)
 void Renderer::toggleLightVolumeTransformation()
 {
 	m_transformLight = !m_transformLight;
+}
+
+void Renderer::setRaySamplingDistance(float newSamplingDistance)
+{
+	m_raySamplingDistanceMultiplier = newSamplingDistance;
+}
+
+float Renderer::getRaySamplingDistance()
+{
+	return m_raySamplingDistanceMultiplier;
 }

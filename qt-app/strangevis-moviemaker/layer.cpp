@@ -49,7 +49,7 @@ void Layer::colorChange(QColor color)
 {
 	m_layerRGBA = color;
 	clicked(this, false);
-	updatePhaseFunc();
+	updateTransferFunc();
 }
 
 // some hacky code from Stack Overflow

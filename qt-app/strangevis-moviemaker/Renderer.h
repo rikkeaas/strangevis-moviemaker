@@ -14,8 +14,8 @@
 
 #include "model.h"
 #include "keyframeHandler.h"
-#include "phasefunction.h"
-#include "layer.h";
+#include "transferFunction.h"
+#include "layer.h"
 
 #include "interpolation.h"
 
@@ -33,7 +33,7 @@ public:
 	Model* getVolume();
 	QWidget* setKeyframes(QWidget*, QSize*);
 	void setKeyframeWrapper(QWidget* qw);
-	PhaseFunction* getPhaseFunction();
+	TransferFunction* getTransferFunction();
 	void clearStates();
 	void setBackgroundColor();
 	void playAnimation();
@@ -45,8 +45,11 @@ public:
 	void setSphereRadius(double);
 	void setCubeSize(double);
 	void setShowCut(bool, bool);
+	void setInterpolationType(bool);
+	void setRaySamplingDistance(float);
+	float getRaySamplingDistance();
 public slots:
-	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> phaseFunction, QList<Layer*> layers);
+	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> transferFunction, QList<Layer*> layers);
 	void addNewKeyframe();
 	void updateKeyframes();
 	void toggleLightVolumeTransformation();
@@ -63,16 +66,22 @@ private:
 	bool m_transformLight = false;
 
 	QVector3D m_backgroundColor;
-	QVector<float> m_phaseFunctionData;
+	QVector<float> m_transferFunctionData;
 
+	QList<QMatrix4x4> previousKeyframe;
 	QList<QMatrix4x4> fromKeyframe;
 	QList<QMatrix4x4> toKeyframe;
+	QList<QMatrix4x4> nextKeyframe;
 
+	QVector3D previousBackgroundColor;
 	QVector3D fromBackgroundColor;
 	QVector3D toBackgroundColor;
+	QVector3D nextBackgroundColor;
 
-	QVector<float> fromPhaseFunction;
-	QVector<float> toPhaseFunction;
+	QVector<float> previousTransferFunction;
+	QVector<float> fromTransferFunction;
+	QVector<float> toTransferFunction;
+	QVector<float> nextTransferFunction;
 
 	QOpenGLShaderProgram shaderProgram;
 	QVector<QVector3D> vertices;
@@ -95,7 +104,7 @@ private:
 	QVector3D arcballVector(qreal x, qreal y);
 
 	Model* m_volume;
-	PhaseFunction* m_phasefunction;
+	TransferFunction* m_transferfunction;
 
 	int clicks = 0;
 
@@ -109,6 +118,9 @@ private:
 	LinearInterpolation* interpolater;
 	float animationDuration = 1000.f;
 
+	bool catmullRom = false;
+	bool interpolationTypeIsCM = true;
+
 	bool m_sphereCut = false;
 	bool m_cubeCut = false;
 	double m_sphereCutRadius;
@@ -118,6 +130,8 @@ private:
 
 	bool isInterpolating = false;
 	QList<Layer*> m_layers;
+
+	float m_raySamplingDistanceMultiplier = 1.0;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);

@@ -23,9 +23,11 @@ uniform vec3 voxelDimsInTexCoord;
 uniform vec3 lightPosition;
 
 uniform sampler3D volumeTexture;
-uniform sampler2D phaseFunction;
+uniform sampler2D transferFunction;
 
 uniform vec3 backgroundColorVector;
+
+uniform float samplingDistanceMultiplier = 1.0;
 
 in vec2 fragCoord;
 out vec4 fragColor;
@@ -169,13 +171,10 @@ void main() {
     vec3 rayDir = normalize(far.xyz - near.xyz);
 
 	vec2 t_hit = intersect_box(rayOrigin, rayDir);
-	
 	t_hit.x = max(t_hit.x, 0.0);
 
-
-	float samplingDistance = 0.002;
-	float gd = 0.001;
 	float renderDistance = t_hit.y - t_hit.x;
+	float samplingDistance = 0.001 * samplingDistanceMultiplier;
 
 	vec3 firstValues = vec3(0.0);
 	bool notFound = true;
@@ -296,7 +295,7 @@ void main() {
 		//	continue;
 		//}
 
-		vec4 pfColor = texture(phaseFunction, vec2(densityAndGradient.r,0.5));
+		vec4 tfColor = texture(transferFunction, vec2(densityAndGradient.r,0.5));
 
 		float x = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.x + voxelDimsInTexCoord.x, sampligPoint.yz))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.x - voxelDimsInTexCoord.x, sampligPoint.yz))).r));
 		float y = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.x, sampligPoint.y + voxelDimsInTexCoord.y, sampligPoint.z))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.x, sampligPoint.y - voxelDimsInTexCoord.y, sampligPoint.z))).r));
@@ -313,10 +312,10 @@ void main() {
 
 
 		//vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(densityAndGradient.yzw), pfColor.rgb);
-		vec3 phong = diffuseComponent(lightPosition, sampligPoint, normalize(vec3(x,y,z)), pfColor.rgb);
-		phong += pfColor.rgb * 0.2;
-		color.rgb += (1.0 - color.a) * pfColor.a * phong;
-		color.a += (1.0 - color.a) * pfColor.a;
+		vec3 phong = diffuseComponent(lightPosition, sampligPoint, normalize(vec3(x,y,z)), tfColor.rgb);
+		phong += tfColor.rgb * 0.2;
+		color.rgb += (1.0 - color.a) * tfColor.a * phong;
+		color.a += (1.0 - color.a) * tfColor.a;
 		notFound = false;
 
 

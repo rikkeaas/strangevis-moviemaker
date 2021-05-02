@@ -98,7 +98,7 @@
       <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
     </ClCompile>
     <ClCompile Include="layerHandler.cpp" />
-    <ClCompile Include="phasefunction.cpp" />
+    <ClCompile Include="transferFunction.cpp" />
     <ClCompile Include="histogram.cpp" />
     <QtRcc Include="strangevismoviemaker.qrc" />
     <QtUic Include="strangevismoviemaker.ui" />
@@ -118,16 +118,15 @@
     <QtMoc Include="layerHandler.h" />
     <QtMoc Include="layer.h" />
     <QtMoc Include="colorSlot.h" />
-    <ClInclude Include="phasefunction.h" />
+    <ClInclude Include="transferFunction.h" />
     <QtMoc Include="histogram.h" />
     <ClInclude Include="interpolation.h" />
     <QtMoc Include="keyframeHandler.h" />
     <QtMoc Include="keyframes.h" />
-    <QtMoc Include="model.h" />
+    <ClInclude Include="model.h" />
     <QtMoc Include="Renderer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="cpp.hint" />
     <None Include="Shaders\fragmentShader.glsl" />
     <None Include="Shaders\raycast-fs.glsl" />
     <None Include="Shaders\raycast-vs.glsl" />

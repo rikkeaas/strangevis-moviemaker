@@ -13,12 +13,12 @@
     <ClCompile Include="histogramChartView.cpp" />
     <ClCompile Include="layer.cpp" />
     <ClCompile Include="layerHandler.cpp" />
-    <ClCompile Include="phasefunction.cpp" />
+    <ClCompile Include="transferFunction.cpp" />
     <ClCompile Include="colorSlot.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="interpolation.h" />
-    <ClInclude Include="phasefunction.h" />
+    <ClInclude Include="transferFunction.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="strangevismoviemaker.cpp">
@@ -61,6 +61,5 @@
     <None Include="Shaders\raycast-fs.glsl" />
     <None Include="Shaders\raycast-vs.glsl" />
     <None Include="Shaders\vertexShader.glsl" />
-    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>
