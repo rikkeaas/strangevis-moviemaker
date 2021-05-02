@@ -6,7 +6,7 @@ class ColorSlot : public QWidget
 	Q_OBJECT
 
 public:
-	ColorSlot(int size);
+	ColorSlot(int size, QColor inColor);
 	void publicMousePress();
 	QColor color;
 signals:

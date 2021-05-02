@@ -57,6 +57,10 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     QAction* clearStatesAction = new QAction("Clear All States", this);
     connect(clearStatesAction, SIGNAL(triggered()), this, SLOT(clearStates()));
     animationMenu->addAction(clearStatesAction);
+   
+    QAction* toggleLightVolumeTransformationAction = new QAction("Toggle light/volume transformation", this);
+    connect(toggleLightVolumeTransformationAction, SIGNAL(triggered()), m_renderer, SLOT(toggleLightVolumeTransformation()));
+    ui.menuEdit->addAction(toggleLightVolumeTransformationAction);
 
     QAction* cutAction = new QAction("Cut type", this);
     connect(cutAction, SIGNAL(triggered()), this, SLOT(cut()));
@@ -248,6 +252,7 @@ void strangevismoviemaker::appendDockWidgets()
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
     Histogram* h = new Histogram(m_renderer);
+    QObject::connect(m_renderer, &Renderer::updateLayers, h->m_layerHandler, &LayerHandler::setLayers);
     dockLayout->addWidget(toolbarContent(h, QString("Layers")));
 
     dockContentWrapper->setLayout(dockLayout);

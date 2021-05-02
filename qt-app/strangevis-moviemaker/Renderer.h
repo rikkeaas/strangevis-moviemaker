@@ -15,6 +15,7 @@
 #include "model.h"
 #include "keyframeHandler.h"
 #include "transferFunction.h"
+#include "layer.h"
 
 #include "interpolation.h"
 
@@ -38,6 +39,7 @@ public:
 	void playAnimation();
 	int getAnimationDuration();
 	void setAnimationDuration(double);
+	void setLayers(QList<Layer*>);
 	void setSphereCut(bool);
 	void setCubeCut(bool);
 	void setSphereRadius(double);
@@ -47,10 +49,12 @@ public:
 	void setRaySamplingDistance(float);
 	float getRaySamplingDistance();
 public slots:
-	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> transferFunction);
+	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> transferFunction, QList<Layer*> layers);
 	void addNewKeyframe();
 	void updateKeyframes();
 	void toggleLightVolumeTransformation();
+signals:
+	void updateLayers(QList<Layer*> layers);
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
@@ -125,6 +129,7 @@ private:
 	bool m_showInFront = false;
 
 	bool isInterpolating = false;
+	QList<Layer*> m_layers;
 
 	float m_raySamplingDistanceMultiplier = 1.0;
 

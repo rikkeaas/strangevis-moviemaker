@@ -4,9 +4,8 @@
 #include <QVector3d>
 #include <vector>
 
-class Model : public QObject, protected QOpenGLExtraFunctions
+class Model : protected QOpenGLExtraFunctions
 {
-Q_OBJECT
 public:
 	Model(QObject* parent);
 	~Model();

@@ -63,7 +63,7 @@ void Renderer::setState()
 	mx.append(m_translateMatrix.data());
 	qDebug() << "Background color in renderer: " << m_backgroundColor;
 	m_transferFunctionData = m_transferfunction->getTransferFunctionData();
-	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx, m_backgroundColor, m_transferfunction->getTransferFunctionData());
+	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx, m_backgroundColor, m_transferfunction->getTransferFunctionData(), m_layers);
 	m_keyframeHandler->takeQtScreenShot(this, m_volume->getFilename());
 }
 
@@ -423,7 +423,7 @@ void Renderer::clearStates()
 	setKeyframes(keyframeWrapper, square);
 }
 
-void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> transferFunction) {
+void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> transferFunction, QList<Layer*> layers) {
 	t = 0;
 	timer.restart();
 	fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
@@ -432,7 +432,14 @@ void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor
 	toBackgroundColor = backgroundColor;
 	fromTransferFunction = m_transferFunctionData;
 	toTransferFunction = transferFunction;
+	m_layers = layers;
+	updateLayers(m_layers);
 	update();
+	foreach(auto * x, layers) {
+		qDebug() << x->label->text();
+		qDebug() << x->m_selectedArea;
+		qDebug() << x->m_layerRGBA;
+	}
 }
 
 void Renderer::setBackgroundColor()
@@ -535,7 +542,7 @@ void Renderer::playAnimation()
 			index++;
 			keyframeHighlightIndex--;
 		}
-		setMatrices(backupMatrices, backupBackgroundColor, backuptransferFunction);
+		setMatrices(backupMatrices, backupBackgroundColor, backuptransferFunction, QList<Layer*>());
 		catmullRom = false;
 	}
 	else {
@@ -564,6 +571,10 @@ void Renderer::setAnimationDuration(double newDur)
 	animationDuration = newDur * 1000.f;
 }
 
+void Renderer::setLayers(QList<Layer*> layers)
+{
+	m_layers = layers;
+}
 
 void Renderer::setSphereCut(bool cut)
 {
