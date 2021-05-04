@@ -39,7 +39,6 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="strangevismoviemaker.h" />
-    <QtMoc Include="model.h" />
     <QtMoc Include="Renderer.h" />
     <QtMoc Include="keyframeHandler.h" />
     <QtMoc Include="keyframes.h" />
@@ -49,6 +48,7 @@
     <QtMoc Include="layer.h" />
     <QtMoc Include="histogram.h" />
     <QtMoc Include="colorSlot.h" />
+    <QtMoc Include="model.h" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="strangevismoviemaker.qrc" />

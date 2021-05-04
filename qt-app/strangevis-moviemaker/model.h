@@ -24,8 +24,9 @@ public:
 	Volume(QVector3D voxelSpacing, QVector3D dimensionScaling, unsigned int m_height, unsigned int m_width, unsigned int m_depth, bool m_updateNeeded, QVector<unsigned short> m_Data, QString modelFilename);
 };
 
-class Model : protected QOpenGLExtraFunctions
+class Model : public QObject, protected QOpenGLExtraFunctions
 {
+	Q_OBJECT
 public:
 	Model(QObject* parent);
 	~Model();
