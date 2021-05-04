@@ -8,6 +8,7 @@ class HistogramChartView : public QChartView
 public:
 	HistogramChartView(QChart* chart, QWidget* parent);
 	QRect getSelectedArea();
+	void clearSelection();
 
 public slots:
 	void showLayerSelection(QRect layerSelectionArea);

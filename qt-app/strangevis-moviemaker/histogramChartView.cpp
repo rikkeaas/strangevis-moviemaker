@@ -86,6 +86,11 @@ QRect HistogramChartView::getSelectedArea()
     return m_area;
 }
 
+void HistogramChartView::clearSelection()
+{
+    unshowLayerSelection(m_selectedLayer);
+}
+
 void HistogramChartView::showLayerSelection(QRect layerSelectionArea)
 {
     m_selectedLayer = layerSelectionArea;

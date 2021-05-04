@@ -1,5 +1,4 @@
 #include "histogram.h"
-#include "histogramChartView.h"
 #include "model.h"
 #include "customSlider.h"
 #include <cfloat>
@@ -67,7 +66,7 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
     chart->setContentsMargins(0, 0, 0, 0);
     chart->layout()->setContentsMargins(0, 0, 0, 0);
 
-    HistogramChartView* chartView = new HistogramChartView(chart, this);
+    chartView = new HistogramChartView(chart, this);
     //chartView->setChart(chart);
     
     chartView->setRenderHint(QPainter::Antialiasing);
@@ -164,7 +163,8 @@ void Histogram::showHovering(bool status, int index)
 void Histogram::updateLayers(QList<Layer*> layers)
 {
     m_layerHandler->setLayers(layers);
-    m_renderer->setLayers(m_layerHandler->getLayers());
+    m_layerHandler->clearSelection();
+    chartView->clearSelection();
 }
 
 void Histogram::registerClick(int index)

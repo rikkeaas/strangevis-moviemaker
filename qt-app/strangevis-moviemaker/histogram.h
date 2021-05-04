@@ -30,6 +30,7 @@ private:
 	QGraphicsRectItem hoverItem;
 
 	Renderer* m_renderer;
+	HistogramChartView* chartView;
 
 public slots:
 	void updatePhaseFunction(int start, int end, QVector<float>);

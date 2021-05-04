@@ -54,10 +54,15 @@ QList<Layer*> LayerHandler::getLayers()
 	return m_layers;
 }
 
+void LayerHandler::clearSelection()
+{
+	m_selectedLayer = NULL;
+}
+
 void LayerHandler::setLayers(QList<Layer*> layers)
 {
 	while (!layout()->isEmpty()) {
-		m_selectedLayer = NULL;
+		clearSelection();
 		QLayoutItem* l = layout()->takeAt(0);
 		layout()->removeWidget(l->widget());
 		delete l->widget();
