@@ -11,7 +11,7 @@
 #include <QtConcurrent>
 
 
-Model::Model(QObject* parent) : QObject(parent), m_volumeTexture(QOpenGLTexture::Target3D)
+Model::Model(QObject* parent) : m_volumeTexture(QOpenGLTexture::Target3D)
 {}
 
 Model::~Model()

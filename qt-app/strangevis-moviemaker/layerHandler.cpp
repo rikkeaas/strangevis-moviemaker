@@ -12,7 +12,7 @@ LayerHandler::LayerHandler(HistogramChartView* chartView) : QWidget()
 	m_selectedLayer = NULL;
 	
 	m_chartView = chartView;
-	m_phaseFuncData.resize(256 * 4);
+	m_transferFuncData.resize(256 * 4);
 }
 
 void LayerHandler::addLayer(QRect area)
@@ -23,11 +23,11 @@ void LayerHandler::addLayer(QRect area)
 	layout()->addWidget(newLayer);
 	
 	QObject::connect(newLayer, &Layer::clicked, this, &LayerHandler::layerSelected);
-	QObject::connect(newLayer, &Layer::updatePhaseFunc, this, &LayerHandler::updatePhaseFuncData);
+	QObject::connect(newLayer, &Layer::updateTransferFunc, this, &LayerHandler::updateTransferFuncData);
 
 	m_layers.append(newLayer);
 	layerSelected(newLayer, false);
-	updatePhaseFuncData();
+	updateTransferFuncData();
 }
 
 void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
@@ -71,12 +71,12 @@ void LayerHandler::setLayers(QList<Layer*> layers)
 	foreach(auto * x, m_layers) {
 		x->setParent(this);
 		QObject::connect(x, &Layer::clicked, this, &LayerHandler::layerSelected);
-		QObject::connect(x, &Layer::updatePhaseFunc, this, &LayerHandler::updatePhaseFuncData);
+		QObject::connect(x, &Layer::updateTransferFunc, this, &LayerHandler::updateTransferFuncData);
 		layout()->addWidget(x);
 	}
 }
 
-void LayerHandler::updatePhaseFuncData()
+void LayerHandler::updateTransferFuncData()
 {
 	qDebug() << m_chartView->width();
 	auto maxX = m_chartView->width() - 20;
@@ -98,5 +98,5 @@ void LayerHandler::updatePhaseFuncData()
 
 	qDebug() << float(color.red()) / 255.0 << " " << float(color.green()) / 255.0 << " " << float(color.blue()) / 255.0 << " " << float(color.alpha()) / 255.0;
 	qDebug() << "Interval " << intervalStart << intervalEnd;
-	updatePhaseFunction(intervalStart, intervalEnd, textureData);
+	updateTransferFunction(intervalStart, intervalEnd, textureData);
 }

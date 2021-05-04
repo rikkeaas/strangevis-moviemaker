@@ -100,7 +100,7 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
 
     QObject::connect(chartViewP, &HistogramChartView::addLayer, m_layerHandler, &LayerHandler::addLayer);
 
-    QObject::connect(m_layerHandler, &LayerHandler::updatePhaseFunction, this, &Histogram::updatePhaseFunction);
+    QObject::connect(m_layerHandler, &LayerHandler::updateTransferFunction, this, &Histogram::updateTransferFunction);
 
 }
 
@@ -134,6 +134,7 @@ QChartView* Histogram::getHistogram()
     return chartViewP;
 }
 
+/*
 void Histogram::showHovering(bool status, int index) 
 {
 
@@ -159,6 +160,7 @@ void Histogram::showHovering(bool status, int index)
         hoverItem.hide();
     }
 }
+*/
 
 void Histogram::updateLayers(QList<Layer*> layers)
 {
@@ -167,6 +169,7 @@ void Histogram::updateLayers(QList<Layer*> layers)
     chartView->clearSelection();
 }
 
+/*
 void Histogram::registerClick(int index)
 {
     qDebug() << "Histogram click";
@@ -201,7 +204,7 @@ void Histogram::registerClick(int index)
             textureData[i] = 0.0;
         }
 
-        m_renderer->getPhaseFunction()->updatePhaseFunction(start, end, &textureData);
+        m_renderer->getTransferFunction()->updateTransferFunction(start, end, &textureData);
     }
     else
     {
@@ -214,10 +217,11 @@ void Histogram::registerClick(int index)
     
     interval.append(index);
 }
+*/
 
-void Histogram::updatePhaseFunction(int start, int end, QVector<float> textureData)
+void Histogram::updateTransferFunction(int start, int end, QVector<float> textureData)
 {
     qDebug() << m_layerHandler->getLayers().at(0)->m_selectedArea;
-    m_renderer->getPhaseFunction()->updatePhaseFunction(start, end, &textureData);
+    m_renderer->getTransferFunction()->updateTransferFunction(start, end, &textureData);
     m_renderer->setLayers(m_layerHandler->getLayers());
 }

@@ -161,6 +161,65 @@ void KeyframeHandler::removeKeyframeHighlighting(QWidget* keyframeWrapper, int i
     keyframeWrapper->layout()->itemAt(index)->widget()->setStyleSheet(backupStyleSheet);
 }
 
+void KeyframeHandler::getStates(QString statePath, QList<QMatrix4x4>& matrices, QVector3D& background, QVector<float>& transferFunc)
+{
+    QFile inputFile(statePath);
+    if (inputFile.open(QIODevice::ReadOnly))
+    {
+        float projectionMatrix[16];
+        float rotateMatrix[16];
+        float scaleMatrix[16];
+        float translateMatrix[16];
+        QVector3D backgroundColorVector;
+        QVector<float> transferfunctionVector;
+
+        QTextStream in(&inputFile);
+        int index = 0;
+        for (int i = 0; i < 1024 + 67; i++)
+        {
+            QString line = in.readLine();
+            float dd = line.toFloat();
+            if (i > 66) {
+                transferfunctionVector << dd;
+            }
+            else if (i == 64) {
+                backgroundColorVector.setX(dd);
+            }
+            else if (i == 65) {
+                backgroundColorVector.setY(dd);
+            }
+            else if (i == 66) {
+                backgroundColorVector.setZ(dd);
+            }
+            else if (i > 47) {
+                translateMatrix[index] = dd;
+            }
+            else if (i > 31) {
+                scaleMatrix[index] = dd;
+            }
+            else if (i > 15) {
+                rotateMatrix[index] = dd;
+            }
+            else {
+                projectionMatrix[index] = dd;
+            }
+            index++;
+            if (index == 16) {
+                index = 0;
+            }
+        }
+        inputFile.close();
+
+       
+        matrices.append(QMatrix4x4(projectionMatrix).transposed());
+        matrices.append(QMatrix4x4(rotateMatrix).transposed());
+        matrices.append(QMatrix4x4(scaleMatrix).transposed());
+        matrices.append(QMatrix4x4(translateMatrix).transposed());
+        background = QVector3D(backgroundColorVector);
+        transferFunc = transferfunctionVector;
+    }
+}
+
 void KeyframeHandler::readStates(QString statePath) {
     QFile inputFile(statePath);
     if (inputFile.open(QIODevice::ReadOnly))

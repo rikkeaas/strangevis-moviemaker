@@ -20,20 +20,18 @@ private:
 	HistogramChartView* chartViewP;
 	float roundNearest(int, float);
 
-	void showHovering(bool status, int index);
-	void registerClick(int index);
+	//void showHovering(bool status, int index);
+	//void registerClick(int index);
 
 	QVector<int> interval;
 
 	bool endClick = false;
-	QGraphicsRectItem clickItem;
-	QGraphicsRectItem hoverItem;
 
 	Renderer* m_renderer;
 	HistogramChartView* chartView;
 
 public slots:
-	void updatePhaseFunction(int start, int end, QVector<float>);
+	void updateTransferFunction(int start, int end, QVector<float>);
 	void updateLayers(QList<Layer*>);
 };
 

@@ -15,8 +15,8 @@ public:
 private:
 	Layer* m_selectedLayer;
 	QList<Layer*>  m_layers;
-	QVector<float> m_phaseFuncData;
-	void updatePhaseFuncData();
+	QVector<float> m_transferFuncData;
+	void updateTransferFuncData();
 	HistogramChartView* m_chartView;
 public slots:
 	void addLayer(QRect area);
@@ -29,5 +29,5 @@ signals:
 	void updateGreenSlider(int green);
 	void updateBlueSlider(int blue);
 	void updateAlphaSlider(int alpha);
-	void updatePhaseFunction(int start, int end, QVector<float> data);
+	void updateTransferFunction(int start, int end, QVector<float> data);
 };
