@@ -53,6 +53,7 @@ public slots:
 	void updateWidget();
 signals:
 	void updateLayers(QList<Layer*> layers);
+	void reloadDockWidgets();
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
@@ -119,6 +120,7 @@ private:
 
 	bool isInterpolating = false;
 	QList<Layer*> m_layers;
+	bool animationIsPlaying = false;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);

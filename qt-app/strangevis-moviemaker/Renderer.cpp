@@ -219,6 +219,7 @@ void Renderer::paintGL()
 		m_backgroundColor = toBackgroundColor;
 		m_phasefunction->updatePhaseFunction(0, 256, &toPhaseFunction);
 		isInterpolating = false;
+		updateLayers(m_layers);
 		update();
 	}
 }
@@ -361,7 +362,9 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		setBackgroundColor();
 	}
 	else if (event->key() == Qt::Key_A) {
-		playAnimation();
+		if (!animationIsPlaying) {
+			playAnimation();
+		}
 	}
 	else if (event->key() == Qt::Key_P) {
 		qDebug() << m_phaseFunctionData;
@@ -418,14 +421,8 @@ void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor
 	toBackgroundColor = backgroundColor;
 	fromPhaseFunction = m_phaseFunctionData;
 	toPhaseFunction = phaseFunction;
-	m_layers = layers;
-	updateLayers(m_layers);
+	setLayers(layers);
 	update();
-	foreach(auto * x, layers) {
-		qDebug() << x->label->text();
-		qDebug() << x->m_selectedArea;
-		qDebug() << x->m_layerRGBA;
-	}
 }
 
 void Renderer::setBackgroundColor()
@@ -439,11 +436,15 @@ void Renderer::setBackgroundColor()
 
 void Renderer::playAnimation()
 {
+	animationIsPlaying = true;
 	auto states = m_keyframeHandler->getFiles();
 	if (states.at(1).length() > 0) {
 		auto backupMatrices = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
 		auto backupBackgroundColor = m_backgroundColor;
 		auto backupPhaseFunction = m_phaseFunctionData;
+		QList<Layer*> backupLayers = QList<Layer*>();
+		foreach(auto * layer, m_layers)
+			backupLayers.append(layer);
 		int index = 0;
 		int numberOfStates = states.at(1).length();
 		int keyframeHighlightIndex = numberOfStates - 1;
@@ -464,12 +465,13 @@ void Renderer::playAnimation()
 			index++;
 			keyframeHighlightIndex--;
 		}
-		setMatrices(backupMatrices, backupBackgroundColor, backupPhaseFunction, QList<Layer*>());
+		setMatrices(backupMatrices, backupBackgroundColor, backupPhaseFunction, backupLayers);
+		
 	}
 	else {
 		qDebug() << "Can't play animation with no saved states.";
 	}
-	
+	animationIsPlaying = false;
 }
 
 
@@ -525,5 +527,6 @@ void Renderer::toggleLightVolumeTransformation()
 
 void Renderer::updateWidget()
 {
+	reloadDockWidgets();
 	update();
 }

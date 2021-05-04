@@ -2,6 +2,8 @@
 #include <QtCharts>
 #include <QColor>
 #include <QVector>
+#include <Qlist>
+#include "layer.h"
 #include "model.h"
 #include "Renderer.h"
 #include "layerHandler.h"
@@ -29,8 +31,8 @@ private:
 
 	Renderer* m_renderer;
 
-
 public slots:
 	void updatePhaseFunction(int start, int end, QVector<float>);
+	void updateLayers(QList<Layer*>);
 };
 

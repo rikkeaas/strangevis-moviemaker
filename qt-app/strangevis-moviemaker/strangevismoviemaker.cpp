@@ -22,6 +22,8 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     renderer->setParent(this);
     m_renderer = renderer;
 
+    connect(m_renderer, &Renderer::reloadDockWidgets, this, &strangevismoviemaker::reloadDockWidgets);
+
     ui.setupUi(this);
     
     cutMenu = ui.menuBar->addMenu("Cut");
@@ -85,18 +87,17 @@ void strangevismoviemaker::fileOpen()
     if (!fileName.isEmpty())
     {
         m_renderer->getVolume()->threadedLoading(fileName);
-        if (true)
-        {
-            for (QDockWidget* dw : this->findChildren<QDockWidget *>())
-            {
-                this->removeDockWidget(dw);
-            }
-            appendDockWidgets();
-            qDebug() << "Loaded volume " << fileName; 
-        } else {
-            qDebug() << "Failed to load volume " << fileName;
-        }
+        qDebug() << "Loaded volume " << fileName;
     }
+}
+
+void strangevismoviemaker::reloadDockWidgets()
+{
+    for (QDockWidget* dw : this->findChildren<QDockWidget*>())
+    {
+        this->removeDockWidget(dw);
+    }
+    appendDockWidgets();
 }
 
 void strangevismoviemaker::highresScreenshot()
@@ -222,7 +223,7 @@ void strangevismoviemaker::appendDockWidgets()
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
     Histogram* h = new Histogram(m_renderer);
-    QObject::connect(m_renderer, &Renderer::updateLayers, h->m_layerHandler, &LayerHandler::setLayers);
+    QObject::connect(m_renderer, &Renderer::updateLayers, h, &Histogram::updateLayers);
     dockLayout->addWidget(toolbarContent(h, QString("Layers")));
 
     dockContentWrapper->setLayout(dockLayout);

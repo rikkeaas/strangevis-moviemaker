@@ -95,7 +95,6 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
  
     m_layerHandler = new LayerHandler(chartViewP);
     layout()->addWidget(m_layerHandler);
-
     
     QObject::connect(m_layerHandler, &LayerHandler::displayLayer, chartViewP, &HistogramChartView::showLayerSelection);
     QObject::connect(m_layerHandler, &LayerHandler::undisplayLayer, chartViewP, &HistogramChartView::unshowLayerSelection);
@@ -162,6 +161,12 @@ void Histogram::showHovering(bool status, int index)
     }
 }
 
+void Histogram::updateLayers(QList<Layer*> layers)
+{
+    m_layerHandler->setLayers(layers);
+    m_renderer->setLayers(m_layerHandler->getLayers());
+}
+
 void Histogram::registerClick(int index)
 {
     qDebug() << "Histogram click";
@@ -212,7 +217,7 @@ void Histogram::registerClick(int index)
 
 void Histogram::updatePhaseFunction(int start, int end, QVector<float> textureData)
 {
-    m_renderer->setLayers(m_layerHandler->getLayers());
     qDebug() << m_layerHandler->getLayers().at(0)->m_selectedArea;
     m_renderer->getPhaseFunction()->updatePhaseFunction(start, end, &textureData);
+    m_renderer->setLayers(m_layerHandler->getLayers());
 }
