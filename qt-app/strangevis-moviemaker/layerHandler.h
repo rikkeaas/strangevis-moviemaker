@@ -11,6 +11,7 @@ class LayerHandler : public QWidget
 public:
 	LayerHandler(HistogramChartView* chartView);
 	QList<Layer*> getLayers();
+	void clearSelection();
 private:
 	Layer* m_selectedLayer;
 	QList<Layer*>  m_layers;

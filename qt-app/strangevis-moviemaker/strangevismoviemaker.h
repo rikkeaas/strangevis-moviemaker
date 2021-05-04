@@ -15,6 +15,7 @@ public:
     strangevismoviemaker(Renderer* renderer, QWidget *parent = Q_NULLPTR);
 public slots:
     void fileOpen();
+    void reloadDockWidgets();
     void highresScreenshot();
     void clearStates();
     void setBackgroundColor();

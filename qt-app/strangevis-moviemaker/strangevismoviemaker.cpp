@@ -12,6 +12,7 @@
 #include <QDesktopWidget>
 #include <QtCharts>
 #include <QDateTime>
+#include <QtConcurrent>
 
 
 strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
@@ -20,6 +21,8 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 
     renderer->setParent(this);
     m_renderer = renderer;
+
+    connect(m_renderer, &Renderer::reloadDockWidgets, this, &strangevismoviemaker::reloadDockWidgets);
 
     ui.setupUi(this);
     
@@ -96,18 +99,18 @@ void strangevismoviemaker::fileOpen()
     QString fileName = QFileDialog::getOpenFileName(this, "Open Volume File", QString(), "*.dat");
     if (!fileName.isEmpty())
     {
-        if (m_renderer->getVolume()->load(fileName))
-        {
-            for (QDockWidget* dw : this->findChildren<QDockWidget *>())
-            {
-                this->removeDockWidget(dw);
-            }
-            appendDockWidgets();
-            qDebug() << "Loaded volume " << fileName; 
-        } else {
-            qDebug() << "Failed to load volume " << fileName;
-        }
+        m_renderer->getVolume()->threadedLoading(fileName);
+        qDebug() << "Loaded volume " << fileName;
     }
+}
+
+void strangevismoviemaker::reloadDockWidgets()
+{
+    for (QDockWidget* dw : this->findChildren<QDockWidget*>())
+    {
+        this->removeDockWidget(dw);
+    }
+    appendDockWidgets();
 }
 
 void strangevismoviemaker::highresScreenshot()
@@ -252,7 +255,7 @@ void strangevismoviemaker::appendDockWidgets()
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
     Histogram* h = new Histogram(m_renderer);
-    QObject::connect(m_renderer, &Renderer::updateLayers, h->m_layerHandler, &LayerHandler::setLayers);
+    QObject::connect(m_renderer, &Renderer::updateLayers, h, &Histogram::updateLayers);
     dockLayout->addWidget(toolbarContent(h, QString("Layers")));
 
     dockContentWrapper->setLayout(dockLayout);
@@ -294,10 +297,11 @@ QWidget* strangevismoviemaker::toolbarContent(QWidget* content, QString header) 
     label->setFont(f);
 
     auto dockContent = new QWidget();
-    dockContent->setStyleSheet("background-color: #3C3C3C;border-radius:18px;");
+    dockContent->setStyleSheet("background-color: #3C3C3C; border-radius:18px;");
     dockContent->setLayout(dockLayout);
     dockLayout->addWidget(label);
     dockLayout->addWidget(content);
+    
 
     return dockContent;
 }

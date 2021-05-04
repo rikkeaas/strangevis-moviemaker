@@ -2,6 +2,8 @@
 #include <QtCharts>
 #include <QColor>
 #include <QVector>
+#include <Qlist>
+#include "layer.h"
 #include "model.h"
 #include "Renderer.h"
 #include "layerHandler.h"
@@ -26,9 +28,10 @@ private:
 	bool endClick = false;
 
 	Renderer* m_renderer;
-
+	HistogramChartView* chartView;
 
 public slots:
 	void updateTransferFunction(int start, int end, QVector<float>);
+	void updateLayers(QList<Layer*>);
 };
 

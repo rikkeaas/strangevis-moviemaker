@@ -13,7 +13,9 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
 	setFocusPolicy(Qt::StrongFocus);
 	m_volume = new Model(this);
-	m_volume->load("./data/hand/hand.dat");
+	m_volume->threadedLoading("./data/hand/hand.dat");
+	connect(m_volume, &Model::loadedModel, this, &Renderer::updateWidget);
+
 
 	m_keyframeHandler = new KeyframeHandler();
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
@@ -233,6 +235,7 @@ void Renderer::paintGL()
 		m_backgroundColor = toBackgroundColor;
 		m_transferfunction->updateTransferFunction(0, 256, &toTransferFunction);
 		isInterpolating = false;
+		updateLayers(m_layers);
 		update();
 	}
 }
@@ -375,7 +378,9 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		setBackgroundColor();
 	}
 	else if (event->key() == Qt::Key_A) {
-		playAnimation();
+		if (!animationIsPlaying) {
+			playAnimation();
+		}
 	}
 	else if (event->key() == Qt::Key_P) {
 		qDebug() << m_transferFunctionData;
@@ -432,14 +437,8 @@ void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor
 	toBackgroundColor = backgroundColor;
 	fromTransferFunction = m_transferFunctionData;
 	toTransferFunction = transferFunction;
-	m_layers = layers;
-	updateLayers(m_layers);
+  setLayers(layers);
 	update();
-	foreach(auto * x, layers) {
-		qDebug() << x->label->text();
-		qDebug() << x->m_selectedArea;
-		qDebug() << x->m_layerRGBA;
-	}
 }
 
 void Renderer::setBackgroundColor()
@@ -453,11 +452,15 @@ void Renderer::setBackgroundColor()
 
 void Renderer::playAnimation()
 {
+	animationIsPlaying = true;
 	auto states = m_keyframeHandler->getFiles();
 	if (states.at(1).length() > 0) {
 		auto backupMatrices = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
 		auto backupBackgroundColor = m_backgroundColor;
 		auto backuptransferFunction = m_transferFunctionData;
+		QList<Layer*> backupLayers = QList<Layer*>();
+		foreach(auto * layer, m_layers)
+			backupLayers.append(layer);
 		int index = 0;
 		int numberOfStates = states.at(1).length();
 		int keyframeHighlightIndex = numberOfStates - 1;
@@ -542,13 +545,13 @@ void Renderer::playAnimation()
 			index++;
 			keyframeHighlightIndex--;
 		}
-		setMatrices(backupMatrices, backupBackgroundColor, backuptransferFunction, QList<Layer*>());
+		setMatrices(backupMatrices, backupBackgroundColor, backuptransferFunction, backupLayers);
 		catmullRom = false;
 	}
 	else {
 		qDebug() << "Can't play animation with no saved states.";
 	}
-	
+	animationIsPlaying = false;
 }
 
 void Renderer::setInterpolationType(bool b)
@@ -606,6 +609,11 @@ void Renderer::toggleLightVolumeTransformation()
 	m_transformLight = !m_transformLight;
 }
 
+void Renderer::updateWidget()
+{
+	reloadDockWidgets();
+	update();
+}
 void Renderer::setRaySamplingDistance(float newSamplingDistance)
 {
 	m_raySamplingDistanceMultiplier = newSamplingDistance;
