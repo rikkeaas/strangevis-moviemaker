@@ -34,22 +34,25 @@ void HistogramChartView::mouseMoveEvent(QMouseEvent* event)
 
 void HistogramChartView::mouseReleaseEvent(QMouseEvent* event)
 {
-    //QPoint p = mapFromGlobal(QCursor::pos());// chartView->mapFromGlobal(QCursor::pos());
-    //QGraphicsItem* bar = itemAt(p);
     
-   
-
     m_rubberBand->hide();
     QRect rect = m_rubberBand->geometry();
+    
     rect.setLeft(qMax(20, rect.left()));
+    rect.setLeft(qMin(width() - 20, rect.left()));
+    rect.setRight(qMax(20, rect.right()));
     rect.setRight(qMin(width() - 20, rect.right()));
+    
     rect.setBottom(height()-1-20);
     rect.setTop(0+20);
     
+    if (rect.right() - rect.left() <= 1)
+    {
+        return;
+    }
+    
     m_area = rect;
-
     addLayer(m_area);
-
     update();
     
 }

@@ -163,7 +163,7 @@ void Renderer::paintGL()
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
 	shaderProgram.setUniformValue("volumeTexture", 0);
 	shaderProgram.setUniformValue("transferFunction", 1);
-	shaderProgram.setUniformValue("lightPosition", QVector3D((m_lightTranslateMatrix * m_lightRotateMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted() * QVector4D(5.0, 0.0, 0.0, 1.0)));
+	shaderProgram.setUniformValue("lightPosition", QVector3D((m_lightTranslateMatrix * m_lightRotateMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted() * QVector4D(5.0, 0.0, -5.0, 1.0)));
 	shaderProgram.setUniformValue("modelViewMatrix", m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
 	shaderProgram.setUniformValue("rotate", m_rotateMatrix);
 	shaderProgram.setUniformValue("invRotate", m_rotateMatrix.inverted());
@@ -210,7 +210,7 @@ void Renderer::paintGL()
 			m_translateMatrix = newMatrices[3];
 			m_backgroundColor = CatmullRomInterpolation::vectorInterpolation(previousBackgroundColor, fromBackgroundColor, toBackgroundColor, nextBackgroundColor, t);
 			m_transferFunctionData = CatmullRomInterpolation::transferFunctionInterpolation(previousTransferFunction, fromTransferFunction, toTransferFunction, nextTransferFunction, t);
-			m_transferfunction->updateTransferFunction(0, 256, &m_transferFunctionData);
+			m_transferfunction->updateTransferFunction(0, 512, &m_transferFunctionData);
 		}
 		else
 		{
@@ -221,7 +221,7 @@ void Renderer::paintGL()
 			m_translateMatrix = newMatrices[3];
 			m_backgroundColor = interpolater->backgroundInterpolation(fromBackgroundColor, toBackgroundColor, t);
 			m_transferFunctionData = interpolater->transferFunctionInterpolation(fromTransferFunction, toTransferFunction, t);
-			m_transferfunction->updateTransferFunction(0, 256, &m_transferFunctionData);
+			m_transferfunction->updateTransferFunction(0, 512, &m_transferFunctionData);
 		}
 		update();
 	}
@@ -231,7 +231,7 @@ void Renderer::paintGL()
 		m_scaleMatrix = toKeyframe[2];
 		m_translateMatrix = toKeyframe[3];
 		m_backgroundColor = toBackgroundColor;
-		m_transferfunction->updateTransferFunction(0, 256, &toTransferFunction);
+		m_transferfunction->updateTransferFunction(0, 512, &toTransferFunction);
 		isInterpolating = false;
 		update();
 	}

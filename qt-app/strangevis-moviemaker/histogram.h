@@ -26,7 +26,8 @@ private:
 	bool endClick = false;
 
 	Renderer* m_renderer;
-
+protected:
+	void focusOutEvent(QFocusEvent* event);
 
 public slots:
 	void updateTransferFunction(int start, int end, QVector<float>);

@@ -14,6 +14,7 @@ Histogram::Histogram(Renderer* renderer) : QWidget() {
     barChart->setColor(Qt::white);
     QStringList categories;
    
+    setFocusPolicy(Qt::StrongFocus);
 
     if (!values.isEmpty()) {
        
@@ -218,4 +219,11 @@ void Histogram::updateTransferFunction(int start, int end, QVector<float> textur
 {
     m_renderer->getTransferFunction()->updateTransferFunction(start, end, &textureData);
     m_renderer->setLayers(m_layerHandler->getLayers());
+}
+
+void Histogram::focusOutEvent(QFocusEvent* event)
+{
+    m_layerHandler->deselectSelectedLayer();
+    event->accept();
+    qDebug() << "focus out?";
 }

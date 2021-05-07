@@ -6,7 +6,7 @@
 
 TransferFunction::TransferFunction() : m_transferfunction(QOpenGLTexture::Target2D)
 {
-	for (int i = 0; i < 256 * 4; i++)
+	for (int i = 0; i < 512 * 4; i++)
 	{
 		if (i % 4 == 0 || ((i + 1) % 4 == 0))
 			m_data << 1.0;
@@ -28,7 +28,7 @@ void TransferFunction::bind()
 		m_transferfunction.setMinificationFilter(QOpenGLTexture::Linear);
 		m_transferfunction.setMagnificationFilter(QOpenGLTexture::Linear);
 		m_transferfunction.setAutoMipMapGenerationEnabled(false);
-		m_transferfunction.setSize(256);
+		m_transferfunction.setSize(512);
 		m_transferfunction.allocateStorage();
 
 		m_transferfunction.setData(QOpenGLTexture::RGBA, QOpenGLTexture::Float32, m_data.data());
@@ -56,7 +56,7 @@ void TransferFunction::updateTransferFunction(int startIdx, int endIdx, QVector<
 		//qDebug() << "Start index must be smaller than end index";
 		return;
 	}
-	if (startIdx < 0 || endIdx > 256)
+	if (startIdx < 0 || endIdx > 512)
 	{
 		qDebug() << "Index out of bounds";
 		return;
@@ -65,7 +65,28 @@ void TransferFunction::updateTransferFunction(int startIdx, int endIdx, QVector<
 	m_updated = true;
 	for (int i = startIdx * 4; i < (endIdx) * 4; i++)
 	{
-		m_data[i] = data->at((i - startIdx*4));
+		m_data[i] = data->at(i - startIdx*4);
+	}
+	
+	int startSmoothing = qMax(0, startIdx - m_smoothingFactor);
+	for (int i = startSmoothing; i < startIdx; i++)
+	{
+		float t = float(i - (startIdx - m_smoothingFactor)) / float(m_smoothingFactor);
+		m_data[i * 4] = (1.0 - t) * m_data[i * 4] + t * data->at((0));
+		m_data[i * 4 + 1] = (1.0 - t) * m_data[i * 4 + 1] + t * data->at(1);
+		m_data[i * 4 + 2] = (1.0 - t) * m_data[i * 4 + 2] + t * data->at(2);
+		m_data[i * 4 + 3] = (1.0 - t) * m_data[i * 4 + 3] + t * data->at(3);
+	}
+	
+	int endSmoothing = qMin(512, endIdx + m_smoothingFactor);
+	for (int i = endIdx; i < endSmoothing; i++)
+	{
+		float t = float(i - endIdx) / float(m_smoothingFactor);
+		m_data[i * 4] = (1.0 - t) * data->at(0) + t * m_data[i * 4];
+		m_data[i * 4 + 1] = (1.0 - t) * data->at(1) + t * m_data[i * 4 + 1];
+		m_data[i * 4 + 2] = (1.0 - t) * data->at(2) + t * m_data[i * 4 + 2];
+		auto a = i * 4 + 3;
+		m_data[i * 4 + 3] = (1.0 - t) * data->at(3) + t * m_data[i * 4 + 3];
 	}
 }
 

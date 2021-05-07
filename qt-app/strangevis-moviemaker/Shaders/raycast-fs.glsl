@@ -288,15 +288,23 @@ void main() {
 		// With different dimension scales and voxel spacing we need to scale by these factors also. Note both are in interval [0,1].
 		vec3 scaledSamplePoint = 0.5 + sampligPoint / (scalingFactor * 2.0);
 		vec4 densityAndGradient = texture(volumeTexture, scaledSamplePoint);
-
-		//if (densityAndGradient.x <= 0.1)
-		//{
-		//	sampligPoint += rayDir * samplingDistance;
-		//	continue;
-		//}
-
 		vec4 tfColor = texture(transferFunction, vec2(densityAndGradient.r,0.5));
 
+
+		if(tfColor.a <= 0.00001)
+		{
+			vec3 tempSampl = sampligPoint + rayDir * samplingDistance * 50;
+			vec3 scaledSamplePoint = 0.5 + tempSampl / (scalingFactor * 2.0);
+			vec4 densityAndGradient = texture(volumeTexture, scaledSamplePoint);
+			vec4 tfColor = texture(transferFunction, vec2(densityAndGradient.r,0.5));
+
+			if (tfColor.a <= 0.00001)
+			{
+				sampligPoint = tempSampl;
+				i += samplingDistance * 49;
+				continue;
+			}
+		}
 		float x = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.x + voxelDimsInTexCoord.x, sampligPoint.yz))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.x - voxelDimsInTexCoord.x, sampligPoint.yz))).r));
 		float y = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.x, sampligPoint.y + voxelDimsInTexCoord.y, sampligPoint.z))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.x, sampligPoint.y - voxelDimsInTexCoord.y, sampligPoint.z))).r));
 		float z = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.xy, sampligPoint.z + voxelDimsInTexCoord.z))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.xy, sampligPoint.z - voxelDimsInTexCoord.z))).r));
@@ -314,10 +322,11 @@ void main() {
 		//vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(densityAndGradient.yzw), pfColor.rgb);
 		vec3 phong = diffuseComponent(lightPosition, sampligPoint, normalize(vec3(x,y,z)), tfColor.rgb);
 		phong += tfColor.rgb * 0.2;
-		color.rgb += (1.0 - color.a) * tfColor.a * phong;
-		color.a += (1.0 - color.a) * tfColor.a;
+		float correctedAlpha = 1 - pow(1-tfColor.a, samplingDistanceMultiplier);
+		color.rgb += (1.0 - color.a) * correctedAlpha * phong;
+		color.a += (1.0 - color.a) * correctedAlpha;
 		notFound = false;
-
+		
 
 		if (color.a >= 0.95) 
 		{

@@ -43,9 +43,18 @@ void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 	}
 	else
 	{
-		qDebug() << selectedLayer->m_selectedArea.left() << selectedLayer->m_selectedArea.right();
+		//qDebug() << selectedLayer->m_selectedArea.left() << selectedLayer->m_selectedArea.right();
 		m_selectedLayer = selectedLayer;
 		displayLayer(selectedLayer->m_selectedArea);
+	}
+}
+
+void LayerHandler::deselectSelectedLayer()
+{
+	if (m_selectedLayer != nullptr)
+	{
+		undisplayLayer(m_selectedLayer->m_selectedArea);
+		m_selectedLayer = NULL;
 	}
 }
 
@@ -56,8 +65,9 @@ QList<Layer*> LayerHandler::getLayers()
 
 void LayerHandler::setLayers(QList<Layer*> layers)
 {
+
+	deselectSelectedLayer();
 	while (!layout()->isEmpty()) {
-		m_selectedLayer = NULL;
 		QLayoutItem* l = layout()->takeAt(0);
 		layout()->removeWidget(l->widget());
 		delete l->widget();
@@ -76,8 +86,8 @@ void LayerHandler::updateTransferFuncData()
 	qDebug() << m_chartView->width();
 	auto maxX = m_chartView->width() - 20;
 	auto minX = 20;
-	int intervalStart = 256.0 * (float(m_selectedLayer->m_selectedArea.left()-minX) / float(maxX-minX));
-	int intervalEnd = 256.0 * (float(m_selectedLayer->m_selectedArea.right()-minX) / float(maxX - minX)) - 1;
+	int intervalStart = 512.0 * (float(m_selectedLayer->m_selectedArea.left()-minX) / float(maxX-minX));
+	int intervalEnd = 512.0 * (float(m_selectedLayer->m_selectedArea.right()-minX) / float(maxX - minX)) - 1;
 	
 	QVector<float> textureData;
 	textureData.resize((intervalEnd - intervalStart) * 4);

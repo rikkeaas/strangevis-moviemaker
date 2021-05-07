@@ -180,7 +180,7 @@ void KeyframeHandler::getStates(QString statePath, QList<QMatrix4x4>& matrices, 
         while (!in.atEnd())
         {
             QString line = in.readLine();
-            if (i > 1024 + 66) {
+            if (i > 2048 + 66) {
                 QList<QString> layerString = line.split(",");
                 QString label = layerString[0];
                 QRect rect = QRect(layerString[1].toInt(), layerString[2].toInt(), layerString[3].toInt(), layerString[4].toInt());
@@ -257,7 +257,7 @@ void KeyframeHandler::readStates(QString statePath) {
         while (!in.atEnd())
         {
             QString line = in.readLine();
-            if (i > 1024 + 66) {
+            if (i > 2048 + 66) {
                 QList<QString> layerString = line.split(",");
                 QString label = layerString[0];
                 QRect rect = QRect(layerString[1].toInt(), layerString[2].toInt(), layerString[3].toInt(), layerString[4].toInt());
