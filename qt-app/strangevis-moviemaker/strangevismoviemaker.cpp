@@ -55,6 +55,10 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
 
     // ------------------------------------------------------------------------------------------
     // Animation menu
+    QAction* startAnimation = new QAction("Play animation", this);
+    connect(startAnimation, SIGNAL(triggered()), m_renderer, SLOT(playAnimation()));
+    animationMenu->addAction(startAnimation);
+
     QAction* typeOfAnimation = new QAction("Set type of interpolation", this);
     connect(typeOfAnimation, SIGNAL(triggered()), this, SLOT(setTypeOfAnimation()));
     animationMenu->addAction(typeOfAnimation);

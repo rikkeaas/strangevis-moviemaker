@@ -44,7 +44,6 @@ public:
 	TransferFunction* getTransferFunction();
 	void clearStates();
 	void setBackgroundColor();
-	void playAnimation();
 	int getAnimationDuration();
 	void setAnimationDuration(double);
 	void setLayers(QList<Layer*>);
@@ -63,6 +62,7 @@ public slots:
 	void addNewKeyframe();
 	void updateKeyframes();
 	void toggleLightVolumeTransformation();
+	void playAnimation();
 signals:
 	void updateLayers(QList<Layer*> layers);
 private:
