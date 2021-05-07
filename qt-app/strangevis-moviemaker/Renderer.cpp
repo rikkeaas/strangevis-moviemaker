@@ -15,6 +15,9 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_volume = new Model(this);
 	m_volume->load("./data/hand/hand.dat");
 
+	m_border = new testWidget(this);
+	m_border->setHidden(true);
+
 	m_keyframeHandler = new KeyframeHandler();
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::addedKeyframe, this, &Renderer::addNewKeyframe);
@@ -620,7 +623,16 @@ void Renderer::setShowCut(bool show, bool inFront)
 void Renderer::toggleLightVolumeTransformation()
 {
 	m_transformLight = !m_transformLight;
+	if (m_transformLight)
+	{
+		m_border->setHidden(false);
+	}
+	else
+	{
+		m_border->setHidden(true);
+	}
 }
+
 
 void Renderer::setRaySamplingDistance(float newSamplingDistance)
 {
@@ -630,4 +642,35 @@ void Renderer::setRaySamplingDistance(float newSamplingDistance)
 float Renderer::getRaySamplingDistance()
 {
 	return m_raySamplingDistanceMultiplier;
+}
+
+
+
+testWidget::testWidget(QWidget* parent) : QWidget(parent)
+{
+	auto text = new QLineEdit();
+	QHBoxLayout* layout = new QHBoxLayout();
+	text->setText("Light mode");
+	int id = QFontDatabase::addApplicationFont("fonts/Roboto-Bold.ttf");
+	QString robotoHeader = QFontDatabase::applicationFontFamilies(id).at(0);
+	QFont f(robotoHeader, 10);
+	text->setFont(f);
+	text->setTextMargins(5, 5, 5, 5);
+	text->setStyleSheet("QLineEdit {background-color: #4C4C4C; border: 5px solid white}");
+	text->setReadOnly(true);
+	text->setAlignment(Qt::AlignCenter);
+	layout->addWidget(text);
+
+	//layout->setMargin(5);
+	layout->setContentsMargins(10, 10, 10, 10);
+
+	setLayout(layout);
+}
+
+void testWidget::paintEvent(QPaintEvent* event)
+{
+	QStyleOption opt;
+	opt.init(this);
+	QPainter p(this);
+	style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

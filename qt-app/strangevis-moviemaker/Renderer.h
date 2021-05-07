@@ -19,6 +19,14 @@
 
 #include "interpolation.h"
 
+class testWidget : public QWidget
+{
+public:
+	testWidget(QWidget* parent);
+protected:
+	void paintEvent(QPaintEvent* event);
+};
+
 class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 {
 	Q_OBJECT
@@ -133,6 +141,9 @@ private:
 
 	float m_raySamplingDistanceMultiplier = 1.0;
 
+	testWidget* m_border;
+	QString m_styleSheet;
+
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
@@ -140,3 +151,4 @@ protected:
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);
 };
+
