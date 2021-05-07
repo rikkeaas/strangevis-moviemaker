@@ -56,6 +56,8 @@ public:
 	void setInterpolationType(bool);
 	void setRaySamplingDistance(float);
 	float getRaySamplingDistance();
+	int getSkippingStep();
+	void setSkippingStep(int);
 public slots:
 	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> transferFunction, QList<Layer*> layers);
 	void addNewKeyframe();
@@ -143,6 +145,8 @@ private:
 
 	testWidget* m_border;
 	QString m_styleSheet;
+
+	int m_skippingStep = 50;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);

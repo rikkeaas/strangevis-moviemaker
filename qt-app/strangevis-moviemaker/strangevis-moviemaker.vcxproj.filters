@@ -18,7 +18,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="interpolation.h" />
-    <ClInclude Include="transferFunction.h" />
+    <ClInclude Include="model.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="strangevismoviemaker.cpp">
@@ -39,7 +39,6 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="strangevismoviemaker.h" />
-    <QtMoc Include="model.h" />
     <QtMoc Include="Renderer.h" />
     <QtMoc Include="keyframeHandler.h" />
     <QtMoc Include="keyframes.h" />
@@ -49,6 +48,7 @@
     <QtMoc Include="layer.h" />
     <QtMoc Include="histogram.h" />
     <QtMoc Include="colorSlot.h" />
+    <QtMoc Include="transferFunction.h" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="strangevismoviemaker.qrc" />

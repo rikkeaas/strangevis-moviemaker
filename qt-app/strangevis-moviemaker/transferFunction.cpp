@@ -4,7 +4,7 @@
 #include <QDebug>
 
 
-TransferFunction::TransferFunction() : m_transferfunction(QOpenGLTexture::Target2D)
+TransferFunction::TransferFunction() : QObject() ,m_transferfunction(QOpenGLTexture::Target2D)
 {
 	for (int i = 0; i < 512 * 4; i++)
 	{
@@ -46,6 +46,30 @@ void TransferFunction::bind()
 void TransferFunction::release()
 {
 	m_transferfunction.release();
+}
+
+void TransferFunction::setSmoothingFactor(int smoothingFactor)
+{
+	if (smoothingFactor >= 0 && smoothingFactor <= 512)
+	{
+		m_smoothingFactor = smoothingFactor;
+
+	}
+
+	for (int i = 0; i < 512 * 4; i++)
+	{
+		if (i % 4 == 0 || ((i + 1) % 4 == 0))
+			m_data << 1.0;
+		else
+			m_data << 0.0;
+	}
+
+	reloadLayers();
+}
+
+int TransferFunction::getSmoothingFactor()
+{
+	return m_smoothingFactor;
 }
 
 void TransferFunction::updateTransferFunction(int startIdx, int endIdx, QVector<float>* data) 

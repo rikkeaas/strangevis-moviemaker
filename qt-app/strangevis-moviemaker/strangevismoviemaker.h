@@ -26,6 +26,8 @@ public slots:
     void setTypeOfAnimation();
     void raySamplingDistance();
     void selectHistogramYScaling();
+    void transferFunctionBlending();
+    void fakeEmptySpaceSkipping();
 signals:
     void updateHistogramYScaling(bool, int);
 private:
@@ -43,9 +45,10 @@ private:
     double m_cutSize = 0.5;
     QMenu* animationMenu;
     QMenu* cutMenu;
+    QMenu* advancedMenu;
     int m_showCut = 0;
     int m_animationType = 0;
     int m_histogramYScaling = 1;
     int m_histogramClamp = -1;
-    // class Histogram* m_histogram_widget{};
+    int m_skippingStep = 50;
 };

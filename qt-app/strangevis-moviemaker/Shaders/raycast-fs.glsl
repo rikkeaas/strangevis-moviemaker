@@ -28,6 +28,7 @@ uniform sampler2D transferFunction;
 uniform vec3 backgroundColorVector;
 
 uniform float samplingDistanceMultiplier = 1.0;
+uniform int skippingStep;
 
 in vec2 fragCoord;
 out vec4 fragColor;
@@ -293,7 +294,7 @@ void main() {
 
 		if(tfColor.a <= 0.00001)
 		{
-			vec3 tempSampl = sampligPoint + rayDir * samplingDistance * 50;
+			vec3 tempSampl = sampligPoint + rayDir * samplingDistance * skippingStep;
 			vec3 scaledSamplePoint = 0.5 + tempSampl / (scalingFactor * 2.0);
 			vec4 densityAndGradient = texture(volumeTexture, scaledSamplePoint);
 			vec4 tfColor = texture(transferFunction, vec2(densityAndGradient.r,0.5));
@@ -301,7 +302,7 @@ void main() {
 			if (tfColor.a <= 0.00001)
 			{
 				sampligPoint = tempSampl;
-				i += samplingDistance * 49;
+				i += samplingDistance * (skippingStep - 1);
 				continue;
 			}
 		}

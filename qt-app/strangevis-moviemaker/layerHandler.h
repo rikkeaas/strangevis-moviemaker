@@ -22,6 +22,7 @@ public slots:
 	void addLayer(QRect area);
 	void layerSelected(Layer* selectedLayer, bool remove);
 	void setLayers(QList<Layer*> layers);
+	void reloadLayers();
 signals:
 	void displayLayer(QRect area);
 	void undisplayLayer(QRect area);

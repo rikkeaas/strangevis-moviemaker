@@ -73,12 +73,22 @@ void LayerHandler::setLayers(QList<Layer*> layers)
 		delete l->widget();
 	}
 	m_layers = layers;
-	foreach(auto * x, m_layers) {
+	foreach(Layer* x, m_layers) {
 		x->setParent(this);
 		QObject::connect(x, &Layer::clicked, this, &LayerHandler::layerSelected);
 		QObject::connect(x, &Layer::updateTransferFunc, this, &LayerHandler::updateTransferFuncData);
 		layout()->addWidget(x);
 	}
+}
+
+void LayerHandler::reloadLayers()
+{
+	Layer* selectedLayerBackup = m_selectedLayer;
+	foreach(Layer * x, m_layers) {
+		m_selectedLayer = x;
+		updateTransferFuncData();
+	}
+	m_selectedLayer = selectedLayerBackup;
 }
 
 void LayerHandler::updateTransferFuncData()

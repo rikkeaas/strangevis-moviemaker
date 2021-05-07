@@ -186,6 +186,7 @@ void Renderer::paintGL()
 	shaderProgram.setUniformValue("voxelDimsInTexCoord", QVector3D(QVector3D(1.0,1.0,1.0) / m_volume->getDimensions()));
 	shaderProgram.setUniformValue("backgroundColorVector", m_backgroundColor);
 	shaderProgram.setUniformValue("samplingDistanceMultiplier", m_raySamplingDistanceMultiplier);
+	shaderProgram.setUniformValue("skippingStep", m_skippingStep);
 
 	shaderProgram.setAttributeArray("vertex", vertices.constData());
 	shaderProgram.enableAttributeArray("vertex");
@@ -234,6 +235,7 @@ void Renderer::paintGL()
 		m_scaleMatrix = toKeyframe[2];
 		m_translateMatrix = toKeyframe[3];
 		m_backgroundColor = toBackgroundColor;
+		m_transferFunctionData = toTransferFunction;
 		m_transferfunction->updateTransferFunction(0, 512, &toTransferFunction);
 		isInterpolating = false;
 		update();
@@ -248,19 +250,6 @@ void Renderer::mousePressEvent(QMouseEvent* event)
 	m_previousX = m_currentX;
 	m_previousY = m_currentY;
 
-	/*
-	QVector<float> data;
-	for (int i = 0; i < 256; i++)
-	{
-		if (clicks % 3 == 0)
-			data << 1.0 << 0.0 << 0.0 << 1.0;
-		else if (clicks % 3 == 1)
-			data << 0.0 << 1.0 << 0.0 << 1.0;
-		else 
-			data << 0.0 << 0.0 << 1.0 << 1.0;
-	}
-	m_transferfunction->updatetransferFunction(0, 256, &data);
-	*/
 	clicks++;
 }
 
@@ -281,10 +270,10 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 				if (va != vb)
 				{
 					qreal angle = acos(qMax(-1.0f, qMin(1.0f, QVector3D::dotProduct(va, vb))));
-					QVector3D axis = QVector3D::crossProduct(va, vb);
-
+					
 					if (m_transformLight)
 					{
+						QVector3D axis = QVector3D::crossProduct(vb, va);
 						QMatrix4x4 inverseModelViewMatrix = m_lightRotateMatrix.inverted();
 						QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
 
@@ -292,6 +281,7 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 					}
 					else
 					{
+						QVector3D axis = QVector3D::crossProduct(va, vb);
 						QMatrix4x4 inverseModelViewMatrix = m_rotateMatrix.inverted();
 						QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
 
@@ -323,8 +313,6 @@ void Renderer::wheelEvent(QWheelEvent* event)
 {
 	if (m_transformLight)
 	{
-		float translateZ = 1 + (float(event->delta()) / 1200.0);
-		m_lightTranslateMatrix.translate(0.0, 0.0, translateZ);
 		event->accept();
 		return;
 	}
@@ -644,6 +632,16 @@ float Renderer::getRaySamplingDistance()
 	return m_raySamplingDistanceMultiplier;
 }
 
+
+int Renderer::getSkippingStep()
+{
+	return m_skippingStep;
+}
+
+void Renderer::setSkippingStep(int step)
+{
+	m_skippingStep = step;
+}
 
 
 testWidget::testWidget(QWidget* parent) : QWidget(parent)
