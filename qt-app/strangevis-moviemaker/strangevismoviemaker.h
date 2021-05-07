@@ -25,6 +25,9 @@ public slots:
     void setShowCut();
     void setTypeOfAnimation();
     void raySamplingDistance();
+    void selectHistogramYScaling();
+signals:
+    void updateHistogramYScaling(bool);
 private:
     Ui::strangevismoviemakerClass ui;
     Renderer* m_renderer;
@@ -42,5 +45,6 @@ private:
     QMenu* cutMenu;
     int m_showCut = 0;
     int m_animationType = 0;
+    int m_histogramYScaling = 1;
     // class Histogram* m_histogram_widget{};
 };

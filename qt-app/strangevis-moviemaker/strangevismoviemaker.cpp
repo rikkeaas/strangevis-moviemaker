@@ -42,6 +42,10 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(raySamplingDistance, SIGNAL(triggered()), this, SLOT(raySamplingDistance()));
     ui.menuEdit->addAction(raySamplingDistance);
 
+    QAction* selectHistogramYScaling = new QAction("Choose histogram Y-axis scaling", this);
+    connect(selectHistogramYScaling, SIGNAL(triggered()), this, SLOT(selectHistogramYScaling()));
+    ui.menuEdit->addAction(selectHistogramYScaling);
+
     QAction* toggleLightVolumeTransformation = new QAction("Toggle light/volume transformation", this);
     connect(toggleLightVolumeTransformation, SIGNAL(triggered()), m_renderer, SLOT(toggleLightVolumeTransformation()));
     ui.menuEdit->addAction(toggleLightVolumeTransformation);
@@ -247,8 +251,9 @@ void strangevismoviemaker::appendDockWidgets()
     dockContentWrapper->setStyleSheet("background-color: #6D6D6D;");
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
-    Histogram* h = new Histogram(m_renderer);
+    Histogram* h = new Histogram(m_renderer, true);
     QObject::connect(m_renderer, &Renderer::updateLayers, h->m_layerHandler, &LayerHandler::setLayers);
+    QObject::connect(this, &strangevismoviemaker::updateHistogramYScaling, h, &Histogram::updateHistogramYScaling);
     dockLayout->addWidget(toolbarContent(h, QString("Layers")));
 
     dockContentWrapper->setLayout(dockLayout);
@@ -326,4 +331,26 @@ void strangevismoviemaker::raySamplingDistance()
 void strangevismoviemaker::clearStates()
 {
     m_renderer->clearStates();
+}
+
+void strangevismoviemaker::selectHistogramYScaling()
+{
+    qDebug() << "Hello";
+    QStringList items;
+    items << "Linear" << "Logarithmic (base 10)";
+    QString item = QInputDialog::getItem(0, "Set scaling of Y-axis in histogram", "Select Y-axis scaling", items, m_histogramYScaling, false, nullptr, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+
+    if (!item.isEmpty())
+    {
+        m_histogramYScaling = items.indexOf(item);
+
+        if (m_histogramYScaling == 0)
+        {
+            updateHistogramYScaling(false);
+        }
+        else
+        {
+            updateHistogramYScaling(true);
+        }
+    }
 }
