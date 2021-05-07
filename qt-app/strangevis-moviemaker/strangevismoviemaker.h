@@ -27,7 +27,7 @@ public slots:
     void raySamplingDistance();
     void selectHistogramYScaling();
 signals:
-    void updateHistogramYScaling(bool);
+    void updateHistogramYScaling(bool, int);
 private:
     Ui::strangevismoviemakerClass ui;
     Renderer* m_renderer;
@@ -46,5 +46,6 @@ private:
     int m_showCut = 0;
     int m_animationType = 0;
     int m_histogramYScaling = 1;
+    int m_histogramClamp = -1;
     // class Histogram* m_histogram_widget{};
 };

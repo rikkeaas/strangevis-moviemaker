@@ -251,7 +251,7 @@ void strangevismoviemaker::appendDockWidgets()
     dockContentWrapper->setStyleSheet("background-color: #6D6D6D;");
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
-    Histogram* h = new Histogram(m_renderer, true);
+    Histogram* h = new Histogram(m_renderer, m_histogramYScaling == 1, m_histogramClamp);
     QObject::connect(m_renderer, &Renderer::updateLayers, h->m_layerHandler, &LayerHandler::setLayers);
     QObject::connect(this, &strangevismoviemaker::updateHistogramYScaling, h, &Histogram::updateHistogramYScaling);
     dockLayout->addWidget(toolbarContent(h, QString("Layers")));
@@ -337,20 +337,34 @@ void strangevismoviemaker::selectHistogramYScaling()
 {
     qDebug() << "Hello";
     QStringList items;
-    items << "Linear" << "Logarithmic (base 10)";
-    QString item = QInputDialog::getItem(0, "Set scaling of Y-axis in histogram", "Select Y-axis scaling", items, m_histogramYScaling, false, nullptr, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+    items << "Linear" << "Logarithmic (base 10)" << "Linear with clamp";
+    bool itemSelected;
+    QString item = QInputDialog::getItem(0, "Set scaling of Y-axis in histogram", "Select Y-axis scaling", items, m_histogramYScaling, false, &itemSelected, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
 
-    if (!item.isEmpty())
+    if (itemSelected)
     {
         m_histogramYScaling = items.indexOf(item);
 
         if (m_histogramYScaling == 0)
         {
-            updateHistogramYScaling(false);
+            m_histogramClamp = -1;
+            updateHistogramYScaling(false, -1);
+        }
+        else if (m_histogramYScaling == 1)
+        {
+            m_histogramClamp = -1;
+            updateHistogramYScaling(true, -1);
         }
         else
         {
-            updateHistogramYScaling(true);
+            bool ok;
+            auto clamp = QInputDialog::getInt(0, "Set clamp value for histogram bars",
+                "Set clamp value for histogram bars:", m_histogramClamp, 1, 10000, 1, &ok, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+            if (ok)
+            {
+                m_histogramClamp = clamp;
+                updateHistogramYScaling(false, m_histogramClamp);
+            }
         }
     }
 }

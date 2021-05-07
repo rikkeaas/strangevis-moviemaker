@@ -7,7 +7,7 @@
 using namespace std;
 
 
-void Histogram::updateHistogramYScaling(bool displayLog)
+void Histogram::updateHistogramYScaling(bool displayLog, int clamp)
 {
     chartViewP->chart()->removeAllSeries();
     auto values = m_renderer->getVolume()->getDataset();
@@ -40,6 +40,7 @@ void Histogram::updateHistogramYScaling(bool displayLog)
                 continue;
             }
             if (displayLog) *barChart << log10(val);
+            else if (clamp > 0) *barChart << qMin(clamp, val);
             else *barChart << val;
             QString str = "d";
             str.append(i);
@@ -55,7 +56,7 @@ void Histogram::updateHistogramYScaling(bool displayLog)
 
 }
 
-Histogram::Histogram(Renderer* renderer, bool displayLog) : QWidget() {
+Histogram::Histogram(Renderer* renderer, bool displayLog, int clamp) : QWidget() {
     m_renderer = renderer;
     auto values = renderer->getVolume()->getDataset();
     QBarSet* barChart = new QBarSet("Density");
@@ -91,6 +92,7 @@ Histogram::Histogram(Renderer* renderer, bool displayLog) : QWidget() {
                 continue;
             }
             if (displayLog) *barChart << log10(val);
+            else if (clamp > 0) *barChart << qMin(clamp, val);
             else *barChart << val;
             QString str = "d";
             str.append(i);
