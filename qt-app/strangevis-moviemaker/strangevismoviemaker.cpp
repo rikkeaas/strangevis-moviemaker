@@ -27,6 +27,12 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     cutMenu = ui.menuBar->addMenu("Cut");
     advancedMenu = ui.menuBar->addMenu("Advanced");
 
+    ui.menuFile->setStyleSheet("QMenu::item:selected{background-color: rgb(0, 85, 127);color: rgb(255, 255, 255);}");
+    ui.menuEdit->setStyleSheet("QMenu::item:selected{background-color: rgb(0, 85, 127);color: rgb(255, 255, 255);}");
+    animationMenu->setStyleSheet("QMenu::item:selected{background-color: rgb(0, 85, 127);color: rgb(255, 255, 255);}");
+    cutMenu->setStyleSheet("QMenu::item:selected{background-color: rgb(0, 85, 127);color: rgb(255, 255, 255);} QMenu::item:disabled{background-color: #323232; color: rgb(100,100,100);}");
+    advancedMenu->setStyleSheet("QMenu::item:selected{background-color: rgb(0, 85, 127);color: rgb(255, 255, 255);}");
+
     // ------------------------------------------------------------------------------------------
     // File menu
     QAction* fileOpenAction = new QAction("Open", this);
