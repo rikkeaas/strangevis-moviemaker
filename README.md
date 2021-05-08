@@ -22,25 +22,7 @@
 
 The main task of our program was to have the ability to load and render a volumetric model.
 
-TODO
-
-### Animation
-
-The `Movie Maker` part of our program hints about presenting the data in a way which might look like a movie. To achieve this, we needed to implement a few key features; `State Saving`, `State Loading` and `Interpolation` for smooth transitions between the states.
-
-#### States
-
-A state can be saved in two different ways; either using the <kbd>K</kbd> key, or using the large <kbd>+</kbd> button in the `Keyframe Handler` in the lower left corner of the screen. A state is then saved to a local folder, and contains information about the `projection`, `rotation`, `scaling`, and `translation` matrices used with the current volume in view, in addition to the `background color`, `transfer function` data and each `layer` used. A low-resolution snapshot is also saved with each state, which together creates the Keyframes the Keyframe Handler is presenting.
-
-A state is loaded on demand, and can be triggered by clicking on a saved Keyframe. This initializes a function which updates the matrices to the corresponding ones included in the state file, and the same goes for the other contents saved in the state. The results of a state read is that the volume looks exactly like the corresponding low-res snapshot which was clicked to trigger the state read.
-
-#### Interpolation
-
-Updating the states without interpolating to the new one would not look movie like at all, so we wanted to implement some kind of interpolation to achieve this feeling of smooth animations between two different states. When a state read is initialized, every part of the loaded state will be loaded while being interpolated with a length or step size controlled by the user.
-
-While the interpolation between one state and another looks great using linear interpolation, this would not look equally great when interpolating between several states. To make this kind of interpolation look much better, we also implemented a Catmull-Rom interpolation, making the transitions between many states look much smoother.
-
-The Catmull-Rom interpolation enabled us to interpolate smoothly through all saved states. To start playing through all states, press <kbd>A</kbd>. The type of interpolation can be changed via the menubar, in addition to the option for setting a user specified duration.
+TODO: Write some information about how it works; maybe mention what the shaders does etc.
 
 ### Histogram
 
@@ -60,13 +42,31 @@ Each layer stores the bounds of the data selection, color, opacity and the label
 
 To delete a layer, simply <kbd>Double Click</kbd> on the outermost parts of the layer widgets.
 
+### Animation
+
+The `Movie Maker` part of our program hints about presenting the data in a way which might look like a movie. To achieve this, we needed to implement a few key features; `State Saving`, `State Loading` and `Interpolation` for smooth transitions between the states.
+
+#### States
+
+A state can be saved in two different ways; either using the <kbd>K</kbd> key, or using the large <kbd>+</kbd> button in the `Keyframe Handler` in the lower left corner of the screen. A state is then saved to a local folder, and contains information about the `projection`, `rotation`, `scaling`, and `translation` matrices used with the current volume in view, in addition to the `background color`, `transfer function` data and each `layer` used. A low-resolution snapshot is also saved with each state, which together creates the Keyframes the Keyframe Handler is presenting.
+
+A state is loaded on demand, and can be triggered by clicking on a saved Keyframe. This initializes a function which updates the matrices to the corresponding ones included in the state file, and the same goes for the other contents saved in the state. The results of a state read is that the volume looks exactly like the corresponding low-res snapshot which was clicked to trigger the state read.
+
+#### Interpolation
+
+Updating the states without interpolating to the new one would not look movie like at all, so we wanted to implement some kind of interpolation to achieve this feeling of smooth animations between two different states. When a state read is initialized, every part of the loaded state will be loaded while being interpolated with a length or step size controlled by the user.
+
+While the interpolation between one state and another looks great using linear interpolation, this would not look equally great when interpolating between several states. To make this kind of interpolation look much better, we also implemented a Catmull-Rom interpolation, making the transitions between many states look much smoother.
+
+The Catmull-Rom interpolation enabled us to interpolate smoothly through all saved states. To start playing through all states, press <kbd>A</kbd>. The type of interpolation can be changed via the menubar, in addition to the option for setting a user specified duration.
+
 ### Cutting Tool
 
-TODO
+TODO: Elaborate what this feature does
 
 ### Transfer Function
 
-TODO
+TODO: Elaborate how this is implemented and how it works
 
 ### Other
 
@@ -90,11 +90,13 @@ Before we began implementing the program, we followed the [Five Design Sheet Met
 
 # Installation
 
-TODO
+TODO: Write about how to install the project
 
 # Usage
 
-TODO
+`Strangevis Movie Maker` is highly interactive with loads of different features. Here is a list of how to use every single one of them.
+
+TODO: Write about how to run the project
 
 ## Keyboard Shortcuts and Mouse Actions
 
@@ -117,11 +119,11 @@ Items in the <kbd>File</kbd> menu:
 Items in the <kbd>Edit</kbd> menu:
 
 - <kbd>Choose Background Color</kbd>: Choose background color for `OpenGLWidget
-- <kbd>Set ray sampling distance multiplier</kbd>: TODO
 - <kbd>Toggle light/volume transformation</kbd>: Toggle mode for transforming the volume or the light
 
 Items in the <kbd>Animation</kbd> menu:
 
+- <kbd>Play Animation</kbd>: Interpolate through all saved states
 - <kbd>Set type of interpolation</kbd>: Set the type of interpolation used in the animation
 - <kbd>Adjust Animation Duration</kbd>: Set the duration of a single interpolation between two states
 - <kbd>Clear all states</kbd>: Clear all saved states
@@ -133,7 +135,11 @@ Items in the <kbd>Cut</kbd> menu:
 - <kbd>Set cut size (cubical cut)</kbd>: If cubical cut is selected, set the cut size
 - <kbd>Visualize cut geometry</kbd>: Draw an object for visualizing how and where the cut is being made
 
-# Feature Showcasing
+Items in the <kbd>Advanced</kbd> menu:
+
+- <kbd>Set ray sampling distance multiplier</kbd>: TODO: Elaborate what this feature does
+
+# Feature Preview
 
 TODO: Insert GIFs
 
@@ -144,3 +150,11 @@ TODO: Insert GIFs
 ![Head with low opacity, skeleton fully opaque](assets/app_preview_3.png)
 
 ![Skeleton](assets/app_preview_2.png)
+
+# Ackowledgements
+
+TODO: Might have this field in the README
+
+# License
+
+Copyright © 2021, [Rikke Aas](https://github.com/rikkeaas) and [Christian Hein](https://github.com/chrhein). Written as a part of the [INF252](https://vis.uib.no/courses/inf252/) course at the [University of Bergen](https://github.com/uib). Released under the GPLv3 License.
