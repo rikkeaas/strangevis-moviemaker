@@ -34,23 +34,18 @@ void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 {
 	if (remove)
 	{
-		//undisplayLayer(selectedLayer->m_selectedArea);
 		deselectSelectedLayer();
 		layout()->removeWidget(selectedLayer);
 		if (m_selectedLayer == selectedLayer) m_selectedLayer = NULL;
 		m_layers.removeAt(m_layers.indexOf(selectedLayer));
 		updateLayers();
 		delete selectedLayer;
-
 	}
 	else
 	{
-		//qDebug() << selectedLayer->m_selectedArea.left() << selectedLayer->m_selectedArea.right();
 		m_selectedLayer = selectedLayer;
 		displayLayer(selectedLayer->m_selectedArea);
 	}
-
-	qDebug() << "Hei " << m_selectedLayer;
 }
 
 void LayerHandler::deselectSelectedLayer()
@@ -78,7 +73,6 @@ void LayerHandler::setLayers(QList<Layer*> layers)
 	}
 
 	m_layers.clear();
-
 	
 	foreach(Layer* x, layers) {
 		Layer* newLayer = new Layer(this, x->m_selectedArea, true, x->m_layerRGBA);

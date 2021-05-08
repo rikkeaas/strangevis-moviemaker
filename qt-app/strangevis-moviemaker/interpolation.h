@@ -11,7 +11,7 @@ public:
 	QVector<float> transferFunctionInterpolation(QVector<float> fromColor, QVector<float> toColor, float f);
 };
 
-class CatmullRomInterpolation // For animation
+class CatmullRomInterpolation // For smooth animation
 {
 public:
 	static QVector<float> transferFunctionInterpolation(QVector<float> prevColor, QVector<float> fromColor, QVector<float> toColor, QVector<float> nextColor, float f);

@@ -101,19 +101,20 @@ Volume* Model::load(const QString filepath)
 	unsigned int m_new_depth;
 	QVector3D m_new_dimensionScaling = QVector3D(1.0, 1.0, 1.0);
 	bool m_new_updateNeeded = false;
-
+	
 	// Setting member variables
 	m_new_data.resize(volumeSize);
 	//m_Data.resize(volumeSize);
 	m_new_width = uWidth;
 	m_new_height = uHeight;
 	m_new_depth = uDepth;
-
+	
 	m_new_dimensionScaling = QVector3D(uWidth, uHeight, uDepth);
 	m_new_dimensionScaling /= qMax(qMax(uWidth, uHeight), uDepth);
 
 	m_new_updateNeeded = true;
 
+	qDebug() << m_new_data.length() << " " << data.length();
 	for (long i = 0; i < volumeSize; i++)
 	{
 		m_new_data[i] = data[i] * 16; // Upscaling values from 12bit to 16bit range
@@ -146,11 +147,8 @@ void Model::bind()
 		m_volumeTexture.setSize(m_width, m_height, m_depth);
 		m_volumeTexture.allocateStorage();
 
-		//void* data = reinterpret_cast<void*>(m_Data.data());
 		m_volumeTexture.setData(0, 0, 0, m_width, m_height, m_depth, QOpenGLTexture::Red, QOpenGLTexture::UInt16, m_Data.data());
 		m_updateNeeded = false;
-
-
 	}
 
 	if (m_volumeTexture.isCreated())
@@ -201,5 +199,4 @@ Volume::Volume(QVector3D voxelSpacing, QVector3D dimensionScaling, unsigned int 
 
 	this->m_Data = m_Data;
 	this->modelFilename = modelFilename;
-
 }

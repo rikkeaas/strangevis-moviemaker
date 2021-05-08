@@ -16,13 +16,15 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_volume->threadedLoading("./data/hand/hand.dat");
 	connect(m_volume, &Model::loadedModel, this, &Renderer::updateWidget);
 
-	m_border = new testWidget(this);
-	m_border->setHidden(true);
+	m_lightModeIndicator = new LightModeIndicator(this);
+	m_lightModeIndicator->setHidden(true);
 
+	qDebug() << "Keyframe handler";
 	m_keyframeHandler = new KeyframeHandler();
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::addedKeyframe, this, &Renderer::addNewKeyframe);
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::deletedKeyframe, this, &Renderer::updateKeyframes);
+	qDebug() << "~Keyframe handler";
 
 	interpolater = new LinearInterpolation();
 
@@ -65,7 +67,6 @@ void Renderer::setState()
 	mx.append(m_rotateMatrix.data());
 	mx.append(m_scaleMatrix.data());
 	mx.append(m_translateMatrix.data());
-	qDebug() << "Background color in renderer: " << m_backgroundColor;
 	m_transferFunctionData = m_transferfunction->getTransferFunctionData();
 	m_keyframeHandler->saveState(this, m_volume->getFilename(), mx, m_backgroundColor, m_transferfunction->getTransferFunctionData(), m_layers);
 	m_keyframeHandler->takeQtScreenShot(this, m_volume->getFilename());
@@ -99,8 +100,6 @@ void Renderer::initializeGL()
 
 	initializeOpenGLFunctions();
 
-	//Cube::instance();
-
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	// Set global information
@@ -111,7 +110,7 @@ void Renderer::initializeGL()
 	shaderProgram.link();
 	shaderProgram.bind();
 
-	qDebug() << shaderProgram.isLinked();
+	qDebug() << "Shader program is linked: " << shaderProgram.isLinked();
 	vertices << QVector2D(-1.0, -1.0) << QVector2D(1.0, -1.0) << QVector2D(1.0, 1.0) << QVector2D(-1.0, 1.0);
 }
 
@@ -129,9 +128,6 @@ void Renderer::resizeGL(int width, int height)
 
 	m_projectionMatrix.setToIdentity();
 	m_projectionMatrix.perspective(fov, aspectRatio, nearPlane, farPlane);
-	
-	//m_projectionMatrix.setToIdentity();
-	//m_projectionMatrix.perspective(60.0, (float)width / (float)height, 0.001, 1000);
 
 	glViewport(0, 0, width, height);
 }
@@ -143,16 +139,10 @@ void Renderer::paintGL()
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LESS);
-
-
 	QMatrix4x4 mMatrix;
 	QMatrix4x4 vMatrix;
 
 	QMatrix4x4 cameraTransformation;
-	//cameraTransformation.rotate(alpha, 0, 1, 0);
-	//cameraTransformation.rotate(beta, 1, 0, 0);
 	QVector3D cameraPosition = cameraTransformation * QVector3D(0, 0, distance);
 	QVector3D cameraUpDirection = cameraTransformation * QVector3D(0, 1, 0);
 	vMatrix.lookAt(cameraPosition, QVector3D(0, 0, 0), cameraUpDirection);
@@ -180,7 +170,6 @@ void Renderer::paintGL()
 
 	shaderProgram.setUniformValue("inverseModelViewMatrix", (m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());
 	shaderProgram.setUniformValue("modelViewProjectionMatrix", m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
-	//qDebug() << "mvp " << m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix;
 	shaderProgram.setUniformValue("inverseModelViewProjectionMatrix", (m_projectionMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted());
 	shaderProgram.setUniformValue("voxelSpacing", m_volume->getVoxelSpacing());
 	shaderProgram.setUniformValue("dimensionScaling", m_volume->getDimensionScale());
@@ -328,11 +317,9 @@ void Renderer::wheelEvent(QWheelEvent* event)
 	scaledMat.scale(scaleFac, scaleFac, scaleFac);
 
 	float currScale = scaledMat.column(0).toVector3D().length();
-	//qDebug() << currScale;
 
 	if (currScale > 2.0 || currScale < 0.5)
 	{
-		//qDebug() << "Out of scale";
 		event->accept();
 		return;
 	}
@@ -376,8 +363,6 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		qDebug() << m_transferFunctionData;
 	}
 }
-
-
 
 
 void Renderer::keyPressEvent(QKeyEvent* event)
@@ -612,11 +597,11 @@ void Renderer::toggleLightVolumeTransformation()
 	m_transformLight = !m_transformLight;
 	if (m_transformLight)
 	{
-		m_border->setHidden(false);
+		m_lightModeIndicator->setHidden(false);
 	}
 	else
 	{
-		m_border->setHidden(true);
+		m_lightModeIndicator->setHidden(true);
 	}
 }
 
@@ -647,7 +632,7 @@ void Renderer::setSkippingStep(int step)
 }
 
 
-testWidget::testWidget(QWidget* parent) : QWidget(parent)
+LightModeIndicator::LightModeIndicator(QWidget* parent) : QWidget(parent)
 {
 	auto text = new QLineEdit();
 	QHBoxLayout* layout = new QHBoxLayout();
@@ -661,14 +646,12 @@ testWidget::testWidget(QWidget* parent) : QWidget(parent)
 	text->setReadOnly(true);
 	text->setAlignment(Qt::AlignCenter);
 	layout->addWidget(text);
-
-	//layout->setMargin(5);
 	layout->setContentsMargins(10, 10, 10, 10);
 
 	setLayout(layout);
 }
 
-void testWidget::paintEvent(QPaintEvent* event)
+void LightModeIndicator::paintEvent(QPaintEvent* event)
 {
 	QStyleOption opt;
 	opt.init(this);

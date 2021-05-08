@@ -12,20 +12,15 @@
 class Histogram : public QWidget {
 	Q_OBJECT
 public:
-	QChartView* getHistogram();
 	Histogram(Renderer* renderer, bool log, int clamp);
 	LayerHandler* m_layerHandler;
+	QChartView* getHistogram();
 private:
 	std::map<float, int> binData(QVector<unsigned short>, int, int);
-	HistogramChartView* chartViewP;
+	
 	float roundNearest(int, float);
 
-	//void showHovering(bool status, int index);
-	//void registerClick(int index);
-
-	QVector<int> interval;
-
-	bool endClick = false;
+	QBarSet* computeHistogram(bool log, int clamp);
 
 	Renderer* m_renderer;
 	HistogramChartView* chartView;

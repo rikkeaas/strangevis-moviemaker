@@ -22,7 +22,6 @@ Layer::Layer(QWidget* parent, QRect area, bool isExisting, QColor color) : QWidg
 	label->setStyleSheet("QLineEdit {background-color: #4C4C4C;}");
 	layout->addWidget(label);
 	
-	//layout->setMargin(5);
 	layout->setContentsMargins(10, 10, 10, 10);
 
 	ColorSlot* colorSample = new ColorSlot(40, color);

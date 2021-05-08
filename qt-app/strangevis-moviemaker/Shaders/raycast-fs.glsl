@@ -33,6 +33,8 @@ uniform int skippingStep;
 in vec2 fragCoord;
 out vec4 fragColor;
 
+// Function to calculate the correct gldepth of a 3D position
+// Code taken from the INF251 project - https://git.app.uib.no/code/minity
 float calcDepth(vec3 pos)
 {
 	float far = gl_DepthRange.far; 
@@ -43,8 +45,8 @@ float calcDepth(vec3 pos)
 }
 
 
-
-
+// -------------------------------------------------------------------------------------------------------------------------------
+// LIGHT FUNCTIONS
 // Function to calculate the diffuse component of light at given position (assuming all light sources have the same diffuse intensity)
 vec3 diffuseComponent(vec3 lightPos, vec3 pos, vec3 normal, vec3 color)
 {
@@ -63,7 +65,11 @@ vec3 specularComponent(vec3 lightPos, vec3 pos, vec3 normal, vec3 color)
 	vec3 specular = color * pow(max(dot(reflection, pointToEye), 0.0f), 10.0);
 	return specular;
 }
+// -------------------------------------------------------------------------------------------------------------------------------
 
+
+// -------------------------------------------------------------------------------------------------------------------------------
+// INTERSECTION FUNCTIONS
 // https://www.willusher.io/webgl/2019/01/13/volume-rendering-with-webgl
 vec2 intersect_box(vec3 orig, vec3 dir) {
 	vec3 inv_dir = 1.0 / dir;
@@ -76,7 +82,6 @@ vec2 intersect_box(vec3 orig, vec3 dir) {
 	return vec2(t0, t1);
 }
 
-
 struct Intersection
 {
 	bool hit;
@@ -84,7 +89,6 @@ struct Intersection
 	vec3 exitPoint;
 	vec3 normal;
 };
-
 
 Intersection calcBoxIntersection(vec3 box_min, vec3 box_max, vec3 origin, vec3 dir) {
 
@@ -135,31 +139,14 @@ Intersection calcSphereIntersection(float r, vec3 center, vec3 origin, vec3 line
 	}
 	return Intersection(false, vec3(0), vec3(0), vec3(0));
 }
+// -------------------------------------------------------------------------------------------------------------------------------
 
-/*
-Intersection calcPlaneIntersection(vec3 planeOrigin, vec3 rayOrigin, vec3 rayDirection, vec3 samplePoint, vec3 planeNormal) 
-{
-	float denom = dot(planeNormal, rayDirection); 
-    if (denom > 0) { 
-        vec3 p0l0 = planeOrigin - rayOrigin; 
-        float t = dot(p0l0, planeNormal) / denom; 
-        if (t >= 0)
-		{
-			vec3 intP = rayOrigin + t * rayDirection;
-			return Intersection(true, intP, intP, vec3(0));
-		}
-    } 
- 
-    return Intersection(false, vec3(0), vec3(0), vec3(0));
-}
-*/
 
 
 vec3 scalePoint(vec3 point)
 {
 	return 0.5 + point / (voxelSpacing * dimensionScaling * 2.0);
 }
-
 
 void main() {
     vec4 near = inverseModelViewProjectionMatrix * vec4(fragCoord, -1.0, 1.0);
@@ -310,17 +297,6 @@ void main() {
 		float y = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.x, sampligPoint.y + voxelDimsInTexCoord.y, sampligPoint.z))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.x, sampligPoint.y - voxelDimsInTexCoord.y, sampligPoint.z))).r));
 		float z = 0.5*(texture(volumeTexture, scalePoint(vec3(sampligPoint.xy, sampligPoint.z + voxelDimsInTexCoord.z))).r - (texture(volumeTexture, scalePoint(vec3(sampligPoint.xy, sampligPoint.z - voxelDimsInTexCoord.z))).r));
 		
-		//float x = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x+voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x-voxelDimsInTexCoord.x, scaledSamplePoint.y, scaledSamplePoint.z)).r));
-		//float y = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y+voxelDimsInTexCoord.y, scaledSamplePoint.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y-voxelDimsInTexCoord.y, scaledSamplePoint.z)).r));
-		//float z = 0.5*(texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z+voxelDimsInTexCoord.z)).r - (texture(volumeTexture, vec3(scaledSamplePoint.x, scaledSamplePoint.y, scaledSamplePoint.z-voxelDimsInTexCoord.z)).r));
-		//vec3 phong = (normalize(densityAndGradient.yzw) + 1) * 0.5;
-		//vec3 phong = (normalize(vec3(x,y,z)) + 1) * 0.5;
-		
-		
-		//vec3 phong = diffuseComponent(light.xyz, sampligPoint, normalize(densityAndGradient.yzw), pfColor.rgb);
-
-
-		//vec3 phong = diffuseComponent((inverseModelViewProjectionMatrix * vec4(vec3(0.0), 1.0)).xyz, sampligPoint, normalize(densityAndGradient.yzw), pfColor.rgb);
 		vec3 phong = diffuseComponent(lightPosition, sampligPoint, normalize(vec3(x,y,z)), tfColor.rgb);
 		phong += tfColor.rgb * 0.2;
 		float correctedAlpha = 1 - pow(1-tfColor.a, samplingDistanceMultiplier);
@@ -347,290 +323,8 @@ void main() {
 		{
 			color += vec4(backgroundColorVector * (1.0 - color.a), 1.0);
 		}
-		//vec3 lightpos = vec3(0.0);//(modelViewProjectionMatrix * vec4(vec3(0.0),1.0)).xyz;
-		//vec3 t = sampligPoint;//(modelViewProjectionMatrix * vec4(sampligPoint, 1.0)).xyz;//(inverseModelViewProjectionMatrix * vec4(normalize(sampligPoint),1.0)).xyz;//
-		//vec3 tt = firstValues;//(modelViewProjectionMatrix * vec4(firstValues, 1.0)).xyz;//(inverseModelViewProjectionMatrix * vec4(firstValues, 1.0)).xyz;
-		fragColor = color;//vec4(specularComponent(lightpos, t, tt) + diffuseComponent(lightpos, t, tt) + vec3(0.1), 1.0);//vec4(firstValues,1.0);
+		fragColor = color;
 		gl_FragDepth = calcDepth(sampligPoint);
 	}
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//in vec2 fragPosition;
-//in vec4 near;
-//in vec4 far;
-
-/*
-in vec4 fragPos;
-out vec4 fragColor;
-
-
-float calcDepth(vec3 pos)
-{
-	float far = gl_DepthRange.far; 
-	float near = gl_DepthRange.near;
-	vec4 clip_space_pos = modelViewProjectionMatrix * vec4(pos, 1.0);
-	float ndc_depth = clip_space_pos.z / clip_space_pos.w;
-	return (((far - near) * ndc_depth) + near + far) / 2.0;
-}
-
-
-void main()
-{
-	vec4 fragCoord = fragPos;
-	fragCoord /= fragCoord.w;
-	
-	vec4 near = inverseModelViewProjectionMatrix*vec4(fragCoord.xy,-1.0,1.0);
-	near /= near.w;
-
-	vec4 far = inverseModelViewProjectionMatrix*vec4(fragCoord.xy,1.0,1.0);
-	far /= far.w;
-
-	vec3 dir = normalize(far.xyz-near.xyz);
-	
-	float ssamplingDistance = 0.001;
-	float rrenderDistance = 2.0;
-
-	float firstValues = 0.0;
-	bool notFound = true;
-
-	vec3 sampligPoint = fragCoord.xyz;
-
-	for (float i = 0; i <= rrenderDistance; i += ssamplingDistance) 
-	{
-		float color = texture(volumeTexture, (normalize(near.xyz)+1)*0.5).r;// -1 -> 1
-		if (color > 0.2) 
-		{
-			notFound = false;
-			firstValues = color;
-			break;
-		}
-		sampligPoint += dir * ssamplingDistance;
-	}
-
-	if (notFound)
-	{
-		fragColor = vec4(0.0);
-		gl_FragDepth = 1.0;
-	}
-	else
-	{
-		fragColor = vec4(firstValues,firstValues,firstValues,1.0);
-		gl_FragDepth = calcDepth(sampligPoint);
-	}
-/*
-	vec4 fragCoord = fragPos;
-	fragCoord /= fragCoord.w;
-	
-	vec4 near = inverseModelViewProjectionMatrix*vec4(fragCoord.xy,-1.0,1.0);
-	near /= near.w;
-
-	vec4 far = inverseModelViewProjectionMatrix*vec4(fragCoord.xy,1.0,1.0);
-	far /= far.w;
-
-	vec3 dir = normalize(far.xyz-near.xyz);
-	
-	float samplingDistance = 0.001;
-	float renderDistance = 2.0;
-
-	float firstValues = 0.0;
-	bool notFound = true;
-
-	for (float i = 0; i <= renderDistance; i += samplingDistance) 
-	{
-		float color = texture(volumeTexture, near.xyz).r;// -1 -> 1
-		if (color > 0.2) 
-		{
-			notFound = false;
-			firstValues = color;
-			break;
-		}
-		near += dir * samplingDistance;
-	}
-	if (notFound)
-	{
-		fragColor = vec4(0.0);
-		gl_FragDepth = 1.0;
-	}
-	else
-	{
-		fragColor = vec4(firstValues,firstValues,firstValues,1.0);
-		gl_FragDepth = calcDepth(near.xyz);
-	}
-
-}
-
-/*
-
-
-struct Ray
-{
-	vec3 rayPos;
-	float value;
-};
-
-Ray raycasting(vec3 origin, vec3 direction)
-{
-	int nbSteps = 0;
-	float tex;
-	bool foundSurface = false;
-	while (nbSteps < 2000)
-	{
-		nbSteps += 1;
-		origin += 0.005*direction;
-		tex = texture(volumeTexture, (normalize(origin)+1.0)*0.5).r;
-		if (tex >= 0.2)
-		{
-			foundSurface = true;
-			break;
-		}
-	}
-	if (!foundSurface) return Ray(origin, 0.0);
-	return Ray(origin, tex);
-}
-*/
-
-/*
-void main() 
-{
-	vec3 origin = near.xyz/near.w;
-    vec3 far3 = far.xyz/far.w;
-    vec3 dir = far3 - origin;
-    dir = normalize(dir);   
-	
-	float samplingDistance = 0.001;
-	float renderDistance = 2.0;
-
-	float firstValues = 0.0;
-	bool notFound = true;
-
-	for (float i = 0; i <= renderDistance; i += samplingDistance) {
-		float color = texture(volumeTexture, vec3(normalize(modelViewProjectionMatrix*vec4(origin,1.0))+1)*0.5).r;// -1 -> 1
-		if (color > 0.2) 
-		{
-			notFound = false;
-			firstValues = color;
-			break;
-		}
-		origin += dir * samplingDistance;
-	}
-
-	if (notFound)
-	{
-		fragColor = vec4(0.0);
-		gl_FragDepth = 1.0;
-	}
-	else
-	{
-		fragColor = vec4(firstValues,firstValues,firstValues,1.0);
-		gl_FragDepth = calcDepth(origin);
-	}
-
-}
-*/
-/*
-void main()
-{
-	vec4 v = vec4(gl_FragCoord.xy,0.0,1.0);
-	vec4 samplingPoint = vec4(fragPos.x, fragPos.y, 0.0, 1.0);
-	float samplingDistance = 0.001;
-	float renderDistance = 2.0;
-	vec4 rayDirection = v - samplingPoint;
-	
-	vec3 volumeSize = textureSize(volumeTexture, 0);
-	volumeSize = volumeSize / max(max(volumeSize.x, volumeSize.y), volumeSize.z);
-
-	float firstValues = 0.0;
-	bool notFound = true;
-	for (float i = 0; i <= renderDistance; i += samplingDistance) {
-		vec3 propPos = (vec3(samplingPoint) / volumeSize)/2.0+0.5;
-		vec3 texPos = propPos.xyz;
-		float color = texture(volumeTexture, texPos).r;// -1 -> 1
-		if (color > 0.2) 
-		{
-			notFound = false;
-			firstValues = color;
-			break;
-		}
-		samplingPoint += rayDirection * samplingDistance;
-	}
-
-	if (notFound)
-	{
-		fragColor = vec4(0.0);
-		gl_FragDepth = 1.0;
-	}
-	else
-	{
-		fragColor = vec4(firstValues,firstValues,firstValues,1.0);
-		gl_FragDepth = calcDepth(samplingPoint.xyz);
-	}
-	/*
-	vec4 near = inverseModelViewProjectionMatrix*vec4(fragPosition,-1.0,1.0);
-	near /= near.w;
-
-	vec4 far = inverseModelViewProjectionMatrix*vec4(fragPosition,1.0,1.0);
-	far /= far.w;
-
-	// this is the setup for our viewing ray
-	vec3 rayOrigin = near.xyz;
-	//vec3 rayDirection = normalize((far-near).xyz);
-
-	Ray r = raycasting(rayOrigin, rayDirection);
-
-	if (r.value == 0.0) 
-	{
-		fragColor=vec4(1.0);
-		gl_FragDepth = 1.0;
-	}
-	else 
-	{
-		gl_FragDepth = calcDepth(r.rayPos);
-		fragColor = vec4(r.value.rrr, 1.0);
-	}
-	
-	//float tex = texture(volumeTexture, vec3((fragPosition+1.0)*0.5, 0.5)).r;
-	//fragColor = vec4(tex.rrr, 1.0);
-
-	// using calcDepth, you can convert a ray position to an OpenGL z-value, so that intersections/occlusions with the
-	// model geometry are handled correctly, e.g.: gl_FragDepth = calcDepth(nearestHit);
-	// in case there is no intersection, you should get gl_FragDepth to 1.0, i.e., the output of the shader will be ignored
-
-	//gl_FragDepth = 0.5;
-	
-}
-
-*/
-/*
-vec3 origin = near.xyz/near.w;
-    vec3 far3 = far.xyz/far.w;
-    vec3 dir = far3 - origin;
-    dir = normalize(dir);   
-	
-	float samplingDistance = 0.001;
-	float renderDistance = 2.0;
-
-	float firstValues = 0.0;
-	bool notFound = true;
-*/

@@ -5,7 +5,7 @@
 TEMPLATE = app
 TARGET = strangevis-moviemaker
 DESTDIR = ./x64/Debug
-QT += core opengl gui widgets openglextensions
+QT += core concurrent opengl gui widgets openglextensions
 CONFIG += debug console
 DEFINES += WIN64 QT_OPENGL_LIB QT_OPENGLEXTENSIONS_LIB QT_WIDGETS_LIB
 LIBS += -L"."

@@ -19,10 +19,10 @@
 
 #include "interpolation.h"
 
-class testWidget : public QWidget
+class LightModeIndicator : public QWidget
 {
 public:
-	testWidget(QWidget* parent);
+	LightModeIndicator(QWidget* parent);
 protected:
 	void paintEvent(QPaintEvent* event);
 };
@@ -146,7 +146,7 @@ private:
 
 	float m_raySamplingDistanceMultiplier = 1.0;
 
-	testWidget* m_border;
+	LightModeIndicator* m_lightModeIndicator;
 	QString m_styleSheet;
 
 	int m_skippingStep = 50;

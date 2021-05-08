@@ -1,5 +1,8 @@
 #include "interpolation.h"
 
+
+// ---------------------------------------------------------------------------------------------------------------------
+// LINEAR INTERPOLATION
 QList<QMatrix4x4> LinearInterpolation::interpolate(QList<QMatrix4x4> old_matrices, QList<QMatrix4x4> new_matrices, float t)
 {
 	QMatrix4x4 old_rotateMatrix = old_matrices[1];
@@ -68,8 +71,11 @@ QVector<float> LinearInterpolation::transferFunctionInterpolation(QVector<float>
 	}
 	return newColor;
 }
+// ---------------------------------------------------------------------------------------------------------------------
 
 
+// ---------------------------------------------------------------------------------------------------------------------
+// CATMULL-ROM SPLINE INTERPOLATION
 QMatrix4x4 CatmullRomInterpolation::catmullRomMat()
 {
 	QMatrix4x4 catmullRomMat = QMatrix4x4(-1.0, 3.0, -3.0, 1.0, 2.0, -5.0, 4.0, -1.0,-1.0, 0.0, 1.0, 0.0, 0.0, 2.0, 0.0, 0.0);
@@ -192,8 +198,6 @@ QVector<float> CatmullRomInterpolation::transferFunctionInterpolation(QVector<fl
 	return outTF;
 }
 
-
-
 QVector3D CatmullRomInterpolation::extractScale(QMatrix4x4 matrix)
 {
 	QVector3D scale;
@@ -204,12 +208,10 @@ QVector3D CatmullRomInterpolation::extractScale(QMatrix4x4 matrix)
 	return scale;
 }
 
-
 QVector3D CatmullRomInterpolation::extractTranslation(QMatrix4x4 matrix)
 {
 	return matrix.column(3).toVector3D();
 }
-
 
 QMatrix3x3 CatmullRomInterpolation::extractRotation(QMatrix4x4 matrix)
 {
@@ -226,3 +228,4 @@ QMatrix3x3 CatmullRomInterpolation::extractRotation(QMatrix4x4 matrix)
 	}
 	return rotation;
 }
+// ---------------------------------------------------------------------------------------------------------------------

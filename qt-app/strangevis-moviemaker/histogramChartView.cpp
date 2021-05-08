@@ -5,11 +5,6 @@ HistogramChartView::HistogramChartView(QChart* chart, QWidget* parent) : QChartV
 {
 	setRubberBand(QChartView::RectangleRubberBand);
     m_rubberBand = new QRubberBand(QRubberBand::Rectangle, this);
-
-    //hoverItem.setBrush(QBrush(Qt::red));
-    //hoverItem.setPen(Qt::NoPen);
-
-    qDebug() << "Width " << width();
 }
 
 void HistogramChartView::mousePressEvent(QMouseEvent* event)
@@ -17,7 +12,6 @@ void HistogramChartView::mousePressEvent(QMouseEvent* event)
     origin = event->pos();
     m_rubberBand->setGeometry(QRect(origin, QSize()));
     m_rubberBand->show();
-  
 }
 
 void HistogramChartView::mouseMoveEvent(QMouseEvent* event)
@@ -27,14 +21,12 @@ void HistogramChartView::mouseMoveEvent(QMouseEvent* event)
         m_rubberBand->setGeometry(QRect(origin, event->pos()).normalized());
     }
 
-
     QChartView::mouseMoveEvent(event);
 }
 
 
 void HistogramChartView::mouseReleaseEvent(QMouseEvent* event)
 {
-    
     m_rubberBand->hide();
     QRect rect = m_rubberBand->geometry();
     
@@ -74,10 +66,9 @@ void HistogramChartView::drawForeground(QPainter* painter, const QRectF& rect)
 
         painter->drawRect(m_area);
     }
-    qDebug() << showSelection;
+
     if (showSelection && !m_selectedLayer.isNull())
     {
-        qDebug() << "drawing selection " << m_selectedLayer;
         painter->setBrush(Qt::Dense4Pattern);
         painter->setPen(QColor(20, 20, 20, 127));
 
@@ -95,22 +86,17 @@ QRect HistogramChartView::getSelectedArea()
 void HistogramChartView::showLayerSelection(QRect layerSelectionArea)
 {
     showSelection = true;
-    qDebug() << "showing";
     m_selectedLayer = layerSelectionArea;
-    qDebug() << "Selected layer is " << m_selectedLayer;
     update();
 }
 
 void HistogramChartView::unshowLayerSelection(QRect layerSelection)
 {
     showSelection = false;
-    qDebug() << "unshowing";
     if (m_selectedLayer == layerSelection)
     {
-        qDebug() << "actually unshowing";
         QRect none;
         m_selectedLayer = none;
-        qDebug() << m_selectedLayer;
         update();
     }
 }

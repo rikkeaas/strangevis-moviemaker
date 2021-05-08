@@ -18,7 +18,7 @@
 strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     : QMainWindow(parent)
 {
-
+   
     renderer->setParent(this);
     m_renderer = renderer;
 
@@ -125,6 +125,7 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     qDebug() << ui.centralWidget->rect();
 
     appendDockWidgets();
+    
 }
 
 void strangevismoviemaker::fileOpen()
