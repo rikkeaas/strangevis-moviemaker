@@ -79,6 +79,8 @@ The cut is represented by its position and size, these are sent to the shader wh
 
 A nice, although incidental, consequence of this very simple cutting tool is that a cut usually increases the performance of the rendering since the rays can skip parts of the volume.
 
+We recognize that our cutting tool has some usability issues and would benefit from a little extra attention. Unfortunately, for this project, we ran out of time. We feel however that the cutting tool does provide more user value than the cost of potential frustration, and so we are leaving it in our finished program.
+
 ### Transfer Function
 
 Our transfer function is a 512x1 RGBA texture that is used by the shader to map between density values and the user specified RGBA values. The user can specify the RGBA values of the transfer function by selecting intervals in the histogram and giving these an RGBA value. The program will then update the associated range in the transfer function to contain this RGBA value, and blend these new values with the existing transfer function based on the user specified blending factor (see Menubar actions > Advanced > Transfer function blending). 
