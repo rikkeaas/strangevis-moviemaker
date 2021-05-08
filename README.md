@@ -118,15 +118,16 @@ Items in the <kbd>File</kbd> menu:
 
 Items in the <kbd>Edit</kbd> menu:
 
-- <kbd>Choose Background Color</kbd>: Choose background color for `OpenGLWidget
+- <kbd>Choose Background Color</kbd>: Choose background color for `OpenGLWidget`
+- <kbd>Choose histogram Y-axis scaling</kbd>: Choose how the histogram data will be shown
 - <kbd>Toggle light/volume transformation</kbd>: Toggle mode for transforming the volume or the light
 
 Items in the <kbd>Animation</kbd> menu:
 
-- <kbd>Play Animation</kbd>: Interpolate through all saved states
+- <kbd>Play animation</kbd>: Interpolate through all saved states
 - <kbd>Set type of interpolation</kbd>: Set the type of interpolation used in the animation
 - <kbd>Adjust Animation Duration</kbd>: Set the duration of a single interpolation between two states
-- <kbd>Clear all states</kbd>: Clear all saved states
+- <kbd>Clear All States</kbd>: Clear all saved states
 
 Items in the <kbd>Cut</kbd> menu:
 
@@ -137,7 +138,9 @@ Items in the <kbd>Cut</kbd> menu:
 
 Items in the <kbd>Advanced</kbd> menu:
 
+- <kbd>Transfer function blending</kbd>: TODO: Elaborate what this feature does
 - <kbd>Set ray sampling distance multiplier</kbd>: TODO: Elaborate what this feature does
+- <kbd>Set skipping step size</kbd>: TODO: Elaborate what this feature does
 
 # Feature Preview
 
