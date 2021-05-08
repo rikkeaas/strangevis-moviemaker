@@ -71,11 +71,17 @@ The Catmull-Rom interpolation enabled us to interpolate smoothly through all sav
 
 ### Cutting Tool
 
-TODO: Elaborate what this feature does
+Our program contains a very simple cutting tool, which allows the user to see the interior of the rendered volume. The user can choose between a spherical and a cubical cut, and specify the radius or edge length respectively. 
+The spherical cut is centered in the scene, and remains stationary as the volume is translated, rotated or scaled. This allows the user to examine different parts of the interior of the volume.
+The cubical cut is stationary with respect to the volume, meaning that it moves with the volume.
+
+The cut is represented by its position and size, these are sent to the shader where we perform an intersection test with the user specified geometry. The shader then performs the necessary logic to skip over the part of the volume that is inside the cut geometry.
+
+A nice, although incidental, consequence of this very simple cutting tool is that a cut usually increases the performance of the rendering since the rays can skip parts of the volume.
 
 ### Transfer Function
 
-TODO: Elaborate how this is implemented and how it works
+Our transfer function is a 512x1 RGBA texture that is used by the shader to map between density values and the user specified RGBA values. The user can specify the RGBA values of the transfer function by selecting intervals in the histogram and giving these an RGBA value. The program will then update the associated range in the transfer function to contain this RGBA value, and blend these new values with the existing transfer function based on the user specified blending factor (see Menubar actions > Advanced > Transfer function blending). 
 
 ### Other
 
@@ -147,9 +153,11 @@ Items in the <kbd>Cut</kbd> menu:
 
 Items in the <kbd>Advanced</kbd> menu:
 
-- <kbd>Transfer function blending</kbd>: This feature lets the user decide how much the transfer function should be blended.
-- <kbd>Set ray sampling distance multiplier</kbd>: TODO: Elaborate what this feature does
-- <kbd>Set skipping step size</kbd>: TODO: Elaborate what this feature does
+- <kbd>Transfer function blending</kbd>: This feature lets the user decide how much the different layers that set the RGBA values of transfer function should be blended. Blending in this context means linear interpolation between the current values of the transfer function and the newly specified values of a layer. Setting this value to 0 means that there is no blending, setting it to some value x means that the x values before the layer interval, and the x values after the layer interval will be impacted by the specification of a new layer. 
+A higher blending value is associated with better image quality, but it will at the same time make the transfer function harder to control for the user, as a layer does not only impact the density range specified by the user.
+- <kbd>Set ray sampling distance multiplier</kbd>: This value is multiplied with the sampling distance in the shader, letting the user trade image quality with better performance and vice versa. This impacts how often the volume is sampled along a ray. A higher value will mean fewer sampling points, and thus better performance. A lower value will mean more sampling points along the ray, and thus better image quality.
+- <kbd>Set skipping step size</kbd>: This value decides the length of the step size of our crude "empty space skipping"-inspired optimization. How this works is detailed above in the part about 3D volume rendering. 
+A high value here will drastically increase performance, but it can create artifacts in some models. A notable example of such artifacts can be seen in volumes containing heads where a high value can lead to holes in the ears and the nose. To rectify this the value can be set to around 10, although this limits the performance enhancing contribution of this feature.
 
 # Feature Preview
 
