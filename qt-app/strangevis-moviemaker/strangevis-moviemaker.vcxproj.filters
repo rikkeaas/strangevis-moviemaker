@@ -48,6 +48,7 @@
     <QtMoc Include="layer.h" />
     <QtMoc Include="histogram.h" />
     <QtMoc Include="colorSlot.h" />
+    <QtMoc Include="model.h" />
     <QtMoc Include="transferFunction.h" />
   </ItemGroup>
   <ItemGroup>

@@ -34,10 +34,12 @@ void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 {
 	if (remove)
 	{
-		undisplayLayer(selectedLayer->m_selectedArea);
+		//undisplayLayer(selectedLayer->m_selectedArea);
+		deselectSelectedLayer();
 		layout()->removeWidget(selectedLayer);
 		if (m_selectedLayer == selectedLayer) m_selectedLayer = NULL;
 		m_layers.removeAt(m_layers.indexOf(selectedLayer));
+		updateLayers();
 		delete selectedLayer;
 
 	}
@@ -47,11 +49,13 @@ void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 		m_selectedLayer = selectedLayer;
 		displayLayer(selectedLayer->m_selectedArea);
 	}
+
+	qDebug() << "Hei " << m_selectedLayer;
 }
 
 void LayerHandler::deselectSelectedLayer()
 {
-	if (m_selectedLayer != nullptr)
+	if (m_selectedLayer != NULL)
 	{
 		undisplayLayer(m_selectedLayer->m_selectedArea);
 		m_selectedLayer = NULL;
@@ -72,12 +76,19 @@ void LayerHandler::setLayers(QList<Layer*> layers)
 		layout()->removeWidget(l->widget());
 		delete l->widget();
 	}
-	m_layers = layers;
-	foreach(Layer* x, m_layers) {
-		x->setParent(this);
-		QObject::connect(x, &Layer::clicked, this, &LayerHandler::layerSelected);
-		QObject::connect(x, &Layer::updateTransferFunc, this, &LayerHandler::updateTransferFuncData);
-		layout()->addWidget(x);
+
+	m_layers.clear();
+
+	
+	foreach(Layer* x, layers) {
+		Layer* newLayer = new Layer(this, x->m_selectedArea, true, x->m_layerRGBA);
+		newLayer->label->setText(x->label->text());
+		newLayer->setStyleSheet("background-color:#6D6D6D; height:45; border-radius:10px;");
+		QObject::connect(newLayer, &Layer::clicked, this, &LayerHandler::layerSelected);
+		QObject::connect(newLayer, &Layer::updateTransferFunc, this, &LayerHandler::updateTransferFuncData);
+		layout()->addWidget(newLayer);
+
+		m_layers.append(newLayer);
 	}
 }
 

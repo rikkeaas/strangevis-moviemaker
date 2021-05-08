@@ -13,7 +13,8 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 {
 	setFocusPolicy(Qt::StrongFocus);
 	m_volume = new Model(this);
-	m_volume->load("./data/hand/hand.dat");
+	m_volume->threadedLoading("./data/hand/hand.dat");
+	connect(m_volume, &Model::loadedModel, this, &Renderer::updateWidget);
 
 	m_border = new testWidget(this);
 	m_border->setHidden(true);
@@ -238,6 +239,7 @@ void Renderer::paintGL()
 		m_transferFunctionData = toTransferFunction;
 		m_transferfunction->updateTransferFunction(0, 512, &toTransferFunction);
 		isInterpolating = false;
+		updateLayers(m_layers);
 		update();
 	}
 }
@@ -366,7 +368,9 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		setBackgroundColor();
 	}
 	else if (event->key() == Qt::Key_A) {
-		playAnimation();
+		if (!animationIsPlaying) {
+			playAnimation();
+		}
 	}
 	else if (event->key() == Qt::Key_P) {
 		qDebug() << m_transferFunctionData;
@@ -423,14 +427,8 @@ void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor
 	toBackgroundColor = backgroundColor;
 	fromTransferFunction = m_transferFunctionData;
 	toTransferFunction = transferFunction;
-	m_layers = layers;
-	updateLayers(m_layers);
+    setLayers(layers);
 	update();
-	foreach(auto * x, layers) {
-		qDebug() << x->label->text();
-		qDebug() << x->m_selectedArea;
-		qDebug() << x->m_layerRGBA;
-	}
 }
 
 void Renderer::setBackgroundColor()
@@ -444,6 +442,7 @@ void Renderer::setBackgroundColor()
 
 void Renderer::playAnimation()
 {
+	animationIsPlaying = true;
 	auto states = m_keyframeHandler->getFiles();
 	if (states.at(1).length() > 0) {
 		auto backupMatrices = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
@@ -555,7 +554,7 @@ void Renderer::playAnimation()
 	else {
 		qDebug() << "Can't play animation with no saved states.";
 	}
-	
+	animationIsPlaying = false;
 }
 
 void Renderer::setInterpolationType(bool b)
@@ -621,7 +620,11 @@ void Renderer::toggleLightVolumeTransformation()
 	}
 }
 
-
+void Renderer::updateWidget()
+{
+	reloadDockWidgets();
+	update();
+}
 void Renderer::setRaySamplingDistance(float newSamplingDistance)
 {
 	m_raySamplingDistanceMultiplier = newSamplingDistance;

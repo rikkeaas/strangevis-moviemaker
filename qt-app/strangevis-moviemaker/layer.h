@@ -15,6 +15,7 @@ public:
 signals:
 	void clicked(Layer* selectedLayer, bool remove);
 	void updateTransferFunc();
+	void labelUpdated();
 public slots:
 	void colorChange(QColor color);
 protected:

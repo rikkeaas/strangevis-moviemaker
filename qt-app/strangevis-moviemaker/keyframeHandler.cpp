@@ -38,7 +38,7 @@ void KeyframeHandler::saveState(QWidget* widget, QString filename, QList<float*>
     }
 
     if (layers.length() > 0) {
-        foreach(Layer* x, layers) {
+        foreach(auto* x, layers) {
             QString layer = "";
             layer.append(x->label->text() + ",");
             qDebug() << "Writing rect: " << x->m_selectedArea;
@@ -261,7 +261,6 @@ void KeyframeHandler::readStates(QString statePath) {
                 QList<QString> layerString = line.split(",");
                 QString label = layerString[0];
                 QRect rect = QRect(layerString[1].toInt(), layerString[2].toInt(), layerString[3].toInt(), layerString[4].toInt());
-                qDebug() << "Reading rect: " << rect;
                 QColor color = QColor();
                 color.setAlpha(layerString[5].toInt());
                 color.setRed(layerString[6].toInt());

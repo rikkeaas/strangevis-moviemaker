@@ -74,8 +74,10 @@ void HistogramChartView::drawForeground(QPainter* painter, const QRectF& rect)
 
         painter->drawRect(m_area);
     }
-    if (!m_selectedLayer.isNull())
+    qDebug() << showSelection;
+    if (showSelection && !m_selectedLayer.isNull())
     {
+        qDebug() << "drawing selection " << m_selectedLayer;
         painter->setBrush(Qt::Dense4Pattern);
         painter->setPen(QColor(20, 20, 20, 127));
 
@@ -89,18 +91,26 @@ QRect HistogramChartView::getSelectedArea()
     return m_area;
 }
 
+
 void HistogramChartView::showLayerSelection(QRect layerSelectionArea)
 {
+    showSelection = true;
+    qDebug() << "showing";
     m_selectedLayer = layerSelectionArea;
+    qDebug() << "Selected layer is " << m_selectedLayer;
     update();
 }
 
 void HistogramChartView::unshowLayerSelection(QRect layerSelection)
 {
+    showSelection = false;
+    qDebug() << "unshowing";
     if (m_selectedLayer == layerSelection)
     {
+        qDebug() << "actually unshowing";
         QRect none;
         m_selectedLayer = none;
+        qDebug() << m_selectedLayer;
         update();
     }
 }

@@ -31,4 +31,5 @@ signals:
 	void updateBlueSlider(int blue);
 	void updateAlphaSlider(int alpha);
 	void updateTransferFunction(int start, int end, QVector<float> data);
+	void updateLayers();
 };

@@ -1,5 +1,4 @@
 #include "histogram.h"
-#include "histogramChartView.h"
 #include "model.h"
 #include "customSlider.h"
 #include <cfloat>
@@ -120,7 +119,7 @@ Histogram::Histogram(Renderer* renderer, bool displayLog, int clamp) : QWidget()
     chart->setContentsMargins(0, 0, 0, 0);
     chart->layout()->setContentsMargins(0, 0, 0, 0);
 
-    HistogramChartView* chartView = new HistogramChartView(chart, this);
+    chartView = new HistogramChartView(chart, this);
     //chartView->setChart(chart);
     
     chartView->setRenderHint(QPainter::Antialiasing);
@@ -138,13 +137,13 @@ Histogram::Histogram(Renderer* renderer, bool displayLog, int clamp) : QWidget()
  
     m_layerHandler = new LayerHandler(chartViewP);
     layout()->addWidget(m_layerHandler);
-
     
     QObject::connect(m_layerHandler, &LayerHandler::displayLayer, chartViewP, &HistogramChartView::showLayerSelection);
     QObject::connect(m_layerHandler, &LayerHandler::undisplayLayer, chartViewP, &HistogramChartView::unshowLayerSelection);
 
     QObject::connect(chartViewP, &HistogramChartView::addLayer, m_layerHandler, &LayerHandler::addLayer);
 
+    QObject::connect(m_layerHandler, &LayerHandler::updateLayers, this, &Histogram::updateLayers);
     QObject::connect(m_layerHandler, &LayerHandler::updateTransferFunction, this, &Histogram::updateTransferFunction);
 
 }
@@ -180,6 +179,11 @@ QChartView* Histogram::getHistogram()
 void Histogram::updateTransferFunction(int start, int end, QVector<float> textureData)
 {
     m_renderer->getTransferFunction()->updateTransferFunction(start, end, &textureData);
+    m_renderer->setLayers(m_layerHandler->getLayers());
+}
+
+void Histogram::updateLayers()
+{
     m_renderer->setLayers(m_layerHandler->getLayers());
 }
 
