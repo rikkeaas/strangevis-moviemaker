@@ -22,7 +22,16 @@
 
 The main task of our program was to have the ability to load and render a volumetric model.
 
-TODO: Write some information about how it works; maybe mention what the shaders does etc.
+Our program uses volumetric data from a data file chosen by the user. We assume the file the user chooses follows the specifications in 'fileformat.txt', and that the file '<volumedata>.dat' is accompanied by a metadata file called '<volumedata>.ini' containing information about the spacing of the regular grid of voxels. 
+
+This volume is rendered in the main window of our application by direct volume rendering. This is achieved by rendering a screen filling quad in order to shoot a ray through each rendered pixel. The rays are checked for intersection with the bounding box of the volume, if there is no intersection the pixel is set to the color of the background. If there is intersection, the shader steps though the volume along the ray while sampling the volume to check the density at each point. The density is then used to sample the user defined transfer function, which maps density values to a RGBA-color vector. If this color vector does not have a very small alpha value (opacity), we estimate the gradient at the point in the volume by central differences. The gradient is used as the normal at the point when calculating the final color contribution of the point to the pixel. We are using the diffuse component of Phong shading to achieve a more realistic final result. 
+
+If the alpha value is very small, less than 0.0001, we have added a crude "empty space skipping"-inspired optimization. What happens is that we skip along the ray (with a user defined step size) and sample the volume and transfer function at this new point. If the alpha value at this next point is also very small, we then just continue the stepping along the ray from this second point. The reason this crude technique works quite well with our datasets, is that volumetric data generally contains a lot of air around the interesting parts. Usually users will want to set the opacity of the air to 0 since it is generally not of interest. Thus we know that there will usually be many contiguous voxels with opacity 0, and it is quite likely that we can skip the next "chunck" of the ray.
+Obviously, if the step size of the skip is too large this method could end up ignoring parts of the volume that were not intended to be ignored. And if the step size of the skip is too small this method would just introduce extra overhead that could damage performance instead of enhancing it.
+
+When the ray exits the bounding box of the volume, we check if the pixel is completely opaque. If not (alpha<1), we add the background color times 1-alpha to the final color. This gives the effect that the volume is transparrent and that the user can see the background through the volume.
+
+As mentionned, the user can specify how the program should map between density values, and color and opacity values. The user can also specify the position, rotation and scale of the volume, and the position and rotation of the light source. In addition the user can set the background color, the step size along the ray, the step size of the skipping, and disable/enable a cut and set the size of this. These actions will be detailed later in the README.
 
 ### Histogram
 
@@ -62,11 +71,19 @@ The Catmull-Rom interpolation enabled us to interpolate smoothly through all sav
 
 ### Cutting Tool
 
-TODO: Elaborate what this feature does
+Our program contains a very simple cutting tool, which allows the user to see the interior of the rendered volume. The user can choose between a spherical and a cubical cut, and specify the radius or edge length respectively. 
+The spherical cut is centered in the scene, and remains stationary as the volume is translated, rotated or scaled. This allows the user to examine different parts of the interior of the volume.
+The cubical cut is stationary with respect to the volume, meaning that it moves with the volume.
+
+The cut is represented by its position and size, these are sent to the shader where we perform an intersection test with the user specified geometry. The shader then performs the necessary logic to skip over the part of the volume that is inside the cut geometry.
+
+A nice, although incidental, consequence of this very simple cutting tool is that a cut usually increases the performance of the rendering since the rays can skip parts of the volume.
+
+We recognize that our cutting tool has some usability issues and would benefit from a little extra attention. Unfortunately, for this project, we ran out of time. We feel however that the cutting tool does provide more user value than the cost of potential frustration, and so we are leaving it in our finished program.
 
 ### Transfer Function
 
-TODO: Elaborate how this is implemented and how it works
+Our transfer function is a 512x1 RGBA texture that is used by the shader to map between density values and the user specified RGBA values. The user can specify the RGBA values of the transfer function by selecting intervals in the histogram and giving these an RGBA value. The program will then update the associated range in the transfer function to contain this RGBA value, and blend these new values with the existing transfer function based on the user specified blending factor (see Menubar actions > Advanced > Transfer function blending). 
 
 ### Other
 
@@ -118,15 +135,16 @@ Items in the <kbd>File</kbd> menu:
 
 Items in the <kbd>Edit</kbd> menu:
 
-- <kbd>Choose Background Color</kbd>: Choose background color for `OpenGLWidget
+- <kbd>Choose Background Color</kbd>: Choose background color for `OpenGLWidget`
+- <kbd>Choose histogram Y-axis scaling</kbd>: Choose how the histogram data will be shown
 - <kbd>Toggle light/volume transformation</kbd>: Toggle mode for transforming the volume or the light
 
 Items in the <kbd>Animation</kbd> menu:
 
-- <kbd>Play Animation</kbd>: Interpolate through all saved states
+- <kbd>Play animation</kbd>: Interpolate through all saved states
 - <kbd>Set type of interpolation</kbd>: Set the type of interpolation used in the animation
 - <kbd>Adjust Animation Duration</kbd>: Set the duration of a single interpolation between two states
-- <kbd>Clear all states</kbd>: Clear all saved states
+- <kbd>Clear All States</kbd>: Clear all saved states
 
 Items in the <kbd>Cut</kbd> menu:
 
@@ -137,7 +155,11 @@ Items in the <kbd>Cut</kbd> menu:
 
 Items in the <kbd>Advanced</kbd> menu:
 
-- <kbd>Set ray sampling distance multiplier</kbd>: TODO: Elaborate what this feature does
+- <kbd>Transfer function blending</kbd>: This feature lets the user decide how much the different layers that set the RGBA values of transfer function should be blended. Blending in this context means linear interpolation between the current values of the transfer function and the newly specified values of a layer. Setting this value to 0 means that there is no blending, setting it to some value x means that the x values before the layer interval, and the x values after the layer interval will be impacted by the specification of a new layer. 
+A higher blending value is associated with better image quality, but it will at the same time make the transfer function harder to control for the user, as a layer does not only impact the density range specified by the user.
+- <kbd>Set ray sampling distance multiplier</kbd>: This value is multiplied with the sampling distance in the shader, letting the user trade image quality with better performance and vice versa. This impacts how often the volume is sampled along a ray. A higher value will mean fewer sampling points, and thus better performance. A lower value will mean more sampling points along the ray, and thus better image quality.
+- <kbd>Set skipping step size</kbd>: This value decides the length of the step size of our crude "empty space skipping"-inspired optimization. How this works is detailed above in the part about 3D volume rendering. 
+A high value here will drastically increase performance, but it can create artifacts in some models. A notable example of such artifacts can be seen in volumes containing heads where a high value can lead to holes in the ears and the nose. To rectify this the value can be set to around 10, although this limits the performance enhancing contribution of this feature.
 
 # Feature Preview
 
