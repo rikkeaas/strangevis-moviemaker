@@ -34,18 +34,31 @@ void LayerHandler::layerSelected(Layer* selectedLayer, bool remove)
 {
 	if (remove)
 	{
-		undisplayLayer(selectedLayer->m_selectedArea);
+		//undisplayLayer(selectedLayer->m_selectedArea);
+		deselectSelectedLayer();
 		layout()->removeWidget(selectedLayer);
 		if (m_selectedLayer == selectedLayer) m_selectedLayer = NULL;
 		m_layers.removeAt(m_layers.indexOf(selectedLayer));
+		updateLayers();
 		delete selectedLayer;
 
 	}
 	else
 	{
-		qDebug() << selectedLayer->m_selectedArea.left() << selectedLayer->m_selectedArea.right();
+		//qDebug() << selectedLayer->m_selectedArea.left() << selectedLayer->m_selectedArea.right();
 		m_selectedLayer = selectedLayer;
 		displayLayer(selectedLayer->m_selectedArea);
+	}
+
+	qDebug() << "Hei " << m_selectedLayer;
+}
+
+void LayerHandler::deselectSelectedLayer()
+{
+	if (m_selectedLayer != NULL)
+	{
+		undisplayLayer(m_selectedLayer->m_selectedArea);
+		m_selectedLayer = NULL;
 	}
 }
 
@@ -54,26 +67,39 @@ QList<Layer*> LayerHandler::getLayers()
 	return m_layers;
 }
 
-void LayerHandler::clearSelection()
-{
-	m_selectedLayer = NULL;
-}
-
 void LayerHandler::setLayers(QList<Layer*> layers)
 {
+
+	deselectSelectedLayer();
 	while (!layout()->isEmpty()) {
-		clearSelection();
 		QLayoutItem* l = layout()->takeAt(0);
 		layout()->removeWidget(l->widget());
 		delete l->widget();
 	}
-	m_layers = layers;
-	foreach(auto * x, m_layers) {
-		x->setParent(this);
-		QObject::connect(x, &Layer::clicked, this, &LayerHandler::layerSelected);
-		QObject::connect(x, &Layer::updateTransferFunc, this, &LayerHandler::updateTransferFuncData);
-		layout()->addWidget(x);
+
+	m_layers.clear();
+
+	
+	foreach(Layer* x, layers) {
+		Layer* newLayer = new Layer(this, x->m_selectedArea, true, x->m_layerRGBA);
+		newLayer->label->setText(x->label->text());
+		newLayer->setStyleSheet("background-color:#6D6D6D; height:45; border-radius:10px;");
+		QObject::connect(newLayer, &Layer::clicked, this, &LayerHandler::layerSelected);
+		QObject::connect(newLayer, &Layer::updateTransferFunc, this, &LayerHandler::updateTransferFuncData);
+		layout()->addWidget(newLayer);
+
+		m_layers.append(newLayer);
 	}
+}
+
+void LayerHandler::reloadLayers()
+{
+	Layer* selectedLayerBackup = m_selectedLayer;
+	foreach(Layer * x, m_layers) {
+		m_selectedLayer = x;
+		updateTransferFuncData();
+	}
+	m_selectedLayer = selectedLayerBackup;
 }
 
 void LayerHandler::updateTransferFuncData()
@@ -81,8 +107,8 @@ void LayerHandler::updateTransferFuncData()
 	qDebug() << m_chartView->width();
 	auto maxX = m_chartView->width() - 20;
 	auto minX = 20;
-	int intervalStart = 256.0 * (float(m_selectedLayer->m_selectedArea.left()-minX) / float(maxX-minX));
-	int intervalEnd = 256.0 * (float(m_selectedLayer->m_selectedArea.right()-minX) / float(maxX - minX)) - 1;
+	int intervalStart = 512.0 * (float(m_selectedLayer->m_selectedArea.left()-minX) / float(maxX-minX));
+	int intervalEnd = 512.0 * (float(m_selectedLayer->m_selectedArea.right()-minX) / float(maxX - minX)) - 1;
 	
 	QVector<float> textureData;
 	textureData.resize((intervalEnd - intervalStart) * 4);

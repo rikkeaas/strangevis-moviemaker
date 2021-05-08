@@ -56,8 +56,15 @@ QVector<float> LinearInterpolation::transferFunctionInterpolation(QVector<float>
 {
 	QVector<float> newColor;
 	for (int i = 0; i < fromColor.length(); i++) {
-		float r = (toColor.at(i) - fromColor.at(i)) * f + fromColor.at(i);
-		newColor << r;
+		if (fromColor[i] <= 0.0001 && toColor[i] <= 0.0001)
+		{
+			newColor << 0.0;
+		}
+		else
+		{
+			float r = (toColor.at(i) - fromColor.at(i)) * f + fromColor.at(i);
+			newColor << r;
+		}
 	}
 	return newColor;
 }
@@ -172,8 +179,15 @@ QVector<float> CatmullRomInterpolation::transferFunctionInterpolation(QVector<fl
 {
 	QVector<float> outTF;
 	for (int i = 0; i < fromColor.length(); i++) {
-		float r = scalarInterpolation(prevColor[i], fromColor[i], toColor[i], nextColor[i], f);
-		outTF << r;
+		if (fromColor[i] <= 0.0001 && toColor[i] <= 0.0001)
+		{
+			outTF << 0.0;
+		}
+		else
+		{
+			float r = scalarInterpolation(prevColor[i], fromColor[i], toColor[i], nextColor[i], f);
+			outTF << r;
+		}
 	}
 	return outTF;
 }

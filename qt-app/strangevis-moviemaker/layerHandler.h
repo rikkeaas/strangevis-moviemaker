@@ -11,7 +11,7 @@ class LayerHandler : public QWidget
 public:
 	LayerHandler(HistogramChartView* chartView);
 	QList<Layer*> getLayers();
-	void clearSelection();
+	void deselectSelectedLayer();
 private:
 	Layer* m_selectedLayer;
 	QList<Layer*>  m_layers;
@@ -22,6 +22,7 @@ public slots:
 	void addLayer(QRect area);
 	void layerSelected(Layer* selectedLayer, bool remove);
 	void setLayers(QList<Layer*> layers);
+	void reloadLayers();
 signals:
 	void displayLayer(QRect area);
 	void undisplayLayer(QRect area);
@@ -30,4 +31,5 @@ signals:
 	void updateBlueSlider(int blue);
 	void updateAlphaSlider(int alpha);
 	void updateTransferFunction(int start, int end, QVector<float> data);
+	void updateLayers();
 };

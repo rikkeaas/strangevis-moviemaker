@@ -103,7 +103,8 @@ Volume* Model::load(const QString filepath)
 	bool m_new_updateNeeded = false;
 
 	// Setting member variables
-	m_new_data.resize(volumeSize*4);
+	m_new_data.resize(volumeSize);
+	//m_Data.resize(volumeSize);
 	m_new_width = uWidth;
 	m_new_height = uHeight;
 	m_new_depth = uDepth;
@@ -115,7 +116,7 @@ Volume* Model::load(const QString filepath)
 
 	for (long i = 0; i < volumeSize; i++)
 	{
-		m_new_data[i*4] = data[i] * 16;
+		m_new_data[i] = data[i] * 16; // Upscaling values from 12bit to 16bit range
 	}
 	
 	qDebug() << "Successfully loaded " << filepath;
@@ -138,7 +139,7 @@ void Model::bind()
 
 		m_volumeTexture.setBorderColor(0, 0, 0, 0);
 		m_volumeTexture.setWrapMode(QOpenGLTexture::ClampToBorder);
-		m_volumeTexture.setFormat(QOpenGLTexture::RGBA16F);
+		m_volumeTexture.setFormat(QOpenGLTexture::R16F);
 		m_volumeTexture.setMinificationFilter(QOpenGLTexture::Linear);
 		m_volumeTexture.setMagnificationFilter(QOpenGLTexture::Linear);
 		m_volumeTexture.setAutoMipMapGenerationEnabled(false);
@@ -146,7 +147,7 @@ void Model::bind()
 		m_volumeTexture.allocateStorage();
 
 		//void* data = reinterpret_cast<void*>(m_Data.data());
-		m_volumeTexture.setData(0, 0, 0, m_width, m_height, m_depth, QOpenGLTexture::RGBA, QOpenGLTexture::UInt16, m_Data.data());
+		m_volumeTexture.setData(0, 0, 0, m_width, m_height, m_depth, QOpenGLTexture::Red, QOpenGLTexture::UInt16, m_Data.data());
 		m_updateNeeded = false;
 
 

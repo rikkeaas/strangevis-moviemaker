@@ -28,7 +28,16 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     
     animationMenu = ui.menuBar->addMenu("Animation");
     cutMenu = ui.menuBar->addMenu("Cut");
+    advancedMenu = ui.menuBar->addMenu("Advanced");
 
+    ui.menuFile->setStyleSheet("QMenu::item:selected{background-color: rgb(0, 85, 127);color: rgb(255, 255, 255);}");
+    ui.menuEdit->setStyleSheet("QMenu::item:selected{background-color: rgb(0, 85, 127);color: rgb(255, 255, 255);}");
+    animationMenu->setStyleSheet("QMenu::item:selected{background-color: rgb(0, 85, 127);color: rgb(255, 255, 255);}");
+    cutMenu->setStyleSheet("QMenu::item:selected{background-color: rgb(0, 85, 127);color: rgb(255, 255, 255);} QMenu::item:disabled{background-color: #323232; color: rgb(100,100,100);}");
+    advancedMenu->setStyleSheet("QMenu::item:selected{background-color: rgb(0, 85, 127);color: rgb(255, 255, 255);}");
+
+    // ------------------------------------------------------------------------------------------
+    // File menu
     QAction* fileOpenAction = new QAction("Open", this);
     connect(fileOpenAction, SIGNAL(triggered()), this, SLOT(fileOpen()));
     ui.menuFile->addAction(fileOpenAction);
@@ -36,18 +45,28 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     QAction* highresScreenshotAction = new QAction("Screenshot", this);
     connect(highresScreenshotAction, SIGNAL(triggered()), this, SLOT(highresScreenshot()));
     ui.menuFile->addAction(highresScreenshotAction);
+    // ------------------------------------------------------------------------------------------
 
+    // ------------------------------------------------------------------------------------------
+    // Edit menu
     QAction* setBackgroundColorAction = new QAction("Choose Background Color", this);
     connect(setBackgroundColorAction, SIGNAL(triggered()), this, SLOT(setBackgroundColor()));
     ui.menuEdit->addAction(setBackgroundColorAction);
 
-    QAction* raySamplingDistance = new QAction("Set ray sampling distance multiplier", this);
-    connect(raySamplingDistance, SIGNAL(triggered()), this, SLOT(raySamplingDistance()));
-    ui.menuEdit->addAction(raySamplingDistance);
+    QAction* selectHistogramYScaling = new QAction("Choose histogram Y-axis scaling", this);
+    connect(selectHistogramYScaling, SIGNAL(triggered()), this, SLOT(selectHistogramYScaling()));
+    ui.menuEdit->addAction(selectHistogramYScaling);
 
     QAction* toggleLightVolumeTransformation = new QAction("Toggle light/volume transformation", this);
     connect(toggleLightVolumeTransformation, SIGNAL(triggered()), m_renderer, SLOT(toggleLightVolumeTransformation()));
     ui.menuEdit->addAction(toggleLightVolumeTransformation);
+    // ------------------------------------------------------------------------------------------
+
+    // ------------------------------------------------------------------------------------------
+    // Animation menu
+    QAction* startAnimation = new QAction("Play animation", this);
+    connect(startAnimation, SIGNAL(triggered()), m_renderer, SLOT(playAnimation()));
+    animationMenu->addAction(startAnimation);
 
     QAction* typeOfAnimation = new QAction("Set type of interpolation", this);
     connect(typeOfAnimation, SIGNAL(triggered()), this, SLOT(setTypeOfAnimation()));
@@ -60,11 +79,10 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     QAction* clearStatesAction = new QAction("Clear All States", this);
     connect(clearStatesAction, SIGNAL(triggered()), this, SLOT(clearStates()));
     animationMenu->addAction(clearStatesAction);
-   
-    QAction* toggleLightVolumeTransformationAction = new QAction("Toggle light/volume transformation", this);
-    connect(toggleLightVolumeTransformationAction, SIGNAL(triggered()), m_renderer, SLOT(toggleLightVolumeTransformation()));
-    ui.menuEdit->addAction(toggleLightVolumeTransformationAction);
+    // ------------------------------------------------------------------------------------------
 
+    // ------------------------------------------------------------------------------------------
+    // Cut menu
     QAction* cutAction = new QAction("Cut type", this);
     connect(cutAction, SIGNAL(triggered()), this, SLOT(cut()));
     cutMenu->addAction(cutAction);
@@ -83,7 +101,22 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(showCut, SIGNAL(triggered()), this, SLOT(setShowCut()));
     cutMenu->addAction(showCut);
     cutMenu->actions().at(3)->setEnabled(false);
+    // ------------------------------------------------------------------------------------------
 
+    // ------------------------------------------------------------------------------------------
+    // Advanced menu
+    QAction* transferFunctionBlending = new QAction("Transfer function blending", this);
+    connect(transferFunctionBlending, SIGNAL(triggered()), this, SLOT(transferFunctionBlending()));
+    advancedMenu->addAction(transferFunctionBlending);
+
+    QAction* raySamplingDistance = new QAction("Set ray sampling distance multiplier", this);
+    connect(raySamplingDistance, SIGNAL(triggered()), this, SLOT(raySamplingDistance()));
+    advancedMenu->addAction(raySamplingDistance);
+
+    QAction* fakeEmptySpaceSkipping = new QAction("Set skipping step size", this);
+    connect(fakeEmptySpaceSkipping, SIGNAL(triggered()), this, SLOT(fakeEmptySpaceSkipping()));
+    advancedMenu->addAction(fakeEmptySpaceSkipping);
+    // ------------------------------------------------------------------------------------------
     this->setMinimumSize(1600, 1200);
 
     auto* cw = ui.centralWidget->layout();
@@ -254,8 +287,10 @@ void strangevismoviemaker::appendDockWidgets()
     dockContentWrapper->setStyleSheet("background-color: #6D6D6D;");
 
     QDockWidget* toolbox = new QDockWidget(tr("Toolbox"), this);
-    Histogram* h = new Histogram(m_renderer);
-    QObject::connect(m_renderer, &Renderer::updateLayers, h, &Histogram::updateLayers);
+    Histogram* h = new Histogram(m_renderer, m_histogramYScaling == 1, m_histogramClamp);
+    QObject::connect(m_renderer, &Renderer::updateLayers, h->m_layerHandler, &LayerHandler::setLayers);
+    QObject::connect(this, &strangevismoviemaker::updateHistogramYScaling, h, &Histogram::updateHistogramYScaling);
+    QObject::connect(m_renderer->getTransferFunction(), &TransferFunction::reloadLayers, h->m_layerHandler, &LayerHandler::reloadLayers);
     dockLayout->addWidget(toolbarContent(h, QString("Layers")));
 
     dockContentWrapper->setLayout(dockLayout);
@@ -334,4 +369,63 @@ void strangevismoviemaker::raySamplingDistance()
 void strangevismoviemaker::clearStates()
 {
     m_renderer->clearStates();
+}
+
+void strangevismoviemaker::selectHistogramYScaling()
+{
+    qDebug() << "Hello";
+    QStringList items;
+    items << "Linear" << "Logarithmic (base 10)" << "Linear with clamp";
+    bool itemSelected;
+    QString item = QInputDialog::getItem(0, "Set scaling of Y-axis in histogram", "Select Y-axis scaling", items, m_histogramYScaling, false, &itemSelected, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+
+    if (itemSelected)
+    {
+        m_histogramYScaling = items.indexOf(item);
+
+        if (m_histogramYScaling == 0)
+        {
+            m_histogramClamp = -1;
+            updateHistogramYScaling(false, -1);
+        }
+        else if (m_histogramYScaling == 1)
+        {
+            m_histogramClamp = -1;
+            updateHistogramYScaling(true, -1);
+        }
+        else
+        {
+            bool ok;
+            auto clamp = QInputDialog::getInt(0, "Set clamp value for histogram bars",
+                "Set clamp value for histogram bars:", m_histogramClamp, 1, 10000, 1, &ok, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+            if (ok)
+            {
+                m_histogramClamp = clamp;
+                updateHistogramYScaling(false, m_histogramClamp);
+            }
+        }
+    }
+}
+
+
+void strangevismoviemaker::transferFunctionBlending()
+{
+    bool ok;
+    auto tfBlending = QInputDialog::getInt(0, "Transfer function blending",
+        "Set transfer function blending:", m_renderer->getTransferFunction()->getSmoothingFactor(), 0, 512, 1, &ok, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+    if (ok)
+    {
+        m_renderer->getTransferFunction()->setSmoothingFactor(tfBlending);
+    }
+}
+
+void strangevismoviemaker::fakeEmptySpaceSkipping()
+{
+    bool ok;
+    auto skipStep = QInputDialog::getInt(0, "Set skipping step (performance enhancement)",
+        "Set skipping step:", m_renderer->getSkippingStep(), 1, 200, 1, &ok, (windowFlags() & ~Qt::WindowContextHelpButtonHint & ~Qt::WindowMinMaxButtonsHint));
+    if (ok)
+    {
+        m_renderer->setSkippingStep(skipStep);
+    }
 }

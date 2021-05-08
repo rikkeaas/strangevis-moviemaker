@@ -118,7 +118,7 @@
     <QtMoc Include="layerHandler.h" />
     <QtMoc Include="layer.h" />
     <QtMoc Include="colorSlot.h" />
-    <ClInclude Include="transferFunction.h" />
+    <QtMoc Include="transferFunction.h" />
     <QtMoc Include="histogram.h" />
     <ClInclude Include="interpolation.h" />
     <QtMoc Include="keyframeHandler.h" />

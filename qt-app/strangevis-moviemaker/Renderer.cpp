@@ -16,6 +16,8 @@ Renderer::Renderer(QWidget* parent, Qt::WindowFlags f) : QOpenGLWidget(parent,f)
 	m_volume->threadedLoading("./data/hand/hand.dat");
 	connect(m_volume, &Model::loadedModel, this, &Renderer::updateWidget);
 
+	m_border = new testWidget(this);
+	m_border->setHidden(true);
 
 	m_keyframeHandler = new KeyframeHandler();
 	QObject::connect(m_keyframeHandler, &KeyframeHandler::matricesUpdated, this, &Renderer::setMatrices);
@@ -165,7 +167,7 @@ void Renderer::paintGL()
 	shaderProgram.setUniformValue("zCoord", m_zCoord);
 	shaderProgram.setUniformValue("volumeTexture", 0);
 	shaderProgram.setUniformValue("transferFunction", 1);
-	shaderProgram.setUniformValue("lightPosition", QVector3D((m_lightTranslateMatrix * m_lightRotateMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted() * QVector4D(5.0, 0.0, 0.0, 1.0)));
+	shaderProgram.setUniformValue("lightPosition", QVector3D((m_lightTranslateMatrix * m_lightRotateMatrix * m_translateMatrix * m_rotateMatrix * m_scaleMatrix).inverted() * QVector4D(5.0, 0.0, -5.0, 1.0)));
 	shaderProgram.setUniformValue("modelViewMatrix", m_translateMatrix * m_rotateMatrix * m_scaleMatrix);
 	shaderProgram.setUniformValue("rotate", m_rotateMatrix);
 	shaderProgram.setUniformValue("invRotate", m_rotateMatrix.inverted());
@@ -185,6 +187,7 @@ void Renderer::paintGL()
 	shaderProgram.setUniformValue("voxelDimsInTexCoord", QVector3D(QVector3D(1.0,1.0,1.0) / m_volume->getDimensions()));
 	shaderProgram.setUniformValue("backgroundColorVector", m_backgroundColor);
 	shaderProgram.setUniformValue("samplingDistanceMultiplier", m_raySamplingDistanceMultiplier);
+	shaderProgram.setUniformValue("skippingStep", m_skippingStep);
 
 	shaderProgram.setAttributeArray("vertex", vertices.constData());
 	shaderProgram.enableAttributeArray("vertex");
@@ -212,7 +215,7 @@ void Renderer::paintGL()
 			m_translateMatrix = newMatrices[3];
 			m_backgroundColor = CatmullRomInterpolation::vectorInterpolation(previousBackgroundColor, fromBackgroundColor, toBackgroundColor, nextBackgroundColor, t);
 			m_transferFunctionData = CatmullRomInterpolation::transferFunctionInterpolation(previousTransferFunction, fromTransferFunction, toTransferFunction, nextTransferFunction, t);
-			m_transferfunction->updateTransferFunction(0, 256, &m_transferFunctionData);
+			m_transferfunction->updateTransferFunction(0, 512, &m_transferFunctionData);
 		}
 		else
 		{
@@ -223,7 +226,7 @@ void Renderer::paintGL()
 			m_translateMatrix = newMatrices[3];
 			m_backgroundColor = interpolater->backgroundInterpolation(fromBackgroundColor, toBackgroundColor, t);
 			m_transferFunctionData = interpolater->transferFunctionInterpolation(fromTransferFunction, toTransferFunction, t);
-			m_transferfunction->updateTransferFunction(0, 256, &m_transferFunctionData);
+			m_transferfunction->updateTransferFunction(0, 512, &m_transferFunctionData);
 		}
 		update();
 	}
@@ -233,7 +236,8 @@ void Renderer::paintGL()
 		m_scaleMatrix = toKeyframe[2];
 		m_translateMatrix = toKeyframe[3];
 		m_backgroundColor = toBackgroundColor;
-		m_transferfunction->updateTransferFunction(0, 256, &toTransferFunction);
+		m_transferFunctionData = toTransferFunction;
+		m_transferfunction->updateTransferFunction(0, 512, &toTransferFunction);
 		isInterpolating = false;
 		updateLayers(m_layers);
 		update();
@@ -248,19 +252,6 @@ void Renderer::mousePressEvent(QMouseEvent* event)
 	m_previousX = m_currentX;
 	m_previousY = m_currentY;
 
-	/*
-	QVector<float> data;
-	for (int i = 0; i < 256; i++)
-	{
-		if (clicks % 3 == 0)
-			data << 1.0 << 0.0 << 0.0 << 1.0;
-		else if (clicks % 3 == 1)
-			data << 0.0 << 1.0 << 0.0 << 1.0;
-		else 
-			data << 0.0 << 0.0 << 1.0 << 1.0;
-	}
-	m_transferfunction->updatetransferFunction(0, 256, &data);
-	*/
 	clicks++;
 }
 
@@ -281,10 +272,10 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 				if (va != vb)
 				{
 					qreal angle = acos(qMax(-1.0f, qMin(1.0f, QVector3D::dotProduct(va, vb))));
-					QVector3D axis = QVector3D::crossProduct(va, vb);
-
+					
 					if (m_transformLight)
 					{
+						QVector3D axis = QVector3D::crossProduct(vb, va);
 						QMatrix4x4 inverseModelViewMatrix = m_lightRotateMatrix.inverted();
 						QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
 
@@ -292,6 +283,7 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 					}
 					else
 					{
+						QVector3D axis = QVector3D::crossProduct(va, vb);
 						QMatrix4x4 inverseModelViewMatrix = m_rotateMatrix.inverted();
 						QVector4D transformedAxis = inverseModelViewMatrix * QVector4D(axis, 0.0f);
 
@@ -323,8 +315,6 @@ void Renderer::wheelEvent(QWheelEvent* event)
 {
 	if (m_transformLight)
 	{
-		float translateZ = 1 + (float(event->delta()) / 1200.0);
-		m_lightTranslateMatrix.translate(0.0, 0.0, translateZ);
 		event->accept();
 		return;
 	}
@@ -437,7 +427,7 @@ void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor
 	toBackgroundColor = backgroundColor;
 	fromTransferFunction = m_transferFunctionData;
 	toTransferFunction = transferFunction;
-  setLayers(layers);
+    setLayers(layers);
 	update();
 }
 
@@ -457,10 +447,18 @@ void Renderer::playAnimation()
 	if (states.at(1).length() > 0) {
 		auto backupMatrices = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
 		auto backupBackgroundColor = m_backgroundColor;
-		auto backuptransferFunction = m_transferFunctionData;
-		QList<Layer*> backupLayers = QList<Layer*>();
-		foreach(auto * layer, m_layers)
-			backupLayers.append(layer);
+		auto backuptransferFunction = m_transferfunction->getTransferFunctionData();
+		QList<Layer*> backupLayers;
+		for (Layer* l : m_layers)
+		{
+			Layer* nl = new Layer(nullptr, l->m_selectedArea, true, l->m_layerRGBA);
+			nl->label->setText(l->label->text());
+			nl->m_selectedArea = l->m_selectedArea;
+			nl->m_layerRGBA = l->m_layerRGBA;
+			nl->setStyleSheet("background-color:#6D6D6D; height:45; border-radius:10px;");
+			backupLayers.append(nl);
+		}
+
 		int index = 0;
 		int numberOfStates = states.at(1).length();
 		int keyframeHighlightIndex = numberOfStates - 1;
@@ -468,6 +466,7 @@ void Renderer::playAnimation()
 		QList<QList<QMatrix4x4>> matrices;
 		QList<QVector3D> backgrounds;
 		QList<QVector<float>> transferFunctions;
+		QList<QList<Layer*>> layers;
 
 		if (interpolationTypeIsCM)
 		{
@@ -476,12 +475,14 @@ void Renderer::playAnimation()
 				QList<QMatrix4x4> mats = QList<QMatrix4x4>();
 				QVector3D background = QVector3D();
 				QVector<float> tf = QVector<float>();
+				QList<Layer*> ls = QList<Layer*>();
 
-				m_keyframeHandler->getStates("states/" + states.at(1).at(i), mats, background, tf);
+				m_keyframeHandler->getStates("states/" + states.at(1).at(i), mats, background, tf, ls);
 
 				matrices.append(mats);
 				backgrounds.append(background);
 				transferFunctions.append(tf);
+				layers.append(ls);
 			}
 		}
 
@@ -499,6 +500,8 @@ void Renderer::playAnimation()
 				fromKeyframe = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
 				fromBackgroundColor = m_backgroundColor;
 				fromTransferFunction = m_transferFunctionData;
+				m_layers = layers[index];
+				updateLayers(m_layers);
 				if (index == 0)
 				{
 					previousKeyframe = fromKeyframe;
@@ -607,6 +610,14 @@ void Renderer::setShowCut(bool show, bool inFront)
 void Renderer::toggleLightVolumeTransformation()
 {
 	m_transformLight = !m_transformLight;
+	if (m_transformLight)
+	{
+		m_border->setHidden(false);
+	}
+	else
+	{
+		m_border->setHidden(true);
+	}
 }
 
 void Renderer::updateWidget()
@@ -622,4 +633,45 @@ void Renderer::setRaySamplingDistance(float newSamplingDistance)
 float Renderer::getRaySamplingDistance()
 {
 	return m_raySamplingDistanceMultiplier;
+}
+
+
+int Renderer::getSkippingStep()
+{
+	return m_skippingStep;
+}
+
+void Renderer::setSkippingStep(int step)
+{
+	m_skippingStep = step;
+}
+
+
+testWidget::testWidget(QWidget* parent) : QWidget(parent)
+{
+	auto text = new QLineEdit();
+	QHBoxLayout* layout = new QHBoxLayout();
+	text->setText("Light mode");
+	int id = QFontDatabase::addApplicationFont("fonts/Roboto-Bold.ttf");
+	QString robotoHeader = QFontDatabase::applicationFontFamilies(id).at(0);
+	QFont f(robotoHeader, 10);
+	text->setFont(f);
+	text->setTextMargins(5, 5, 5, 5);
+	text->setStyleSheet("QLineEdit {background-color: #4C4C4C; border: 5px solid white}");
+	text->setReadOnly(true);
+	text->setAlignment(Qt::AlignCenter);
+	layout->addWidget(text);
+
+	//layout->setMargin(5);
+	layout->setContentsMargins(10, 10, 10, 10);
+
+	setLayout(layout);
+}
+
+void testWidget::paintEvent(QPaintEvent* event)
+{
+	QStyleOption opt;
+	opt.init(this);
+	QPainter p(this);
+	style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }

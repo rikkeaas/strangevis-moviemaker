@@ -32,4 +32,5 @@ private:
 	//QGraphicsRectItem hoverItem;
 	QRect m_area;
 	QRect m_selectedLayer;
+	bool showSelection = false;
 };

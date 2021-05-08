@@ -13,7 +13,7 @@ class Histogram : public QWidget {
 	Q_OBJECT
 public:
 	QChartView* getHistogram();
-	Histogram(Renderer* renderer);
+	Histogram(Renderer* renderer, bool log, int clamp);
 	LayerHandler* m_layerHandler;
 private:
 	std::map<float, int> binData(QVector<unsigned short>, int, int);
@@ -29,9 +29,12 @@ private:
 
 	Renderer* m_renderer;
 	HistogramChartView* chartView;
+protected:
+	void focusOutEvent(QFocusEvent* event);
 
 public slots:
 	void updateTransferFunction(int start, int end, QVector<float>);
-	void updateLayers(QList<Layer*>);
+	void updateHistogramYScaling(bool, int);
+	void updateLayers();
 };
 

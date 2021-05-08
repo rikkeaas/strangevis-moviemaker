@@ -19,6 +19,14 @@
 
 #include "interpolation.h"
 
+class testWidget : public QWidget
+{
+public:
+	testWidget(QWidget* parent);
+protected:
+	void paintEvent(QPaintEvent* event);
+};
+
 class Renderer : public QOpenGLWidget, protected QOpenGLFunctions_4_3_Core
 {
 	Q_OBJECT
@@ -36,7 +44,6 @@ public:
 	TransferFunction* getTransferFunction();
 	void clearStates();
 	void setBackgroundColor();
-	void playAnimation();
 	int getAnimationDuration();
 	void setAnimationDuration(double);
 	void setLayers(QList<Layer*>);
@@ -48,11 +55,14 @@ public:
 	void setInterpolationType(bool);
 	void setRaySamplingDistance(float);
 	float getRaySamplingDistance();
+	int getSkippingStep();
+	void setSkippingStep(int);
 public slots:
 	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> transferFunction, QList<Layer*> layers);
 	void addNewKeyframe();
 	void updateKeyframes();
 	void toggleLightVolumeTransformation();
+	void playAnimation();
 	void updateWidget();
 signals:
 	void updateLayers(QList<Layer*> layers);
@@ -136,6 +146,11 @@ private:
 
 	float m_raySamplingDistanceMultiplier = 1.0;
 
+	testWidget* m_border;
+	QString m_styleSheet;
+
+	int m_skippingStep = 50;
+
 protected:
 	void mousePressEvent(QMouseEvent* event);
 	void mouseMoveEvent(QMouseEvent* event);
@@ -143,3 +158,4 @@ protected:
 	void keyPressEvent(QKeyEvent* event);
 	void keyReleaseEvent(QKeyEvent* event);
 };
+
