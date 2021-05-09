@@ -38,10 +38,10 @@ Secondary requirements from Dr. Strangevis which our program fulfills:
 
 Extra features not specified by Dr. Strangevis which our program includes:
 
-- Saving snapshots : users have the ability to save snapshots of the program. These will be saved across program instances letting the user "pick up where they left of" the next time they run the program. 
+- Saving snapshots : users have the ability to save snapshots of the program. These will be saved across program instances letting the user "pick up where they left of" the next time they run the program.
 - Animation : users can play an animation that loops through all saved snapshots. This allows the user to explore different parts of the volume without having to explicitly set the different transformations and transfer function mappings. It also allows for nice presentations of the volume models.
 - Saving high resolution screenshots : users can choose to save high resolution screen shots of the rendered volume.
-- Asynchronous loading : volumetric datasets can be very large and thus take many tens of seconds to load. Therefore we have implemented asynchronous loading of the volumes, allowing the user to continue to interact with the program while the new volume is being loaded in the background. 
+- Asynchronous loading : volumetric datasets can be very large and thus take many tens of seconds to load. Therefore we have implemented asynchronous loading of the volumes, allowing the user to continue to interact with the program while the new volume is being loaded in the background.
 
 ### 3D Volume Rendering
 
@@ -188,7 +188,9 @@ Items in the <kbd>Advanced</kbd> menu:
 
 # Feature Preview
 
-![Linear Interpolation Animation Preview](assets/linear-interpolation.gif)
+![Linear Interpolation Preview](assets/improved_linear_interpolation.gif)
+
+> Linear Interpolation between saved states
 
 # Screenshots
 
