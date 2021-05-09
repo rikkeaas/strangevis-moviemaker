@@ -117,6 +117,7 @@ strangevismoviemaker::strangevismoviemaker(Renderer* renderer, QWidget *parent)
     connect(fakeEmptySpaceSkipping, SIGNAL(triggered()), this, SLOT(fakeEmptySpaceSkipping()));
     advancedMenu->addAction(fakeEmptySpaceSkipping);
     // ------------------------------------------------------------------------------------------
+    
     this->setMinimumSize(1600, 1200);
 
     auto* cw = ui.centralWidget->layout();

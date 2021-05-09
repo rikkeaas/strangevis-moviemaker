@@ -75,7 +75,10 @@ void LayerHandler::setLayers(QList<Layer*> layers)
 	m_layers.clear();
 	
 	foreach(Layer* x, layers) {
-		Layer* newLayer = new Layer(this, x->m_selectedArea, true, x->m_layerRGBA);
+		QRect xRect = x->m_selectedArea;
+		xRect.setBottom(m_chartView->height() - 1 - 20);
+		xRect.setTop(0 + 20);
+		Layer* newLayer = new Layer(this, xRect, true, x->m_layerRGBA);
 		newLayer->label->setText(x->label->text());
 		newLayer->setStyleSheet("background-color:#6D6D6D; height:45; border-radius:10px;");
 		QObject::connect(newLayer, &Layer::clicked, this, &LayerHandler::layerSelected);

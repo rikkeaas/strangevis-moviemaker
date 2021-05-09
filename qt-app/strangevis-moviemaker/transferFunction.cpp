@@ -77,7 +77,7 @@ void TransferFunction::updateTransferFunction(int startIdx, int endIdx, QVector<
 	// error checking
 	if (startIdx >= endIdx)
 	{
-		//qDebug() << "Start index must be smaller than end index";
+		qDebug() << "Start index must be smaller than end index";
 		return;
 	}
 	if (startIdx < 0 || endIdx > 512)
