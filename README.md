@@ -132,13 +132,16 @@ Before we began implementing the program, we followed the [Five Design Sheet Met
 
 # Installation
 
-TODO: Write about how to install the project
+To install the project, simply download the [latest release](https://github.com/rikkeaas/strangevis-moviemaker/releases) which contains the complete source code for the project, in addition to all prebuilt dependencies and binaries for Windows.
+
+# Running
+
+To run the project, un-zip the downloaded folder from the previous step. After this, a folder named `Release` will be created, and this contains the executable file `strangevis-moviemaker.exe`. <kbd>Double Click</kbd> this executable, and the project will start running.
 
 # Usage
 
 `Strangevis Movie Maker` is highly interactive with loads of different features. Here is a list of how to use every single one of them.
 
-TODO: Write about how to run the project
 
 ## Keyboard Shortcuts and Mouse Actions
 
@@ -199,10 +202,6 @@ Items in the <kbd>Advanced</kbd> menu:
 ![Head with low opacity, skeleton fully opaque](assets/app_preview_3.png)
 
 ![Skeleton](assets/app_preview_2.png)
-
-# Ackowledgements
-
-TODO: Might have this field in the README
 
 # License
 
