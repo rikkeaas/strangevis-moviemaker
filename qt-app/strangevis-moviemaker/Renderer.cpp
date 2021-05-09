@@ -235,6 +235,8 @@ void Renderer::paintGL()
 
 void Renderer::mousePressEvent(QMouseEvent* event)
 {
+	if (animationIsPlaying) return;
+
 	m_currentX = qreal(event->x());
 	m_currentY = qreal(event->y());
 
@@ -246,6 +248,8 @@ void Renderer::mousePressEvent(QMouseEvent* event)
 
 void Renderer::mouseMoveEvent(QMouseEvent* event)
 {
+	if (animationIsPlaying) return;
+
 	m_currentX = qreal(event->x());
 	m_currentY = qreal(event->y());
 
@@ -302,6 +306,8 @@ void Renderer::mouseMoveEvent(QMouseEvent* event)
 
 void Renderer::wheelEvent(QWheelEvent* event)
 {
+	if (animationIsPlaying) return;
+
 	if (m_transformLight)
 	{
 		event->accept();
@@ -331,6 +337,8 @@ void Renderer::wheelEvent(QWheelEvent* event)
 
 void Renderer::keyReleaseEvent(QKeyEvent* event)
 {
+	if (animationIsPlaying) return;
+
 	if (event->key() == Qt::Key_Shift)
 	{
 		m_rotating = false;
@@ -340,6 +348,7 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		addNewKeyframe();
 	}
 	else if (event->key() == Qt::Key_C) {
+
 		bool ok;
 		QMessageBox msgBox;
 		msgBox.setWindowTitle("Clearing states");
@@ -357,14 +366,13 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 	else if (event->key() == Qt::Key_A) {
 		playAnimation();
 	}
-	else if (event->key() == Qt::Key_P) {
-		qDebug() << m_transferFunctionData;
-	}
 }
 
 
 void Renderer::keyPressEvent(QKeyEvent* event)
 {
+	if (animationIsPlaying) return;
+
 	if (event->key() == Qt::Key_Shift)
 	{
 		m_rotating = true;
@@ -389,6 +397,8 @@ QVector3D Renderer::arcballVector(qreal x, qreal y)
 
 void Renderer::clearStates()
 {
+	if (animationIsPlaying) return;
+
 	QDirIterator it("./states/", { "*.png" });
 
 	while (it.hasNext())
@@ -417,6 +427,8 @@ void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor
 
 void Renderer::setBackgroundColor()
 {
+	if (animationIsPlaying) return;
+
 	auto colorpicker = QColorDialog::getColor();
 	m_backgroundColor.setX(colorpicker.red() / 255.f);
 	m_backgroundColor.setY(colorpicker.green() / 255.f);
