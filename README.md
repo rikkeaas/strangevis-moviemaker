@@ -36,11 +36,18 @@ Secondary requirements from Dr. Strangevis which our program fulfills:
 - T23: I want to be able to generate realistic images with shadows.
 - T25: I want to see an overview of the whole dataset.
 
+Extra features not specified by Dr. Strangevis which our program includes:
+
+- Saving snapshots : users have the ability to save snapshots of the program. These will be saved across program instances letting the user "pick up where they left of" the next time they run the program.
+- Animation : users can play an animation that loops through all saved snapshots. This allows the user to explore different parts of the volume without having to explicitly set the different transformations and transfer function mappings. It also allows for nice presentations of the volume models.
+- Saving high resolution screenshots : users can choose to save high resolution screen shots of the rendered volume.
+- Asynchronous loading : volumetric datasets can be very large and thus take many tens of seconds to load. Therefore we have implemented asynchronous loading of the volumes, allowing the user to continue to interact with the program while the new volume is being loaded in the background.
+
 ### 3D Volume Rendering
 
 The main task of our program was to have the ability to load and render a volumetric model.
 
-Our program uses volumetric data from a data file chosen by the user. We assume the file the user chooses follows the specifications in `fileformat.txt`, and that the file `<volumedata>.dat` is accompanied by a metadata file called `<volumedata>.ini` containing information about the spacing of the regular grid of voxels.
+Our program uses volumetric data from a data file chosen by the user. We assume the file the user chooses follows the specifications in [`fileformat.txt`](fileformat.txt), and that the file `<volumedata>.dat` is accompanied by a metadata file called `<volumedata>.ini` containing information about the spacing of the regular grid of voxels.
 
 This volume is rendered in the main window of our application by direct volume rendering. This is achieved by rendering a screen filling quad in order to shoot a ray through each rendered pixel. The rays are checked for intersection with the bounding box of the volume, if there is no intersection the pixel is set to the color of the background. If there is intersection, the shader steps though the volume along the ray while sampling the volume to check the density at each point. The density is then used to sample the user defined `transfer function`, which maps density values to a RGBA-color vector. If this color vector does not have a very small alpha value (opacity), we estimate the gradient at the point in the volume by central differences. The gradient is used as the normal at the point when calculating the final color contribution of the point to the pixel. We are using the diffuse component of `Phong shading` to achieve a more realistic final result.
 
@@ -75,9 +82,9 @@ The `Movie Maker` part of our program hints about presenting the data in a way w
 
 #### States
 
-A state can be saved in two different ways; either using the <kbd>K</kbd> key, or using the large <kbd>+</kbd> button in the `Keyframe Handler` in the lower left corner of the screen. A state is then saved to a local folder, and contains information about the `projection`, `rotation`, `scaling`, and `translation` matrices used with the current volume in view, in addition to the `background color`, `transfer function` data and each `layer` used. A low-resolution snapshot is also saved with each state, which together creates the Keyframes the Keyframe Handler is presenting.
+A state can be saved in two different ways; either using the <kbd>K</kbd> key, or using the large <kbd>+</kbd> button in the `Keyframe Handler` in the lower left corner of the screen. A state is then saved to a local folder, and contains information about the `projection`, `rotation`, `scaling`, and `translation` matrices used with the current volume in view, in addition to the `background color`, `transfer function` data and each `layer` used. A low-resolution snapshot is also saved with each state, which together creates the `Keyframes` the `Keyframe Handler` is presenting.
 
-A state is loaded on demand, and can be triggered by clicking on a saved Keyframe. This initializes a function which updates the matrices to the corresponding ones included in the state file, and the same goes for the other contents saved in the state. The results of a state read is that the volume looks exactly like the corresponding low-resolution snapshot which was clicked to trigger the state read.
+A state is loaded on demand, and can be triggered by clicking on a saved `Keyframe`. This initializes a function which updates the matrices to the corresponding ones included in the state file, and the same goes for the other contents saved in the state. The results of a state read is that the volume looks exactly like the corresponding low-resolution snapshot which was clicked to trigger the state read.
 
 #### Interpolation
 
@@ -125,13 +132,15 @@ Before we began implementing the program, we followed the [Five Design Sheet Met
 
 # Installation
 
-TODO: Write about how to install the project
+To install the project, simply download the [latest release](https://github.com/rikkeaas/strangevis-moviemaker/releases) which contains the complete source code for the project, in addition to all prebuilt dependencies and binaries for Windows.
+
+# Running
+
+To run the project, un-zip the downloaded folder from the previous step. After this, a folder named `Release` will be created, and this contains the executable file `strangevis-moviemaker.exe`. <kbd>Double Click</kbd> this executable, and the project will start running.
 
 # Usage
 
 `Strangevis Movie Maker` is highly interactive with loads of different features. Here is a list of how to use every single one of them.
-
-TODO: Write about how to run the project
 
 ## Keyboard Shortcuts and Mouse Actions
 
@@ -181,7 +190,13 @@ Items in the <kbd>Advanced</kbd> menu:
 
 # Feature Preview
 
-![Linear Interpolation Animation Preview](assets/linear-interpolation.gif)
+![Linear Interpolation Preview](assets/improved_linear_interpolation.gif)
+
+> Linear Interpolation between saved states
+
+![File Open Preview](assets/file_open.gif)
+
+> Loading a new model with a cut enabled
 
 # Screenshots
 
@@ -190,10 +205,6 @@ Items in the <kbd>Advanced</kbd> menu:
 ![Head with low opacity, skeleton fully opaque](assets/app_preview_3.png)
 
 ![Skeleton](assets/app_preview_2.png)
-
-# Ackowledgements
-
-TODO: Might have this field in the README
 
 # License
 
