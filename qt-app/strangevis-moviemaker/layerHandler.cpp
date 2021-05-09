@@ -24,6 +24,7 @@ void LayerHandler::addLayer(QRect area)
 	
 	QObject::connect(newLayer, &Layer::clicked, this, &LayerHandler::layerSelected);
 	QObject::connect(newLayer, &Layer::updateTransferFunc, this, &LayerHandler::updateTransferFuncData);
+	QObject::connect(this, &LayerHandler::sendAnimationIsPlaying, newLayer, &Layer::setAnimationIsPlaying);
 
 	m_layers.append(newLayer);
 	layerSelected(newLayer, false);
@@ -83,10 +84,16 @@ void LayerHandler::setLayers(QList<Layer*> layers)
 		newLayer->setStyleSheet("background-color:#6D6D6D; height:45; border-radius:10px;");
 		QObject::connect(newLayer, &Layer::clicked, this, &LayerHandler::layerSelected);
 		QObject::connect(newLayer, &Layer::updateTransferFunc, this, &LayerHandler::updateTransferFuncData);
+		QObject::connect(this, &LayerHandler::sendAnimationIsPlaying, newLayer, &Layer::setAnimationIsPlaying);
 		layout()->addWidget(newLayer);
 
 		m_layers.append(newLayer);
 	}
+}
+
+void LayerHandler::setAnimationIsPlaying(bool playing)
+{
+	sendAnimationIsPlaying(playing);
 }
 
 void LayerHandler::reloadLayers()

@@ -23,6 +23,7 @@ public slots:
 	void layerSelected(Layer* selectedLayer, bool remove);
 	void setLayers(QList<Layer*> layers);
 	void reloadLayers();
+	void setAnimationIsPlaying(bool);
 signals:
 	void displayLayer(QRect area);
 	void undisplayLayer(QRect area);
@@ -32,4 +33,5 @@ signals:
 	void updateAlphaSlider(int alpha);
 	void updateTransferFunction(int start, int end, QVector<float> data);
 	void updateLayers();
+	void sendAnimationIsPlaying(bool);
 };

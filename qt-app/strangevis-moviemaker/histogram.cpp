@@ -46,8 +46,10 @@ Histogram::Histogram(Renderer* renderer, bool displayLog, int clamp) : QWidget()
 
     QObject::connect(m_layerHandler, &LayerHandler::displayLayer, chartView, &HistogramChartView::showLayerSelection);
     QObject::connect(m_layerHandler, &LayerHandler::undisplayLayer, chartView, &HistogramChartView::unshowLayerSelection);
+    QObject::connect(m_renderer, &Renderer::sendAnimationIsPlaying, m_layerHandler, &LayerHandler::setAnimationIsPlaying);
 
     QObject::connect(chartView, &HistogramChartView::addLayer, m_layerHandler, &LayerHandler::addLayer);
+    QObject::connect(m_renderer, &Renderer::sendAnimationIsPlaying, chartView, &HistogramChartView::setAnimationIsPlaying);
 
     QObject::connect(m_layerHandler, &LayerHandler::updateLayers, this, &Histogram::updateLayers);
     QObject::connect(m_layerHandler, &LayerHandler::updateTransferFunction, this, &Histogram::updateTransferFunction);

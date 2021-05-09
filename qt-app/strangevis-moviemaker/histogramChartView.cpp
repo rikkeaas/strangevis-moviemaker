@@ -24,6 +24,10 @@ void HistogramChartView::mouseMoveEvent(QMouseEvent* event)
     QChartView::mouseMoveEvent(event);
 }
 
+void HistogramChartView::setAnimationIsPlaying(bool playing)
+{
+    animationIsPlaying = playing;
+}
 
 void HistogramChartView::mouseReleaseEvent(QMouseEvent* event)
 {
@@ -38,7 +42,7 @@ void HistogramChartView::mouseReleaseEvent(QMouseEvent* event)
     rect.setBottom(height()-1-20);
     rect.setTop(0+20);
     
-    if (rect.right() - rect.left() <= 1)
+    if (animationIsPlaying || (rect.right() - rect.left() <= 1))
     {
         return;
     }

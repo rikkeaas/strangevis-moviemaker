@@ -16,8 +16,10 @@ signals:
 	void clicked(Layer* selectedLayer, bool remove);
 	void updateTransferFunc();
 	void labelUpdated();
+	void sendAnimationIsPlaying(bool);
 public slots:
 	void colorChange(QColor color);
+	void setAnimationIsPlaying(bool);
 protected:
 	void mouseDoubleClickEvent(QMouseEvent* event);
 	void mousePressEvent(QMouseEvent* event);

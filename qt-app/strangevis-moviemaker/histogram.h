@@ -15,6 +15,7 @@ public:
 	Histogram(Renderer* renderer, bool log, int clamp);
 	LayerHandler* m_layerHandler;
 	QChartView* getHistogram();
+	bool animationIsPlaying();
 private:
 	std::map<float, int> binData(QVector<unsigned short>, int, int);
 	

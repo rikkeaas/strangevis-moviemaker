@@ -26,6 +26,7 @@ Layer::Layer(QWidget* parent, QRect area, bool isExisting, QColor color) : QWidg
 
 	ColorSlot* colorSample = new ColorSlot(40, color);
 	QObject::connect(colorSample, &ColorSlot::colorChange, this, &Layer::colorChange);
+	QObject::connect(this, &Layer::sendAnimationIsPlaying, colorSample, &ColorSlot::setAnimationIsPlaying);
 	if (!isExisting) {
 		colorSample->publicMousePress();
 	}
@@ -42,6 +43,11 @@ void Layer::mouseDoubleClickEvent(QMouseEvent* event)
 void Layer::mousePressEvent(QMouseEvent* event)
 {
 	clicked(this, false);
+}
+
+void Layer::setAnimationIsPlaying(bool playing)
+{
+	sendAnimationIsPlaying(playing);
 }
 
 void Layer::colorChange(QColor color)

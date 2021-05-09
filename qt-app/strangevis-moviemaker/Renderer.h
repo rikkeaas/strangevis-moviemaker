@@ -57,6 +57,7 @@ public:
 	float getRaySamplingDistance();
 	int getSkippingStep();
 	void setSkippingStep(int);
+	bool getAnimationIsPlaying();
 public slots:
 	void setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor, QVector<float> transferFunction, QList<Layer*> layers);
 	void addNewKeyframe();
@@ -67,6 +68,7 @@ public slots:
 signals:
 	void updateLayers(QList<Layer*> layers);
 	void reloadDockWidgets();
+	void sendAnimationIsPlaying(bool);
 private:
 	QMatrix4x4 m_projectionMatrix;
 	QMatrix4x4 m_rotateMatrix;
@@ -149,7 +151,7 @@ private:
 	LightModeIndicator* m_lightModeIndicator;
 	QString m_styleSheet;
 
-	int m_skippingStep = 50;
+	int m_skippingStep = 10;
 
 protected:
 	void mousePressEvent(QMouseEvent* event);

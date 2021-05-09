@@ -2,6 +2,7 @@
 #include <QColorDIalog>
 #include <QStyleOption>
 #include <QPainter>
+#include <qdebug.h>
 
 ColorSlot::ColorSlot(int size, QColor inColor) : QWidget()
 {
@@ -15,6 +16,7 @@ ColorSlot::ColorSlot(int size, QColor inColor) : QWidget()
 
 void ColorSlot::mousePressEvent(QMouseEvent* event)
 {
+	if (animationIsPlaying) return;
 	QColor newCol = QColorDialog::getColor(color, nullptr, "Layer color", { QColorDialog::DontUseNativeDialog, QColorDialog::ShowAlphaChannel });
 	if (newCol.isValid())
 	{
@@ -28,6 +30,11 @@ void ColorSlot::mousePressEvent(QMouseEvent* event)
 void ColorSlot::publicMousePress()
 {
 	mousePressEvent(NULL);
+}
+
+void ColorSlot::setAnimationIsPlaying(bool playing)
+{
+	animationIsPlaying = playing;
 }
 
 void ColorSlot::paintEvent(QPaintEvent* event)

@@ -355,9 +355,7 @@ void Renderer::keyReleaseEvent(QKeyEvent* event)
 		setBackgroundColor();
 	}
 	else if (event->key() == Qt::Key_A) {
-		if (!animationIsPlaying) {
-			playAnimation();
-		}
+		playAnimation();
 	}
 	else if (event->key() == Qt::Key_P) {
 		qDebug() << m_transferFunctionData;
@@ -413,6 +411,7 @@ void Renderer::setMatrices(QList<QMatrix4x4> matrices, QVector3D backgroundColor
 	fromTransferFunction = m_transferFunctionData;
 	toTransferFunction = transferFunction;
     setLayers(layers);
+	sendAnimationIsPlaying(animationIsPlaying);
 	update();
 }
 
@@ -427,7 +426,10 @@ void Renderer::setBackgroundColor()
 
 void Renderer::playAnimation()
 {
+	if (animationIsPlaying) return;
+
 	animationIsPlaying = true;
+	sendAnimationIsPlaying(animationIsPlaying);
 	auto states = m_keyframeHandler->getFiles();
 	if (states.at(1).length() > 0) {
 		auto backupMatrices = QList<QMatrix4x4>({ m_projectionMatrix, m_rotateMatrix, m_scaleMatrix, m_translateMatrix });
@@ -487,6 +489,7 @@ void Renderer::playAnimation()
 				fromTransferFunction = m_transferFunctionData;
 				m_layers = layers[index];
 				updateLayers(m_layers);
+				sendAnimationIsPlaying(animationIsPlaying);
 				if (index == 0)
 				{
 					previousKeyframe = fromKeyframe;
@@ -540,6 +543,7 @@ void Renderer::playAnimation()
 		qDebug() << "Can't play animation with no saved states.";
 	}
 	animationIsPlaying = false;
+	sendAnimationIsPlaying(animationIsPlaying);
 }
 
 void Renderer::setInterpolationType(bool b)
@@ -632,6 +636,12 @@ void Renderer::setSkippingStep(int step)
 }
 
 
+bool Renderer::getAnimationIsPlaying()
+{
+	return animationIsPlaying;
+}
+
+
 LightModeIndicator::LightModeIndicator(QWidget* parent) : QWidget(parent)
 {
 	auto text = new QLineEdit();
@@ -658,3 +668,5 @@ void LightModeIndicator::paintEvent(QPaintEvent* event)
 	QPainter p(this);
 	style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
+
+
