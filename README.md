@@ -181,7 +181,7 @@ Items in the <kbd>Advanced</kbd> menu:
 
 # Feature Preview
 
-TODO: Insert GIFs
+![Linear Interpolation Animation Preview](assets/linear-interpolation.gif)
 
 # Screenshots
 
