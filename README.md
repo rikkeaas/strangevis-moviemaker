@@ -47,7 +47,7 @@ Extra features not specified by Dr. Strangevis which our program includes:
 
 The main task of our program was to have the ability to load and render a volumetric model.
 
-Our program uses volumetric data from a data file chosen by the user. We assume the file the user chooses follows the specifications in `fileformat.txt`, and that the file `<volumedata>.dat` is accompanied by a metadata file called `<volumedata>.ini` containing information about the spacing of the regular grid of voxels.
+Our program uses volumetric data from a data file chosen by the user. We assume the file the user chooses follows the specifications in [`fileformat.txt`](fileformat.txt), and that the file `<volumedata>.dat` is accompanied by a metadata file called `<volumedata>.ini` containing information about the spacing of the regular grid of voxels.
 
 This volume is rendered in the main window of our application by direct volume rendering. This is achieved by rendering a screen filling quad in order to shoot a ray through each rendered pixel. The rays are checked for intersection with the bounding box of the volume, if there is no intersection the pixel is set to the color of the background. If there is intersection, the shader steps though the volume along the ray while sampling the volume to check the density at each point. The density is then used to sample the user defined `transfer function`, which maps density values to a RGBA-color vector. If this color vector does not have a very small alpha value (opacity), we estimate the gradient at the point in the volume by central differences. The gradient is used as the normal at the point when calculating the final color contribution of the point to the pixel. We are using the diffuse component of `Phong shading` to achieve a more realistic final result.
 
@@ -82,9 +82,9 @@ The `Movie Maker` part of our program hints about presenting the data in a way w
 
 #### States
 
-A state can be saved in two different ways; either using the <kbd>K</kbd> key, or using the large <kbd>+</kbd> button in the `Keyframe Handler` in the lower left corner of the screen. A state is then saved to a local folder, and contains information about the `projection`, `rotation`, `scaling`, and `translation` matrices used with the current volume in view, in addition to the `background color`, `transfer function` data and each `layer` used. A low-resolution snapshot is also saved with each state, which together creates the Keyframes the Keyframe Handler is presenting.
+A state can be saved in two different ways; either using the <kbd>K</kbd> key, or using the large <kbd>+</kbd> button in the `Keyframe Handler` in the lower left corner of the screen. A state is then saved to a local folder, and contains information about the `projection`, `rotation`, `scaling`, and `translation` matrices used with the current volume in view, in addition to the `background color`, `transfer function` data and each `layer` used. A low-resolution snapshot is also saved with each state, which together creates the `Keyframes` the `Keyframe Handler` is presenting.
 
-A state is loaded on demand, and can be triggered by clicking on a saved Keyframe. This initializes a function which updates the matrices to the corresponding ones included in the state file, and the same goes for the other contents saved in the state. The results of a state read is that the volume looks exactly like the corresponding low-resolution snapshot which was clicked to trigger the state read.
+A state is loaded on demand, and can be triggered by clicking on a saved `Keyframe`. This initializes a function which updates the matrices to the corresponding ones included in the state file, and the same goes for the other contents saved in the state. The results of a state read is that the volume looks exactly like the corresponding low-resolution snapshot which was clicked to trigger the state read.
 
 #### Interpolation
 
@@ -142,7 +142,6 @@ To run the project, un-zip the downloaded folder from the previous step. After t
 
 `Strangevis Movie Maker` is highly interactive with loads of different features. Here is a list of how to use every single one of them.
 
-
 ## Keyboard Shortcuts and Mouse Actions
 
 - <kbd>A</kbd>: Interpolate through all saved states
@@ -194,6 +193,10 @@ Items in the <kbd>Advanced</kbd> menu:
 ![Linear Interpolation Preview](assets/improved_linear_interpolation.gif)
 
 > Linear Interpolation between saved states
+
+![File Open Preview](assets/file_open.gif)
+
+> Loading a new model with a cut enabled
 
 # Screenshots
 
