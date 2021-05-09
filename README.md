@@ -36,6 +36,13 @@ Secondary requirements from Dr. Strangevis which our program fulfills:
 - T23: I want to be able to generate realistic images with shadows.
 - T25: I want to see an overview of the whole dataset.
 
+Extra features not specified by Dr. Strangevis which our program includes:
+
+- Saving snapshots : users have the ability to save snapshots of the program. These will be saved across program instances letting the user "pick up where they left of" the next time they run the program. 
+- Animation : users can play an animation that loops through all saved snapshots. This allows the user to explore different parts of the volume without having to explicitly set the different transformations and transfer function mappings. It also allows for nice presentations of the volume models.
+- Saving high resolution screenshots : users can choose to save high resolution screen shots of the rendered volume.
+- Asynchronous loading : volumetric datasets can be very large and thus take many tens of seconds to load. Therefore we have implemented asynchronous loading of the volumes, allowing the user to continue to interact with the program while the new volume is being loaded in the background. 
+
 ### 3D Volume Rendering
 
 The main task of our program was to have the ability to load and render a volumetric model.
