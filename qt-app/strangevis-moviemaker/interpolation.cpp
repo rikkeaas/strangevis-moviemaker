@@ -84,10 +84,8 @@ QMatrix4x4 CatmullRomInterpolation::catmullRomMat()
 
 float CatmullRomInterpolation::scalarInterpolation(float p0, float p1, float p2, float p3, float samplePoint)
 {
-	QVector4D samplePointPow = QVector4D(pow(samplePoint, 3), pow(samplePoint, 2), samplePoint, 1);
-	QVector4D points = QVector4D(p0, p1, p2, p3);
-
-	return QVector4D::dotProduct(samplePointPow * catmullRomMat(), points);
+	float r = (p2 - p1) * samplePoint + p1;
+	return r;
 }
 
 
@@ -185,15 +183,9 @@ QVector<float> CatmullRomInterpolation::transferFunctionInterpolation(QVector<fl
 {
 	QVector<float> outTF;
 	for (int i = 0; i < fromColor.length(); i++) {
-		if (fromColor[i] <= 0.0001 && toColor[i] <= 0.0001)
-		{
-			outTF << 0.0;
-		}
-		else
-		{
-			float r = scalarInterpolation(prevColor[i], fromColor[i], toColor[i], nextColor[i], f);
-			outTF << r;
-		}
+		float r = scalarInterpolation(prevColor[i], fromColor[i], toColor[i], nextColor[i], f);
+		outTF << r;
+		
 	}
 	return outTF;
 }
